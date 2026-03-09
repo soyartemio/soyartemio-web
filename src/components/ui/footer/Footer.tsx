@@ -33,7 +33,9 @@ export default function Footer() {
                     <a href="#metodo" className="hover:text-white transition-colors duration-200">El Método</a>
                     <a href="#impacto" className="hover:text-white transition-colors duration-200">Impacto</a>
                     <a href="#bio" className="hover:text-white transition-colors duration-200">Consultor</a>
-                    <a href="https://calendly.com/soyartemio/30min" target="_blank" rel="noreferrer" className="text-brand-cyan hover:text-brand-primary transition-colors duration-200">Agendar Piloto</a>
+                    <a href="https://calendly.com/soyartemio/30min" target="_blank" rel="noreferrer" className="text-brand-cyan hover:text-brand-primary transition-colors duration-200">Agendar Sesión</a>
+                    <a href="https://www.linkedin.com/in/soyartemio/" target="_blank" rel="noreferrer" className="hover:text-[#0a66c2] transition-colors duration-200">LinkedIn</a>
+                    <a href="mailto:yo@soyartemio.me" className="hover:text-white transition-colors duration-200">yo@soyartemio.me</a>
                 </div>
 
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"></div>
