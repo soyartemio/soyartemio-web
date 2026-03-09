@@ -137,7 +137,7 @@ export default function Hero() {
                         </motion.div>
                         <motion.div variants={itemVariants} className="mt-4 text-center min-h-[24px]">
                             <span className="inline-block px-3 py-1 border text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-full transition-colors duration-500 bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                                Auditoría Inicial 100% Bonificada
+                                Auditoría inicial gratuita (30 min)
                             </span>
                         </motion.div>
 

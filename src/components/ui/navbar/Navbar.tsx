@@ -150,7 +150,7 @@ export default function Navbar() {
                         {/* Micro-text Scarcity Badge flotante en el hover o siempre visible pequeño */}
                         <div className="absolute -bottom-6 right-0 w-max pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
                             <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border bg-black/60 shadow-md text-brand-cyan border-brand-cyan/30">
-                                Diagnóstico VIP
+                                Gratis (30 min)
                             </span>
                         </div>
                     </div>
@@ -211,7 +211,7 @@ export default function Navbar() {
                                     Agendar Sesión
                                     <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-max">
                                         <span className="text-[10px] font-bold tracking-widest uppercase bg-black/80 px-3 py-1 rounded-full border block shadow-xl text-brand-cyan border-brand-cyan/30">
-                                            Diagnóstico VIP Gratuito
+                                            Auditoría Gratuita (30 min)
                                         </span>
                                     </div>
                                 </motion.a>
