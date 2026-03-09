@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ArrowRight, X, ChevronRight, Activity, Database, Zap } from "lucide-react";
+import { ArrowRight, X, ChevronRight, Activity, Database, Zap, ShieldCheck } from "lucide-react";
 
 type Project = {
     id: string;
@@ -209,7 +209,14 @@ export default function Portfolio() {
                                             {selectedProject.clientType.toUpperCase()}
                                         </div>
                                         <h3 className="text-3xl md:text-4xl font-black text-white mb-2">{selectedProject.title}</h3>
-                                        <p className="text-brand-primary font-medium">{selectedProject.tag}</p>
+                                        <p className="text-brand-primary font-medium mb-4">{selectedProject.tag}</p>
+
+                                        <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-lg w-max max-w-full">
+                                            <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                                            <span className="text-[10px] md:text-xs text-green-400 font-bold uppercase tracking-wider leading-tight">
+                                                Validado: Estructura implementada bajo acuerdos de confidencialidad
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-8">

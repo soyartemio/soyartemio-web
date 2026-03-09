@@ -135,6 +135,11 @@ export default function Hero() {
                                 Ver Casos de Éxito
                             </motion.button>
                         </motion.div>
+                        <motion.div variants={itemVariants} className="mt-4 text-center">
+                            <span className="inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 text-[10px] md:text-xs text-red-400 font-bold uppercase tracking-wider rounded-full shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                                Solo 2 auditorías de infraestructura disponibles para marzo
+                            </span>
+                        </motion.div>
 
                         {/* Trust Indicators Internos */}
                         <motion.div variants={itemVariants} className="mt-10 md:mt-12 pt-6 md:pt-8 border-t border-white/10 flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12 text-xs md:text-sm text-gray-300 font-medium">

@@ -5,6 +5,7 @@ import BioSection from "@/components/ui/bio/BioSection";
 import ImpactSection from "@/components/ui/impact/ImpactSection";
 import Portfolio from "@/components/ui/portfolio/Portfolio";
 import LeadMagnet from "@/components/ui/leadmagnet/LeadMagnet";
+import SaasCalculator from "@/components/ui/calculator/SaasCalculator";
 import Footer from "@/components/ui/footer/Footer";
 import VideoManifest from "@/components/ui/video/VideoManifest";
 
@@ -28,6 +29,7 @@ export default function Home() {
         <Portfolio />
         <BioSection />
         <LeadMagnet />
+        <SaasCalculator />
         <Footer />
       </div>
     </main>

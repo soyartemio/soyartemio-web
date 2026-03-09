@@ -83,10 +83,10 @@ export default function BioSection() {
                             className="space-y-4 text-gray-300 leading-relaxed text-sm md:text-base drop-shadow"
                         >
                             <p>
-                                No soy una agencia gigante ni un algoritmo sin rostro. Soy un consultor especializado que cree en el trato humano.
+                                2026 no espera a nadie. Mientras lees esto, tu competencia no está contratando personal, está integrando arquitecturas inteligentes.
                             </p>
                             <p>
-                                Mi filosofía es simple: <strong className="text-white">La IA no es el fin, es la herramienta.</strong> He visto empresas gastar fortunas en software que nadie usa. Mi misión es evitarte ese gasto y enfocar tus recursos en sistemas que realmente muevan la aguja de tu negocio.
+                                Yo no soy un gurú, soy el <strong className="text-white">arquitecto</strong> que conecta tu caos operativo con sistemas eficientes que realmente te pertenecen.
                             </p>
                         </motion.div>
 

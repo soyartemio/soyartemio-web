@@ -138,7 +138,7 @@ export default function Navbar() {
                     </nav>
 
                     {/* CTA Desktop - Right aligned */}
-                    <div className="hidden md:flex shrink-0 justify-self-end">
+                    <div className="hidden md:flex shrink-0 justify-self-end relative group">
                         <a
                             href="https://calendly.com/soyartemio/30min"
                             target="_blank"
@@ -147,6 +147,12 @@ export default function Navbar() {
                         >
                             Agendar Sesión
                         </a>
+                        {/* Micro-text Scarcity Badge flotante en el hover o siempre visible pequeño */}
+                        <div className="absolute -bottom-6 right-0 w-max pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                            <span className="text-[9px] text-red-400 font-bold tracking-widest uppercase bg-black/60 px-2 py-0.5 rounded-full border border-red-500/30">
+                                2 Auditorías disp. en marzo
+                            </span>
+                        </div>
                     </div>
 
                     {/* Mobile Toggle Button */}
@@ -192,17 +198,24 @@ export default function Navbar() {
                                 className="w-16 h-px bg-white/20 my-4"
                             ></motion.div>
 
-                            <motion.a
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}
-                                href="https://calendly.com/soyartemio/30min"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="w-full text-center bg-brand-cyan text-black text-lg font-bold py-4 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]"
-                            >
-                                Agendar Sesión
-                            </motion.a>
+                            <div className="w-full flex justify-center">
+                                <motion.a
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    href="https://calendly.com/soyartemio/30min"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="w-full text-center bg-brand-cyan text-black text-lg font-bold py-4 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative"
+                                >
+                                    Agendar Sesión
+                                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-max">
+                                        <span className="text-[10px] text-red-400 font-bold tracking-widest uppercase bg-black/80 px-3 py-1 rounded-full border border-red-500/30 block shadow-xl">
+                                            Solo 2 auditorías para marzo
+                                        </span>
+                                    </div>
+                                </motion.a>
+                            </div>
                         </nav>
                     </motion.div>
                 )}
