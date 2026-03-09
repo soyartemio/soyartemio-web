@@ -1,0 +1,67 @@
+# Antigravity Rules - SoyArtemio Project (Liquid Glass Edition)
+
+## Reglas Anti-Frustración (Supervisión de Código y Workflow)
+- **Principio de No-Asunción:** Si hay ambigüedad en un componente complejo (ej. la escena 3D), preguntar antes de escribir bloques masivos de código.
+- **Micro-Commits Aislados:** Cada feature funcional (ej. Navbar, Hero 3D, Footer) debe completarse, probarse y garantizar que funciona independientemente antes de montar el siguiente.
+- **Evitar Visión de Túnel:** Después de cada paso de ejecución importante, aplicar una "mirada de pájaro" (Bird's Eye View) para asegurar que el componente actual no rompió la armonía de la página ni la responsividad general.
+- **Consistencia de Clases:** Usar estrictamente las variables CSS/Tailwind del tema definido. Cero "magic numbers" (valores *hardcodeados*) en colores o espaciados.
+- **Prevención de Errores Comunes:** 
+  - Validar siempre `z-index` en elementos Liquid Glass para evitar sobreposición en menús móviles.
+  - Asegurar contraste a11y (accesibilidad) al superponer texto blanco sobre los difuminados cristalinos, usando fondos con opacidad como red de seguridad.
+  - El Hero 3D (Three.js/R3F) debe montarse en un componente separado que soporte un *fallback* 2D elegante por si falla la aceleración de hardware del dispositivo cliente.
+
+## Estándares de Diseño (Materiales)
+- Principio: Liquid Glass (Materiales de Apple).
+- Capas: Background Blur (20px - 40px), Vibrancy (Saturación +15%).
+- Bordes: 1px sólido con degradado lineal (blanco/transparente) para simular reflejo de luz.
+- Sombras: Drop shadows suaves con radio de difusión amplio y opacidad baja (<15%).
+
+## Ejecución Técnica
+- Framework: React + Tailwind CSS.
+- Interactividad: Framer Motion para el "spring" físico en los menús.
+- Código: Entregar bloques completos y funcionales (Copy/Paste ready).
+
+---
+
+## ADN Extraído de soyartemio.me (Contenido para el Rediseño)
+
+### 1. Identidad y Mensajes Principales (Hero)
+- **Título SEO / Pestaña:** SoyArtemio | Consultoría Estratégica de IA
+- **Titular Principal:** De la Confusión Técnica a la Claridad de Negocio.
+- **Subtítulo:** Soy tu traductor en la era de la Inteligencia Artificial. Ayudo a empresas a implementar tecnología con propósito, sin falsas promesas ni tecnicismos innecesarios.
+- **Llamados a la Acción (CTAs):**
+  - Botón Primario: "Diagnóstico Gratuito" (Abre Calendly)
+  - Botón Secundario: "Ver Manifiesto" (Link a #video-demo)
+
+### 2. El Método A.R.T.
+*Premisa: No improvisamos. Usamos un sistema de 3 fases para asegurar que la inversión en IA tenga sentido para TU realidad.*
+- **A: Analizar (La Radiografía):** Antes de instalar nada, entiendo tu negocio. Identificamos cuellos de botella reales y datos desaprovechados. Sin diagnóstico no hay receta.
+- **R: Rutas (El Diseño):** Diseño la arquitectura personalizada. Seleccionamos las herramientas exactas (ni más, ni menos) y creamos el plan de implementación paso a paso.
+- **T: Transformar (El Piloto):** Implementación acompañada. No te dejo solo con el software; capacito a tu equipo para que la tecnología trabaje para ellos, y no al revés.
+
+### 3. Biografía (El Consultor Detrás de la Pantalla)
+- **Titular:** Hola, soy Artemio.
+- **Copy:** No soy una agencia gigante ni un algoritmo sin rostro. Soy un consultor especializado que cree en el trato humano. Mi filosofía es simple: **La IA no es el fin, es la herramienta.** He visto empresas gastar fortunas en software que nadie usa. Mi misión es evitarte ese gasto y enfocar tus recursos en sistemas que realmente muevan la aguja de tu negocio.
+- **Métricas/Kpis Visuales:** 
+  - 2026 (Visión Futura)
+  - 100% (Compromiso)
+
+### 4. Áreas de Impacto (¿Qué puedes esperar?)
+*Premisa: Sin promesas mágicas. Estos son los resultados tangibles de una buena estrategia.*
+- **Recuperación de Tiempo:** Automatización de tareas repetitivas para liberar a tu equipo.
+- **Control de Datos:** Dejar de adivinar y empezar a decidir con información unificada.
+- **Compromiso Total:** No soy un ticket de soporte. Soy tu socio estratégico durante toda la implementación.
+- **Escalabilidad:** Capacidad de atender a más clientes con la misma estructura.
+
+### 5. Lead Magnet / Captación
+- **Titular:** Auditoría Confidencial 2026
+- **Copy:** Descarga el checklist gratuito. Sin registros molestos. Solo bájalo, llénalo y si quieres mi opinión, envíamelo.
+- **Archivo a Entregar:** Checklist en PDF.
+
+### 6. Archivos Multimedia e Integraciones
+- **Imágenes Encontradas:** `assets/miimagen.jpg` (alt: "Artemio Consultor IA").
+- **Archivos Descargables:** `assets/checklist-ia-2026.pdf`.
+- **Integraciones 3rd-Party detectadas:**
+  - **Calendly:** (`https://calendly.com/soyartemio/30min`)
+  - **Tawk.to:** Script para Widget de Chat en vivo.
+- **Iconografía Detectada:** Material Symbols Outlined (`schedule`, `visibility`, `handshake`, `trending_up`, `download`, `play_circle`).
