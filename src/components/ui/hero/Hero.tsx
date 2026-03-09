@@ -2,19 +2,11 @@
 
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { ArrowRight, Calendar, Layers, ShieldCheck } from "lucide-react";
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent } from "react";
 
 export default function Hero() {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
-    const [dateInfo, setDateInfo] = useState({ month: "", isFirstWeek: false, mounted: false });
-
-    useEffect(() => {
-        const now = new Date();
-        const firstWeek = now.getDate() <= 7;
-        const currentMonth = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(now);
-        setDateInfo({ month: currentMonth, isFirstWeek: firstWeek, mounted: true });
-    }, []);
 
     function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
         const { left, top } = currentTarget.getBoundingClientRect();
@@ -144,11 +136,9 @@ export default function Hero() {
                             </motion.button>
                         </motion.div>
                         <motion.div variants={itemVariants} className="mt-4 text-center min-h-[24px]">
-                            {dateInfo.mounted && (
-                                <span className={`inline-block px-3 py-1 border text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-full transition-colors duration-500 ${dateInfo.isFirstWeek ? "bg-green-500/10 border-green-500/20 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.2)]" : "bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"}`}>
-                                    {dateInfo.isFirstWeek ? `Agenda abierta para ${dateInfo.month}` : `Pocas auditorías disponibles para ${dateInfo.month}`}
-                                </span>
-                            )}
+                            <span className="inline-block px-3 py-1 border text-[10px] md:text-xs font-bold uppercase tracking-wider rounded-full transition-colors duration-500 bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                                Auditoría Inicial 100% Bonificada
+                            </span>
                         </motion.div>
 
                         {/* Trust Indicators Internos */}

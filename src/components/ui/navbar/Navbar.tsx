@@ -9,14 +9,6 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState("");
-    const [dateInfo, setDateInfo] = useState({ month: "", isFirstWeek: false, mounted: false });
-
-    useEffect(() => {
-        const now = new Date();
-        const firstWeek = now.getDate() <= 7;
-        const currentMonth = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(now);
-        setDateInfo({ month: currentMonth, isFirstWeek: firstWeek, mounted: true });
-    }, []);
 
     // Detectar scroll para aplicar Glassmorphism solo cuando no está en el top
     useEffect(() => {
@@ -156,13 +148,11 @@ export default function Navbar() {
                             Agendar Sesión
                         </a>
                         {/* Micro-text Scarcity Badge flotante en el hover o siempre visible pequeño */}
-                        {dateInfo.mounted && (
-                            <div className="absolute -bottom-6 right-0 w-max pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
-                                <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border bg-black/60 shadow-md ${dateInfo.isFirstWeek ? "text-green-400 border-green-500/30" : "text-red-400 border-red-500/30"}`}>
-                                    {dateInfo.isFirstWeek ? `Abierta en ${dateInfo.month}` : `Pocas disp. en ${dateInfo.month}`}
-                                </span>
-                            </div>
-                        )}
+                        <div className="absolute -bottom-6 right-0 w-max pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                            <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full border bg-black/60 shadow-md text-brand-cyan border-brand-cyan/30">
+                                Diagnóstico VIP
+                            </span>
+                        </div>
                     </div>
 
                     {/* Mobile Toggle Button */}
@@ -219,13 +209,11 @@ export default function Navbar() {
                                     className="w-full text-center bg-brand-cyan text-black text-lg font-bold py-4 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative"
                                 >
                                     Agendar Sesión
-                                    {dateInfo.mounted && (
-                                        <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-max">
-                                            <span className={`text-[10px] font-bold tracking-widest uppercase bg-black/80 px-3 py-1 rounded-full border block shadow-xl ${dateInfo.isFirstWeek ? "text-green-400 border-green-500/30" : "text-red-400 border-red-500/30"}`}>
-                                                {dateInfo.isFirstWeek ? `Agenda abierta para ${dateInfo.month}` : `Pocas disp. para ${dateInfo.month}`}
-                                            </span>
-                                        </div>
-                                    )}
+                                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-max">
+                                        <span className="text-[10px] font-bold tracking-widest uppercase bg-black/80 px-3 py-1 rounded-full border block shadow-xl text-brand-cyan border-brand-cyan/30">
+                                            Diagnóstico VIP Gratuito
+                                        </span>
+                                    </div>
                                 </motion.a>
                             </div>
                         </nav>
