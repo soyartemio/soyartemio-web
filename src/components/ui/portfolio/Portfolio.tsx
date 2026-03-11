@@ -112,7 +112,7 @@ export default function Portfolio() {
                 {/* Grid de Tarjetas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                     {projects.map((project, index) => (
-                        <motion.div
+                        <motion.article
                             key={project.id}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -128,7 +128,7 @@ export default function Portfolio() {
                             <div className="relative w-full flex-1 overflow-hidden border-b border-white/5 bg-black/50">
                                 <Image
                                     src={project.image}
-                                    alt={project.title}
+                                    alt={`Mockup ilustrativo del ${project.title}`}
                                     fill
                                     className="object-cover object-top opacity-60 group-hover:scale-105 group-hover:opacity-90 transition-all duration-700 ease-out"
                                 />
@@ -157,7 +157,7 @@ export default function Portfolio() {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </motion.article>
                     ))}
                 </div>
 

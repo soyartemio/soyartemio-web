@@ -51,7 +51,7 @@ export default function BioSection() {
                     }}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 relative z-10">
+                <article className="grid grid-cols-1 md:grid-cols-2 relative z-10">
 
                     {/* Contenido / Texto */}
                     <div className="p-8 md:p-16 flex flex-col justify-center order-2 md:order-1 relative z-10 w-full">
@@ -121,7 +121,7 @@ export default function BioSection() {
                             {/*  Descomenta para agregar la foto real cuando se levante el entorno en Localhost
                             <Image 
                                 src="/assets/miimagen.jpg" 
-                                alt="Artemio Consultor IA"
+                                alt="Artemio - Arquitecto Cloud y Consultor de IA"
                                 fill
                                 style={{ objectFit: 'cover', objectPosition: 'top' }}
                                 priority
@@ -130,7 +130,7 @@ export default function BioSection() {
                             <div className="w-full h-full bg-gradient-to-br from-brand-dark via-gray-900 to-black flex items-center justify-center text-white/10 font-bold text-xl uppercase tracking-widest">
                                 <Image
                                     src="/assets/miimagen.jpg"
-                                    alt="Artemio Consultor IA"
+                                    alt="Artemio - Consultor Estratégico de IA y Soberanía Tecnológica"
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                     fill
                                     className="object-cover object-top opacity-60 grayscale hover:grayscale-0 transition-all duration-700"
@@ -142,7 +142,7 @@ export default function BioSection() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </article>
             </motion.div>
         </section>
     );

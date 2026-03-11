@@ -37,7 +37,7 @@ export default function Hero() {
     };
 
     return (
-        <section className="relative w-full min-h-screen flex items-center justify-center px-4 overflow-hidden pt-20 pb-16">
+        <header className="relative w-full min-h-screen flex items-center justify-center px-4 overflow-hidden pt-20 pb-16">
             <div className="max-w-4xl mx-auto w-full z-10 relative">
 
                 {/* Panel Liquid Glass con Spotlight Effect */}
@@ -156,6 +156,6 @@ export default function Hero() {
                     </div>
                 </motion.div>
             </div>
-        </section>
+        </header>
     );
 }

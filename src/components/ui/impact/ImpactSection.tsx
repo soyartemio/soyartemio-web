@@ -56,7 +56,7 @@ export default function ImpactSection() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {impacts.map((item, index) => (
-                        <motion.div
+                        <motion.article
                             key={item.title}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export default function ImpactSection() {
                             </div>
                             <h3 className="text-lg font-bold text-white mb-3 tracking-wide">{item.title}</h3>
                             <p className="text-sm text-gray-400 leading-relaxed">{item.description}</p>
-                        </motion.div>
+                        </motion.article>
                     ))}
                 </div>
 

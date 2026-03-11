@@ -12,7 +12,7 @@ export default function SaasCalculator() {
     const dineroTirado = empleados * 20 * 12;
 
     return (
-        <section className="relative py-20 px-4 w-full flex items-center justify-center">
+        <article id="calculadora" className="relative py-20 px-4 w-full flex items-center justify-center">
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -79,6 +79,6 @@ export default function SaasCalculator() {
                     </div>
                 </div>
             </motion.div>
-        </section>
+        </article>
     );
 }

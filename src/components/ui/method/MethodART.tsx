@@ -73,7 +73,7 @@ export default function MethodART() {
                     <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent -z-10"></div>
 
                     {steps.map((step, index) => (
-                        <motion.div
+                        <motion.article
                             key={step.id}
                             initial={{ opacity: 0, y: 40 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ export default function MethodART() {
                                 <h3 className="text-xl md:text-2xl font-bold text-white mb-4 drop-shadow-sm">{step.title}</h3>
                                 <p className="text-gray-400 text-sm md:text-base leading-relaxed">{step.description}</p>
                             </div>
-                        </motion.div>
+                        </motion.article>
                     ))}
                 </div>
             </div>
