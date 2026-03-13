@@ -11,6 +11,7 @@ import ImpactSection from "@/components/ui/impact/ImpactSection";
 import Portfolio from "@/components/ui/portfolio/Portfolio";
 import LeadMagnet from "@/components/ui/leadmagnet/LeadMagnet";
 import SaasCalculator from "@/components/ui/calculator/SaasCalculator";
+import BlogSection from "@/components/ui/blog/BlogSection";
 import Footer from "@/components/ui/footer/Footer";
 import VideoManifest from "@/components/ui/video/VideoManifest";
 
@@ -39,6 +40,7 @@ export default function Home() {
         <BioSection />
         <LeadMagnet />
         <SaasCalculator />
+        <BlogSection />
         <Footer />
       </div>
     </main>

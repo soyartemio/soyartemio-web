@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
@@ -51,24 +52,31 @@ export default function Navbar() {
         };
     }, []);
 
+    const pathname = usePathname();
+
     const navLinks = [
-        { name: "Manifiesto", href: "#manifiesto" },
-        { name: "El Método A.R.T.", href: "#metodo" },
-        { name: "Impacto", href: "#impacto" },
-        { name: "Consultor", href: "#bio" },
+        { name: "Manifiesto", href: "/#manifiesto" },
+        { name: "El Método A.R.T.", href: "/#metodo" },
+        { name: "Impacto", href: "/#impacto" },
+        { name: "Consultor", href: "/#bio" },
+        { name: "Blog", href: "/blog" },
     ];
 
     const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, href: string) => {
-        e.preventDefault();
-        setMobileMenuOpen(false); // Cerrar menú en móvil
-        const element = document.querySelector(href);
-        if (element) {
-            // Ajustamos el offset para que el header sticky no tape el título de la sección
-            const offsetTop = element.getBoundingClientRect().top + window.scrollY - 100;
-            window.scrollTo({
-                top: offsetTop,
-                behavior: "smooth"
-            });
+        // Solo prevenir por default y scrollear suave si estamos en la misma página y es un ancla
+        if (pathname === '/' && href.startsWith('/#')) {
+            e.preventDefault();
+            setMobileMenuOpen(false); // Cerrar menú en móvil
+            const targetId = href.substring(1); // Quitar '/' para que quede '#metodo'
+            const element = document.querySelector(targetId);
+            if (element) {
+                // Ajustamos el offset para que el header sticky no tape el título de la sección
+                const offsetTop = element.getBoundingClientRect().top + window.scrollY - 100;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: "smooth"
+                });
+            }
         }
     };
 
