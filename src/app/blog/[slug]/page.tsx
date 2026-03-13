@@ -1,5 +1,5 @@
 import { getPostBySlug, getAllPosts } from "@/lib/mdx";
-import { MDXRemote } from "next-mdx-remote/rsc";
+import { marked } from "marked";
 import Navbar from "@/components/ui/navbar/Navbar";
 import Footer from "@/components/ui/footer/Footer";
 import { notFound } from "next/navigation";
@@ -103,7 +103,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                     prose-blockquote:border-l-4 prose-blockquote:border-brand-primary prose-blockquote:bg-white/5 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:rounded-r-xl prose-blockquote:text-gray-200 prose-blockquote:italic
                     prose-code:text-brand-accent prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none
                     prose-pre:bg-black/60 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:shadow-2xl backdrop-blur-md">
-                    <MDXRemote source={post.content} />
+                    <div dangerouslySetInnerHTML={{ __html: await marked(post.content) }} />
                 </div>
 
                 {/* Footer del Artículo - CTA */}
