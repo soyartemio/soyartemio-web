@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "predev": "node scripts/generate-blog.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-blog.mjs",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
