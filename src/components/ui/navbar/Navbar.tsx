@@ -54,6 +54,10 @@ export default function Navbar() {
 
     const pathname = usePathname();
 
+    if (pathname === "/" || pathname === "/en" || pathname === "/concept" || pathname === "/en/concept") {
+        return null;
+    }
+
     const navLinks = [
         { name: "Manifiesto", href: "/#manifiesto" },
         { name: "El Método A.R.T.", href: "/#metodo" },
