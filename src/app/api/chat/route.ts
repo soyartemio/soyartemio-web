@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge"; // Run as lightweight edge function on Cloudflare
-
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
@@ -13,7 +11,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Safely retrieve Gemini API Key across Node and Cloudflare Worker contexts
+    let apiKey = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {}
+
+    if (!apiKey) {
+      try {
+        apiKey = (globalThis as any).GEMINI_API_KEY || (globalThis as any).env?.GEMINI_API_KEY;
+      } catch (e) {}
+    }
+
     if (!apiKey) {
       return NextResponse.json(
         { error: "La clave de la API de Gemini no está configurada." },
