@@ -1,4 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+type ChatMessage = {
+  role?: string;
+  content?: string;
+};
+
+type GeminiResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,17 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Safely retrieve Gemini API Key across Node and Cloudflare Worker contexts
-    let apiKey = undefined;
-    try {
-      apiKey = process.env.GEMINI_API_KEY;
-    } catch (e) {}
-
-    if (!apiKey) {
-      try {
-        apiKey = (globalThis as any).GEMINI_API_KEY || (globalThis as any).env?.GEMINI_API_KEY;
-      } catch (e) {}
-    }
+    const apiKey = await getGeminiApiKey();
 
     if (!apiKey) {
       return NextResponse.json(
@@ -31,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Format messages for Gemini API
-    const contents = messages.map((m: any) => ({
+    const contents = (messages as ChatMessage[]).map((m) => ({
       role: m.role === "user" ? "user" : "model",
       parts: [{ text: m.content || "" }]
     }));
@@ -98,15 +104,28 @@ REGLAS DE COMPORTAMIENTO:
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GeminiResponse;
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     return NextResponse.json({ reply: replyText });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en el API de Chat:", error);
     return NextResponse.json(
       { error: "Error interno del servidor." },
       { status: 500 }
     );
+  }
+}
+
+async function getGeminiApiKey() {
+  if (process.env.GEMINI_API_KEY) {
+    return process.env.GEMINI_API_KEY;
+  }
+
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    return (env as Record<string, string | undefined>).GEMINI_API_KEY;
+  } catch {
+    return undefined;
   }
 }
