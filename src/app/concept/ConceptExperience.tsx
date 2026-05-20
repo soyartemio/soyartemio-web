@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import ChatbotWidget from "../../components/ui/chatbot/ChatbotWidget";
 import {
   ArrowRight,
   Bot,
@@ -613,37 +614,6 @@ function ServiceGrid({ locale }: { locale: Locale }) {
   );
 }
 
-function WhatsAppWidget({ locale }: { locale: Locale }) {
-  const copy = content[locale].whatsapp;
-  const whatsappHref = `https://wa.me/5261468024571?text=${encodeURIComponent(copy.message)}`;
-
-  return (
-    <motion.a
-      href={whatsappHref}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={copy.label}
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.9 }}
-      className="group fixed bottom-4 right-4 z-50 flex h-14 w-14 max-w-[calc(100vw-2rem)] items-center justify-center rounded-full border border-[#f4f0e8]/35 bg-[#171717] p-0 text-[#f4f0e8] shadow-[0_14px_34px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-0.5 sm:bottom-5 sm:right-5 sm:h-auto sm:w-auto sm:rounded-none sm:border-[#171717] sm:bg-[#f4f0e8] sm:p-2 sm:pr-4 sm:text-[#171717] sm:shadow-[8px_8px_0_#171717] sm:hover:shadow-[10px_10px_0_#171717] md:bottom-7 md:right-7"
-    >
-      <span className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-[#f4f0e8] sm:h-12 sm:w-12 sm:rounded-none">
-        <span className="absolute inset-0 opacity-25 [background-image:linear-gradient(#f4f0e8_1px,transparent_1px),linear-gradient(90deg,#f4f0e8_1px,transparent_1px)] [background-size:10px_10px]" />
-        <MessageCircle className="relative h-5 w-5" />
-        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#56b6b2]" />
-      </span>
-      <span className="hidden min-w-0 sm:block">
-        <span className="block text-sm font-black leading-tight">{copy.title}</span>
-        <span className="mt-0.5 block max-w-[230px] truncate text-xs font-semibold text-[#171717]/58">
-          {copy.body}
-        </span>
-      </span>
-      <ArrowRight className="hidden h-4 w-4 transition group-hover:translate-x-0.5 sm:block" />
-    </motion.a>
-  );
-}
-
 export default function ConceptExperience({ locale = "es" }: { locale?: Locale }) {
   const copy = content[locale];
 
@@ -831,7 +801,7 @@ export default function ConceptExperience({ locale = "es" }: { locale?: Locale }
           </div>
         </div>
       </section>
-      <WhatsAppWidget locale={locale} />
+      <ChatbotWidget locale={locale} />
     </main>
   );
 }
