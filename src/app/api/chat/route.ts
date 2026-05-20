@@ -16,6 +16,12 @@ type GeminiResponse = {
   }>;
 };
 
+const GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+] as const;
+
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
@@ -36,11 +42,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Format messages for Gemini API
-    const contents = (messages as ChatMessage[]).map((m) => ({
-      role: m.role === "user" ? "user" : "model",
-      parts: [{ text: m.content || "" }]
-    }));
+    const contents = formatMessagesForGemini(messages as ChatMessage[]);
+
+    if (contents.length === 0) {
+      return NextResponse.json(
+        { error: "No hay mensajes válidos para enviar a la IA." },
+        { status: 400 }
+      );
+    }
 
     const systemPrompt = `Eres el asistente de IA oficial de Artemio (soyartemio.com), Arquitecto de IA Operativa. Tu objetivo es resolver dudas sobre el trabajo de Artemio, su filosofía y ayudar al cliente a agendar una auditoría gratuita de 30 minutos.
 
@@ -84,27 +93,17 @@ REGLAS DE COMPORTAMIENTO:
       }
     };
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error de la API de Gemini:", errorText);
+    let data: GeminiResponse;
+    try {
+      data = await generateGeminiContent(apiKey, requestBody);
+    } catch (error) {
+      console.error("Error de la API de Gemini:", error);
       return NextResponse.json(
         { error: "Error al comunicarse con el motor de IA." },
-        { status: response.status }
+        { status: 502 }
       );
     }
 
-    const data = (await response.json()) as GeminiResponse;
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     return NextResponse.json({ reply: replyText });
@@ -115,6 +114,70 @@ REGLAS DE COMPORTAMIENTO:
       { status: 500 }
     );
   }
+}
+
+function formatMessagesForGemini(messages: ChatMessage[]) {
+  let hasSeenUserMessage = false;
+
+  return messages.flatMap((message) => {
+    const text = message.content?.trim();
+
+    if (!text) {
+      return [];
+    }
+
+    const role = message.role === "user" ? "user" : "model";
+
+    if (role === "user") {
+      hasSeenUserMessage = true;
+    }
+
+    if (!hasSeenUserMessage && role === "model") {
+      return [];
+    }
+
+    return [
+      {
+        role,
+        parts: [{ text }],
+      },
+    ];
+  });
+}
+
+async function generateGeminiContent(apiKey: string, requestBody: unknown) {
+  let lastStatus = 500;
+
+  for (const model of GEMINI_MODELS) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (response.ok) {
+      return (await response.json()) as GeminiResponse;
+    }
+
+    lastStatus = response.status;
+    const errorText = await response.text();
+    console.error(`Error de la API de Gemini (${model}):`, errorText);
+
+    if (!isRetryableGeminiStatus(response.status)) {
+      break;
+    }
+  }
+
+  throw new Error(`Gemini request failed with status ${lastStatus}`);
+}
+
+function isRetryableGeminiStatus(status: number) {
+  return status === 429 || status >= 500;
 }
 
 async function getGeminiApiKey() {
