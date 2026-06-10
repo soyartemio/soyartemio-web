@@ -67,6 +67,53 @@ const jsonLd = {
       "founder": {
         "@id": `${SITE_URL}/#person`
       }
+    },
+    {
+      "@type": "ProfessionalService",
+      "@id": `${SITE_URL}/#service`,
+      "name": "Consultoría de IA operativa para empresas",
+      "url": SITE_URL,
+      "provider": {
+        "@id": `${SITE_URL}/#organization`
+      },
+      "areaServed": "MX",
+      "serviceType": [
+        "Consultoría de inteligencia artificial",
+        "Automatización de procesos",
+        "Arquitectura de datos e IA",
+        "Implementación de agentes de IA"
+      ],
+      "description": "Diseño e implementación de infraestructura de IA propia para automatizar operaciones, ordenar datos y reducir rentas de software."
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE_URL}/#faq`,
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Qué incluye la auditoría gratuita de IA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Incluye una conversación de 30 minutos para entender la operación, detectar fugas de tiempo o software y definir si tiene sentido construir una arquitectura de IA propia."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Esto reemplaza ChatGPT Enterprise o Copilot?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No necesariamente. Pueden integrarse como una capa del sistema. La diferencia es que la arquitectura se diseña alrededor de los datos, procesos y reglas de la empresa."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuánto tarda una implementación de IA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Depende del alcance, pero conviene iniciar con un módulo de alto impacto en semanas para demostrar valor antes de ampliar la arquitectura."
+          }
+        }
+      ]
     }
   ]
 };
