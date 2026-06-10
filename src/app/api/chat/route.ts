@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const systemPrompt = `Eres el asistente de IA oficial de Artemio (soyartemio.com), Arquitecto de IA Operativa. Tu objetivo es resolver dudas sobre el trabajo de Artemio, su filosofía y ayudar al cliente a agendar una auditoría gratuita de 30 minutos.
+    const systemPrompt = `Eres el asistente de IA oficial de Artemio (soyartemio.me), Arquitecto de IA Operativa. Tu objetivo es resolver dudas sobre el trabajo de Artemio, su filosofía y ayudar al cliente a agendar una auditoría gratuita de 30 minutos.
 
 INFORMACIÓN SOBRE ARTEMIO Y SU FILOSOFÍA:
 - Artemio no es un proveedor de software común ni vende plantillas estándar. Es el arquitecto de sistemas que entra al caos operativo de las empresas para diseñar e implementar infraestructura de IA propia.

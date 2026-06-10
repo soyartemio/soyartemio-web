@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/navbar/Navbar";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://soyartemio.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Artemio | Consultoría Estratégica en IA y Arquitectura Cloud",
     template: "%s | SoyArtemio"
@@ -23,8 +24,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Artemio | Consultoría Estratégica en IA",
     description: "Transformando negocios mediante IA, automatización y arquitecturas tecnológicas robustas.",
-    url: "https://soyartemio.com",
-    siteName: "SoyArtemio",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "es_ES",
     type: "website",
   },
@@ -50,21 +51,21 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Person",
-      "@id": "https://soyartemio.com/#person",
+      "@id": `${SITE_URL}/#person`,
       "name": "Artemio",
       "jobTitle": "Estratega de Inteligencia Artificial & Arquitecto Cloud",
-      "url": "https://soyartemio.com",
+      "url": SITE_URL,
       "sameAs": [
         "https://linkedin.com/in/artemio"
       ]
     },
     {
       "@type": "Organization",
-      "@id": "https://soyartemio.com/#organization",
+      "@id": `${SITE_URL}/#organization`,
       "name": "SoyArtemio Consulting",
-      "url": "https://soyartemio.com",
+      "url": SITE_URL,
       "founder": {
-        "@id": "https://soyartemio.com/#person"
+        "@id": `${SITE_URL}/#person`
       }
     }
   ]

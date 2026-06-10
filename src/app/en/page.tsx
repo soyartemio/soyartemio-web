@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ConceptExperience from "@/app/concept/ConceptExperience";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI Operating Architecture | SoyArtemio",
@@ -13,11 +14,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "SoyArtemio | AI Operating Architecture",
+    title: `${SITE_NAME} | AI Operating Architecture`,
     description:
       "Stop using AI like a toy. Build owned systems that automate your operation, protect your data, and reduce software rent.",
-    url: "https://soyartemio.com/en",
-    siteName: "SoyArtemio",
+    url: `${SITE_URL}/en`,
+    siteName: SITE_NAME,
     locale: "en_US",
     type: "website",
   },

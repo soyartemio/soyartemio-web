@@ -5,6 +5,7 @@ import Footer from "@/components/ui/footer/Footer";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateStaticParams() {
     const posts = getAllPosts();
@@ -50,7 +51,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         "author": {
             "@type": "Person",
             "name": "Artemio",
-            "url": "https://soyartemio.com"
+            "url": SITE_URL
         }
     };
 
