@@ -1359,7 +1359,7 @@ function MobileHero({ locale }: { locale: Locale }) {
           locale={locale}
           initialText={copy.mobile.heroTitle}
           responses={copy.hero.responses}
-          className="mt-[26px] min-h-[2.52em] w-full text-[clamp(3.15rem,15vw,4.25rem)] font-black leading-[0.84] tracking-[-0.055em]"
+          className="mt-[26px] min-h-[2.72em] w-full text-[clamp(3.15rem,15vw,4.25rem)] font-black leading-[0.84] tracking-[-0.055em]"
           initialClassName="max-w-[9ch]"
           responseClassName="max-w-full text-[0.72em] leading-[0.94] tracking-[-0.04em]"
         />
