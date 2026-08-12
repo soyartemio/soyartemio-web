@@ -45,7 +45,7 @@ export function renderSocialCard() {
               MENOS TRABAJO MANUAL
             </div>
             <div style={{ marginTop: 20, fontSize: 78, fontWeight: 900, lineHeight: 0.92, letterSpacing: -4.5 }}>
-              Saco tu operación del caos.
+              Deja de usar la IA como un juguete.
             </div>
           </div>
         </div>

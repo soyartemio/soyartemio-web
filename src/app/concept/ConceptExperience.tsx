@@ -61,7 +61,7 @@ const content = {
     },
     mobile: {
       eyebrow: "Para empresas cansadas de operar a mano",
-      heroTitle: "Saco tu operación del caos.",
+      heroTitle: "Deja de usar la IA como un juguete.",
       heroBody: "No necesitas otro software. Entro a tu empresa, encuentro qué roba tiempo y dinero, y construyo contigo una forma más simple de operar.",
       primaryCta: "Diagnóstico de 30 min",
       secondaryCta: "Calcular lo que pierdo",
@@ -89,7 +89,7 @@ const content = {
     },
     hero: {
       eyebrow: "Para empresas cansadas de operar a mano",
-      title: "Saco tu operación del caos.",
+      title: "Deja de usar la IA como un juguete.",
       body: "No necesitas otro software. Entro a tu empresa, encuentro qué está robando tiempo y dinero, y construyo contigo una forma más simple de operar.",
       primaryCta: "Agendar diagnóstico",
       secondaryCta: "Calcular lo que pierdo al año",
@@ -311,7 +311,7 @@ const content = {
     },
     mobile: {
       eyebrow: "For companies tired of manual work",
-      heroTitle: "I turn operating chaos into control.",
+      heroTitle: "Stop using AI like a toy.",
       heroBody: "You do not need more software. I enter your company, find what is draining time and money, and build a simpler way to operate with you.",
       primaryCta: "30-minute diagnosis",
       secondaryCta: "Calculate what I lose",
@@ -339,7 +339,7 @@ const content = {
     },
     hero: {
       eyebrow: "For companies tired of manual work",
-      title: "I turn operating chaos into control.",
+      title: "Stop using AI like a toy.",
       body: "You do not need more software. I enter your company, find what is draining time and money, and build a simpler way to operate with you.",
       primaryCta: "Book a diagnosis",
       secondaryCta: "Calculate my yearly loss",
