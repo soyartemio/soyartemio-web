@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import ChatbotWidget from "../../components/ui/chatbot/ChatbotWidget";
+import VoiceAgent from "../../components/ui/voice/VoiceAgent";
 import {
   ArrowRight,
   Bot,
@@ -38,434 +38,516 @@ const icons = {
 };
 
 const baseLayerClasses = [
-  "mx-auto w-[64%] border-[#b8954f] bg-[#2b2417]",
-  "mx-auto w-[82%] border-[#56b6b2] bg-[#102b2b]",
+  "mx-auto w-[61.8%] border-[#b8954f] bg-[#2b2417]",
+  "mx-auto w-[78.6%] border-[#56b6b2] bg-[#102b2b]",
   "w-full border-[#7d8fd6] bg-[#151d3b]",
 ];
+
+/*
+ * Sistema macro de proporción: 10 → 16 → 26 → 42 → 68 → 110.
+ * Las composiciones de dos columnas usan 0.618fr / 1fr; los controles
+ * conservan incrementos táctiles de 8, 12, 16 y 24 cuando la usabilidad manda.
+ */
 
 const content = {
   es: {
     nav: {
       diagnosis: "Diagnóstico",
-      blueprint: "Blueprint",
-      savings: "Ahorro",
-      cta: "Agendar auditoría",
+      blueprint: "Cómo funciona",
+      savings: "Calculadora",
+      cta: "Agendar diagnóstico",
       localeHref: "/en/concept",
       localeLabel: "EN",
     },
+    mobile: {
+      eyebrow: "Para empresas cansadas de operar a mano",
+      heroTitle: "Saco tu operación del caos.",
+      heroBody: "No necesitas otro software. Entro a tu empresa, encuentro qué roba tiempo y dinero, y construyo contigo una forma más simple de operar.",
+      primaryCta: "Diagnóstico de 30 min",
+      secondaryCta: "Calcular lo que pierdo",
+      receiptLabel: "Antes / Después",
+      receiptTitle: "Menos caos. Más control.",
+      receiptNote: "Una solución hecha alrededor de tu empresa.",
+      offerEyebrow: "Así te ayudo",
+      offerTitle: "Cuatro formas de salir del problema.",
+      offerBody: "Empezamos por lo que más tiempo, dinero o control te está costando.",
+      methodEyebrow: "Cómo lo resolvemos",
+      methodTitle: "Del problema a una forma mejor de trabajar.",
+      methodSteps: [
+        "Encontramos la fuga.",
+        "Resolvemos lo prioritario.",
+        "Tu equipo lo adopta.",
+      ],
+      calculatorEyebrow: "Haz la cuenta",
+      calculatorTitle: "¿Cuánto te cuesta seguir igual?",
+      calculatorBody: "Ajusta tres variables. Te doy una señal para decidir, no una promesa.",
+      calculatorResult: "Costo anual estimado",
+      calculatorCta: "Encontrar por dónde empezar",
+      bioEyebrow: "Soy Artemio",
+      bioTitle: "Primero entiendo. Luego construyo.",
+      bioBody: "Entro al problema contigo y me quedo hasta que la solución funcione.",
+    },
     hero: {
-      eyebrow: "IA aplicada a margen, datos y operación",
-      title: "Deja de usar la IA como un juguete.",
-      body: "Conviértela en infraestructura operativa propia: sistemas de IA que automatizan tu operación, protegen tus datos y reemplazan rentas de software por activos que sí te pertenecen.",
-      primaryCta: "Agendar auditoría gratuita",
-      secondaryCta: "Calcular lo que dejo de rentar",
+      eyebrow: "Para empresas cansadas de operar a mano",
+      title: "Saco tu operación del caos.",
+      body: "No necesitas otro software. Entro a tu empresa, encuentro qué está robando tiempo y dinero, y construyo contigo una forma más simple de operar.",
+      primaryCta: "Agendar diagnóstico",
+      secondaryCta: "Calcular lo que pierdo al año",
+      auditNote: "30 min · sin costo · sales con el siguiente paso claro.",
       outcomes: [
-        "Dejas de pagar rentas por herramientas que no controlas.",
-        "Tus datos, procesos y automatizaciones viven en un sistema propio.",
-        "Te acompaño desde el diagnóstico hasta que tu equipo lo usa.",
+        "Detectamos dónde se atasca el trabajo.",
+        "Decidimos qué conviene automatizar y qué no.",
+        "Construimos primero lo que más alivio genera.",
       ],
       proofStrip: [
-        { label: "Diagnóstico", title: "Dónde se fuga margen", body: "Mapa claro antes de construir.", href: "#diagnostico" },
-        { label: "Automatización", title: "Qué puede trabajar solo", body: "Flujos reales, no demos.", href: "#propiedad" },
-        { label: "Propiedad de datos", title: "Qué vuelve a ser tuyo", body: "Activos internos bajo control.", href: "#acta" },
-        { label: "Ahorro SaaS", title: "Qué dejas de rentar", body: "Rentas convertidas en sistema.", href: "#calculadora" },
+        { label: "Diagnóstico", title: "Encuentra el problema", body: "Antes de gastar en herramientas.", href: "#diagnostico" },
+        { label: "Automatización", title: "Quita trabajo manual", body: "Sin romper lo que ya funciona.", href: "#propiedad" },
+        { label: "Información", title: "Ordena tus datos", body: "Para decidir sin perseguir reportes.", href: "#acta" },
+        { label: "Ahorro", title: "Recupera presupuesto", body: "Menos rentas, más control.", href: "#calculadora" },
       ],
     },
     act: {
-      eyebrow: "Acta de propiedad operativa",
-      title: "Tu empresa deja de rentar su operación",
-      input: "Entrada detectada",
-      working: "IA trabajando",
-      generated: "Acta generada",
+      eyebrow: "Resultado del diagnóstico",
+      title: "Tu operación deja de depender de parches",
+      input: "Lo que hoy duele",
+      working: "Lo que resolvemos",
+      generated: "Lo que cambia",
       result: "Resultado",
-      lockIn: "lock-in",
-      resultBody: "rentas innecesarias como base de crecimiento",
-      dataTitle: "Tus datos",
-      dataBody: "ordenados, consultables y bajo tu control",
-      systemTitle: "Tu sistema",
-      systemBody: "hecho alrededor de cómo trabaja tu equipo",
+      lockIn: "dependencias",
+      resultBody: "de herramientas que no puedes controlar",
+      dataTitle: "Tu información",
+      dataBody: "ordenada y bajo tu control",
+      systemTitle: "Tu forma de trabajar",
+      systemBody: "convertida en un sistema simple",
       supportTitle: "Mi acompañamiento",
-      supportBody: "diagnóstico, implementación y adopción real",
-      savingsLine: "El ahorro no es el final. Es el presupuesto para construir propiedad.",
-      savingsBadge: "Margen recuperado",
+      supportBody: "hasta que tu equipo lo use",
+      savingsLine: "Lo que hoy se desperdicia puede financiar una mejor forma de operar.",
+      savingsBadge: "Presupuesto recuperado",
       transformations: [
-        { before: "Rentas de software", after: "Activos internos" },
-        { before: "Datos regados", after: "Fuente de verdad" },
-        { before: "Trabajo repetitivo", after: "Agentes operando" },
+        { before: "Rentas de software", after: "Herramientas propias" },
+        { before: "Datos regados", after: "Información en orden" },
+        { before: "Trabajo repetitivo", after: "Procesos automáticos" },
       ],
       workSteps: [
-        "Leyendo operación actual",
-        "Detectando fugas SaaS",
-        "Cruzando datos y procesos",
-        "Generando arquitectura propia",
+        "Entendiendo cómo trabajan",
+        "Encontrando fugas",
+        "Priorizando qué resolver",
+        "Armando el plan",
       ],
     },
     services: {
       eyebrow: "Lo que construimos juntos",
-      title: "Del caos operativo a un sistema que trabaja contigo.",
+      title: "Cuatro formas de salir del problema.",
       cards: [
         {
           icon: icons.strategy,
-          title: "Estrategia y Consultoría IA",
-          subtitle: "Del concepto inicial al mapa de implementación.",
-          body: "Evaluación tecnológica, recomendaciones estratégicas y próximos pasos claros para que la IA tenga sentido en tu operación.",
+          title: "Diagnóstico y plan",
+          subtitle: "Encuentra dónde empezar y qué no comprar.",
+          body: "Reviso tu operación, detecto los cuellos de botella y te dejo una ruta clara.",
         },
         {
           icon: icons.training,
-          title: "Capacitación IA Interna",
-          subtitle: "Tu equipo entiende, adopta y aplica la tecnología.",
-          body: "Workshops, mejores prácticas y guía práctica para que la IA no dependa de una sola persona ni se quede como experimento.",
+          title: "Capacitación para tu equipo",
+          subtitle: "La IA deja de depender de una sola persona.",
+          body: "Tu equipo aprende a usarla con criterio, seguridad y casos reales de su trabajo.",
         },
         {
           icon: icons.custom,
-          title: "Soluciones IA a Medida",
-          subtitle: "Sistemas inteligentes para tus requisitos reales.",
-          body: "Desde agentes conversacionales hasta automatización de flujos, construidos alrededor de tu contexto y tus datos.",
+          title: "Sistemas hechos para tu empresa",
+          subtitle: "Automatizamos lo que realmente estorba.",
+          body: "Construyo herramientas alrededor de tus procesos, no al revés.",
         },
         {
           icon: icons.implementation,
-          title: "Implementación de Proyectos",
-          subtitle: "Ejecución completa, de arquitectura a despliegue.",
-          body: "Sistemas listos para producción con monitoreo, soporte y mejora continua para que la operación realmente cambie.",
+          title: "Implementación completa",
+          subtitle: "Te acompaño hasta que funcione todos los días.",
+          body: "Del primer módulo a la adopción: construimos, probamos y mejoramos contigo.",
         },
       ],
     },
     useCases: {
-      eyebrow: "Casos típicos",
-      title: "La IA se vuelve útil cuando toca procesos concretos.",
-      body: "Estas son las zonas donde normalmente aparece el ahorro: tareas repetidas, datos dispersos, seguimiento manual y decisiones que dependen de copiar información entre herramientas.",
+      eyebrow: "Dónde suele doler",
+      title: "Lo que hoy te quita tiempo puede dejar de hacerlo.",
+      body: "Normalmente empezamos donde el equipo persigue información, repite tareas o deja seguimientos a medias.",
       cases: [
         {
           icon: Database,
-          title: "Datos y reportes",
-          body: "Unificar información de hojas, CRM, correos y sistemas internos para generar respuestas y reportes sin persecución manual.",
+          title: "Reportes sin persecución",
+          body: "Junta información de hojas, correos y sistemas sin pedirla una y otra vez.",
         },
         {
           icon: Bot,
-          title: "Agentes operativos",
-          body: "Asistentes que consultan contexto, clasifican solicitudes, preparan respuestas y ejecutan pasos bajo reglas claras.",
+          title: "Atención y seguimiento",
+          body: "Responde, clasifica y da seguimiento con reglas claras.",
         },
         {
           icon: Route,
-          title: "Flujos comerciales",
-          body: "Seguimiento de leads, calificación, recordatorios, propuestas y handoffs entre ventas, operación y dirección.",
+          title: "Ventas sin cabos sueltos",
+          body: "Evita que oportunidades, recordatorios y entregas se pierdan entre equipos.",
         },
         {
           icon: ShieldCheck,
-          title: "Control y auditoría",
-          body: "Permisos, trazabilidad, criterios de revisión y límites para que la automatización no se vuelva caja negra.",
+          title: "Procesos con reglas claras",
+          body: "Define quién revisa, quién decide y hasta dónde puede avanzar cada automatización.",
         },
       ],
     },
     process: {
       eyebrow: "Cómo trabajamos",
-      title: "Primero se entiende la operación. Después se construye.",
+      title: "Primero entendemos el problema. Luego lo resolvemos.",
       steps: [
         {
           number: "01",
-          title: "Diagnóstico operativo",
-          body: "Detectamos dónde se pierde tiempo, margen, datos y control. Sales con un mapa claro, no con una lista de herramientas.",
+          title: "Encontramos la fuga",
+          body: "Vemos dónde se pierde tiempo, dinero o control.",
         },
         {
           number: "02",
-          title: "Blueprint de arquitectura",
-          body: "Definimos fuentes de datos, agentes, permisos, automatizaciones y prioridades de implementación.",
+          title: "Elegimos la prioridad",
+          body: "Definimos qué resolver primero y qué puede esperar.",
         },
         {
           number: "03",
-          title: "Construcción por módulos",
-          body: "Se implementa por piezas útiles: primero lo que recupera margen o elimina trabajo repetitivo de alto impacto.",
+          title: "Construimos contigo",
+          body: "Implementamos una pieza útil y la probamos en el trabajo real.",
         },
         {
           number: "04",
-          title: "Adopción y mejora",
-          body: "Tu equipo aprende a usarlo, medirlo y mejorarlo para que el sistema no dependa de una demo bonita.",
+          title: "Tu equipo la adopta",
+          body: "Acompaño el uso hasta que la mejora se vuelve parte de la operación.",
         },
       ],
     },
     calculator: {
-      eyebrow: "Calculadora rápida",
-      title: "Estima cuánto presupuesto puedes convertir en propiedad.",
-      body: "No es una cotización; es una forma rápida de ver cuánto dinero se queda atrapado en rentas y tareas repetitivas.",
-      toolsLabel: "Gasto mensual en SaaS",
-      hoursLabel: "Horas repetitivas por semana",
+      eyebrow: "Haz la cuenta",
+      title: "Mide cuánto te cuesta seguir igual.",
+      body: "Suma el gasto en herramientas y el tiempo que tu equipo pierde en tareas repetitivas.",
+      toolsLabel: "Gasto mensual en herramientas",
+      hoursLabel: "Horas de trabajo repetitivo por semana",
       rateLabel: "Costo por hora del equipo",
-      monthlyLeak: "Fuga mensual estimada",
-      yearlyLeak: "Presupuesto anual recuperable",
-      note: "El diagnóstico aterriza esta cifra con tus procesos, herramientas y datos reales.",
-      cta: "Auditar mi operación",
+      monthlyLeak: "Costo mensual de seguir igual",
+      yearlyLeak: "Costo anual estimado",
+      note: "En el diagnóstico revisamos qué parte sí se puede recuperar y por dónde conviene empezar.",
+      cta: "Encontrar la fuga",
     },
     blueprint: {
-      eyebrow: "Arquitectura, no espectáculo",
-      title: "La IA seria se construye por capas.",
-      body: "No empezamos con una herramienta. Empezamos con tus datos, tus procesos y tus decisiones repetidas. Luego diseñamos la inteligencia que las conecta.",
+      eyebrow: "Cómo se sostiene",
+      title: "Primero ordenamos. Después automatizamos.",
+      body: "La tecnología entra al final. Antes dejamos claro qué información importa, cómo debe fluir el trabajo y quién conserva el control.",
       metrics: [
-        { icon: icons.time, title: "Tiempo recuperado", body: "Automatización de tareas repetitivas para liberar capacidad del equipo." },
-        { icon: icons.data, title: "Datos bajo control", body: "Información unificada para dejar de adivinar y empezar a decidir." },
-        { icon: icons.savings, title: "Rentas convertidas", body: "El ahorro deja de ser recorte y se vuelve presupuesto para construir activos." },
+        { icon: icons.time, title: "Tiempo para el equipo", body: "Menos tareas repetidas y más capacidad para resolver." },
+        { icon: icons.data, title: "Información confiable", body: "Los datos dejan de vivir repartidos en correos y hojas." },
+        { icon: icons.savings, title: "Gasto mejor aprovechado", body: "El presupuesto se dirige a lo que la empresa realmente necesita." },
       ],
       layers: [
-        { number: "03", title: "Validación, confianza y control", body: "Auditoría, permisos, trazabilidad y reglas para que la IA trabaje con criterio operativo.", label: "CONTROL" },
-        { number: "02", title: "Marco operativo de IA", body: "Agentes, automatizaciones, memoria, evaluaciones y flujos que conectan decisiones con ejecución.", label: "OPERACIÓN" },
-        { number: "01", title: "Fundación de datos propios", body: "Información unificada, conocimiento interno, procesos críticos y fuentes de verdad bajo tu dominio.", label: "PROPIEDAD" },
+        { number: "03", title: "Reglas y control", body: "Permisos, revisión y límites claros.", label: "CONTROL" },
+        { number: "02", title: "Procesos que avanzan solos", body: "Seguimientos y tareas que dejan de depender de recordatorios.", label: "FLUJO" },
+        { number: "01", title: "Información en orden", body: "Una base confiable para trabajar y decidir.", label: "BASE" },
       ],
     },
     bio: {
       imageAlt: "Artemio, consultor estratégico de IA y arquitectura operativa",
       label: "Soy Artemio",
-      cardTitle: "Arquitecto de IA para operaciones que necesitan control.",
+      cardTitle: "Consultor para empresas que necesitan volver a tener control.",
       eyebrow: "Quién te acompaña",
-      title: "No soy un proveedor de software. Soy el arquitecto que entra contigo al caos.",
-      body: "Mi trabajo es entender cómo opera tu empresa, detectar dónde se pierde tiempo, margen y control, y convertirlo en sistemas de IA propios que tu equipo pueda usar todos los días.",
-      cta: "Agendar auditoría gratuita",
+      title: "Primero entiendo tu operación. Luego construyo.",
+      body: "No llego con software prefabricado. Entro contigo al problema, encuentro qué lo está causando y me quedo hasta que la solución funcione para tu equipo.",
+      cta: "Agendar diagnóstico gratuito",
     },
     manifesto: {
       eyebrow: "Manifiesto operativo",
       title: "No eres usuario de tu operación. Eres dueño.",
-      p1: "La IA no se compra como suscripción y se espera que haga magia. Se diseña alrededor de tus flujos, tus datos y tus decisiones.",
-      p2: "Mi trabajo es entrar contigo al caos operativo, encontrar dónde se pierde tiempo, margen y control, y convertirlo en una arquitectura que tu equipo pueda usar todos los días.",
-      cta: "Empezar con diagnóstico",
+      p1: "No necesitas comprar más tecnología esperando que algo cambie. Necesitas una forma de trabajar diseñada alrededor de tu empresa.",
+      p2: "Mi trabajo es encontrar lo que hoy te frena, construir la solución contigo y dejar a tu equipo con más tiempo, margen y control.",
+      cta: "Encontrar mi siguiente paso",
     },
     faq: {
-      eyebrow: "Preguntas comunes",
-      title: "Lo que normalmente se pregunta antes de construir IA en serio.",
+      eyebrow: "Antes de empezar",
+      title: "Las dudas que conviene resolver antes de empezar.",
       items: [
         {
-          question: "¿Qué incluye la auditoría gratuita?",
-          answer: "Una conversación de 30 minutos para entender tu operación, detectar fugas de tiempo o software y definir si tiene sentido construir una arquitectura de IA propia.",
+          question: "¿Qué recibo en el diagnóstico gratuito?",
+          answer: "En 30 minutos revisamos el principal cuello de botella, las herramientas que usa tu equipo y el trabajo que hoy se repite. Al final te digo por dónde empezaría, qué no automatizaría todavía y si tiene sentido que trabajemos juntos. Sin obligación.",
         },
         {
-          question: "¿Esto reemplaza ChatGPT Enterprise o Copilot?",
-          answer: "No necesariamente. A veces se integran como una capa más. La diferencia es que el sistema se diseña alrededor de tus datos, procesos y reglas, no alrededor de una suscripción genérica.",
+          question: "¿Tengo que cambiar todas mis herramientas?",
+          answer: "No. Primero aprovechamos lo que ya funciona. Sólo reemplazamos o conectamos lo que hoy duplica trabajo, encierra datos o cuesta más de lo que aporta.",
         },
         {
           question: "¿Cuánto tarda una implementación?",
-          answer: "Depende del alcance, pero normalmente conviene empezar con un módulo de alto impacto en semanas, no con un megaproyecto que tarde meses en demostrar valor.",
+          answer: "Depende del alcance. Normalmente empezamos con una mejora concreta que pueda probarse en semanas, sin esperar meses para saber si funciona.",
         },
         {
           question: "¿Necesito tener mis datos perfectamente ordenados?",
-          answer: "No. Justamente parte del trabajo es identificar fuentes de verdad, limpiar lo necesario y diseñar una base útil para que la IA opere con contexto.",
+          answer: "No. Parte del trabajo es encontrar qué información importa, ordenarla y dejar una base confiable para que el sistema funcione.",
         },
       ],
     },
     whatsapp: {
       label: "Resolver duda por WhatsApp",
       title: "Dudas rápidas",
-      body: "Te respondo sobre IA, datos propios y ahorro SaaS.",
+      body: "Cuéntame qué está frenando a tu equipo.",
       message:
-        "Hola Artemio, vengo de tu página. Quiero resolver una duda sobre cómo convertir IA en infraestructura operativa propia.",
+        "Hola Artemio, vengo de tu página. Quiero contarte qué está frenando a mi equipo y saber por dónde empezar.",
+    },
+    footer: {
+      tagline:
+        "Encuentro lo que frena tu operación y construyo contigo una forma más simple de trabajar.",
+      navTitle: "Secciones",
+      contactTitle: "Contacto",
+      cta: "Agendar diagnóstico gratuito",
+      rights: "Todos los derechos reservados.",
+      origin: "Hecho en México.",
     },
   },
   en: {
     nav: {
       diagnosis: "Diagnosis",
-      blueprint: "Blueprint",
-      savings: "Savings",
-      cta: "Book audit",
+      blueprint: "How it works",
+      savings: "Calculator",
+      cta: "Book diagnosis",
       localeHref: "/concept",
       localeLabel: "ES",
     },
+    mobile: {
+      eyebrow: "For companies tired of manual work",
+      heroTitle: "I turn operating chaos into control.",
+      heroBody: "You do not need more software. I enter your company, find what is draining time and money, and build a simpler way to operate with you.",
+      primaryCta: "30-minute diagnosis",
+      secondaryCta: "Calculate what I lose",
+      receiptLabel: "Before / After",
+      receiptTitle: "Less chaos. More control.",
+      receiptNote: "A solution built around your company.",
+      offerEyebrow: "How I help",
+      offerTitle: "Four ways out of the problem.",
+      offerBody: "We start with what is costing you the most time, money, or control.",
+      methodEyebrow: "How we solve it",
+      methodTitle: "From the problem to a better way of working.",
+      methodSteps: [
+        "We find the leak.",
+        "We solve the priority.",
+        "Your team adopts it.",
+      ],
+      calculatorEyebrow: "Run the numbers",
+      calculatorTitle: "What does staying the same cost you?",
+      calculatorBody: "Adjust three variables. This is a signal for your decision, not a promise.",
+      calculatorResult: "Estimated yearly cost",
+      calculatorCta: "Find where to start",
+      bioEyebrow: "I am Artemio",
+      bioTitle: "First I understand. Then I build.",
+      bioBody: "I enter the problem with you and stay until the solution works.",
+    },
     hero: {
-      eyebrow: "AI applied to margin, data, and operations",
-      title: "Stop using AI like a toy.",
-      body: "Turn it into owned operating infrastructure: AI systems that automate your operation, protect your data, and replace software rent with assets your company actually owns.",
-      primaryCta: "Book a free audit",
-      secondaryCta: "Calculate what I stop renting",
+      eyebrow: "For companies tired of manual work",
+      title: "I turn operating chaos into control.",
+      body: "You do not need more software. I enter your company, find what is draining time and money, and build a simpler way to operate with you.",
+      primaryCta: "Book a diagnosis",
+      secondaryCta: "Calculate my yearly loss",
+      auditNote: "30 min · free · leave with a clear next step.",
       outcomes: [
-        "You stop paying rent for tools you do not control.",
-        "Your data, processes, and automations live inside your own system.",
-        "I work with you from diagnosis until your team uses it in production.",
+        "We find where work gets stuck.",
+        "We decide what is worth automating and what is not.",
+        "We build what creates the most relief first.",
       ],
       proofStrip: [
-        { label: "Diagnosis", title: "Where margin leaks", body: "A clear map before building.", href: "#diagnostico" },
-        { label: "Automation", title: "What can work alone", body: "Real workflows, not demos.", href: "#propiedad" },
-        { label: "Data ownership", title: "What becomes yours", body: "Internal assets under control.", href: "#acta" },
-        { label: "SaaS savings", title: "What you stop renting", body: "Rent turned into systems.", href: "#calculadora" },
+        { label: "Diagnosis", title: "Find the problem", body: "Before spending on tools.", href: "#diagnostico" },
+        { label: "Automation", title: "Remove manual work", body: "Without breaking what works.", href: "#propiedad" },
+        { label: "Information", title: "Organize your data", body: "Decide without chasing reports.", href: "#acta" },
+        { label: "Savings", title: "Recover budget", body: "Less rent, more control.", href: "#calculadora" },
       ],
     },
     act: {
-      eyebrow: "Operating ownership deed",
-      title: "Your company stops renting its operation",
-      input: "Detected input",
-      working: "AI working",
-      generated: "Deed generated",
+      eyebrow: "Your diagnosis outcome",
+      title: "Your operation stops depending on patches",
+      input: "What hurts today",
+      working: "What we solve",
+      generated: "What changes",
       result: "Result",
-      lockIn: "lock-in",
-      resultBody: "unnecessary software rent as a growth foundation",
-      dataTitle: "Your data",
-      dataBody: "organized, searchable, and under your control",
-      systemTitle: "Your system",
-      systemBody: "built around how your team actually works",
+      lockIn: "dependencies",
+      resultBody: "on tools you cannot control",
+      dataTitle: "Your information",
+      dataBody: "organized and under your control",
+      systemTitle: "Your way of working",
+      systemBody: "turned into a simple system",
       supportTitle: "My support",
-      supportBody: "diagnosis, implementation, and real adoption",
-      savingsLine: "Savings are not the end. They are the budget to build ownership.",
-      savingsBadge: "Recovered margin",
+      supportBody: "until your team actually uses it",
+      savingsLine: "What is wasted today can fund a better way to operate.",
+      savingsBadge: "Recovered budget",
       transformations: [
-        { before: "Software rent", after: "Internal assets" },
-        { before: "Scattered data", after: "Source of truth" },
-        { before: "Repetitive work", after: "Agents operating" },
+        { before: "Software rent", after: "Your own tools" },
+        { before: "Scattered data", after: "Organized information" },
+        { before: "Repetitive work", after: "Automated processes" },
       ],
       workSteps: [
-        "Reading current operation",
-        "Detecting SaaS leakage",
-        "Mapping data and workflows",
-        "Generating owned architecture",
+        "Understanding how you work",
+        "Finding the leaks",
+        "Choosing what to solve",
+        "Building the plan",
       ],
     },
     services: {
       eyebrow: "What we build together",
-      title: "From operational chaos to a system that works with you.",
+      title: "Four ways out of the problem.",
       cards: [
         {
           icon: icons.strategy,
-          title: "AI Strategy & Consulting",
-          subtitle: "From initial concept to implementation roadmap.",
-          body: "Technology assessment, strategic recommendations, and clear next steps so AI makes sense inside your operation.",
+          title: "Diagnosis and plan",
+          subtitle: "Find where to start and what not to buy.",
+          body: "I review your operation, find the bottlenecks, and leave you with a clear path.",
         },
         {
           icon: icons.training,
-          title: "Internal AI Training",
-          subtitle: "Your team understands, adopts, and applies the technology.",
-          body: "Workshops, best practices, and hands-on guidance so AI does not depend on one person or stay trapped as an experiment.",
+          title: "Training for your team",
+          subtitle: "AI stops depending on one person.",
+          body: "Your team learns to use it safely and sensibly through examples from their real work.",
         },
         {
           icon: icons.custom,
-          title: "Custom AI Solutions",
-          subtitle: "Intelligent systems tailored to your actual requirements.",
-          body: "From conversational agents to workflow automation, built around your context and your data.",
+          title: "Systems built for your company",
+          subtitle: "We automate what actually gets in the way.",
+          body: "I build tools around your processes, not the other way around.",
         },
         {
           icon: icons.implementation,
-          title: "Project Implementation",
-          subtitle: "Complete execution from architecture to deployment.",
-          body: "Production-ready systems with monitoring, support, and continuous improvement so the operation actually changes.",
+          title: "Full implementation",
+          subtitle: "I stay until it works every day.",
+          body: "From the first module to adoption, we build, test, and improve it together.",
         },
       ],
     },
     useCases: {
-      eyebrow: "Typical use cases",
-      title: "AI becomes useful when it touches concrete workflows.",
-      body: "These are the areas where savings usually appear: repeated tasks, scattered data, manual follow-up, and decisions that depend on copying information between tools.",
+      eyebrow: "Where it usually hurts",
+      title: "What takes your time today does not have to tomorrow.",
+      body: "We usually start where teams chase information, repeat tasks, or lose track of follow-ups.",
       cases: [
         {
           icon: Database,
-          title: "Data and reporting",
-          body: "Unify information from sheets, CRM, email, and internal systems to generate answers and reports without manual chasing.",
+          title: "Reports without chasing",
+          body: "Bring together information from sheets, email, and systems without asking for it again and again.",
         },
         {
           icon: Bot,
-          title: "Operational agents",
-          body: "Assistants that read context, classify requests, draft responses, and execute steps under clear rules.",
+          title: "Service and follow-up",
+          body: "Respond, classify, and follow up under clear rules.",
         },
         {
           icon: Route,
-          title: "Commercial workflows",
-          body: "Lead follow-up, qualification, reminders, proposals, and handoffs between sales, operations, and leadership.",
+          title: "Sales without loose ends",
+          body: "Keep opportunities, reminders, and deliveries from getting lost between teams.",
         },
         {
           icon: ShieldCheck,
-          title: "Control and audit",
-          body: "Permissions, traceability, review criteria, and limits so automation does not become a black box.",
+          title: "Processes with clear rules",
+          body: "Define who reviews, who decides, and how far each automation can go.",
         },
       ],
     },
     process: {
       eyebrow: "How we work",
-      title: "First we understand the operation. Then we build.",
+      title: "First we understand the problem. Then we solve it.",
       steps: [
         {
           number: "01",
-          title: "Operating diagnosis",
-          body: "We detect where time, margin, data, and control are leaking. You leave with a clear map, not a list of tools.",
+          title: "Find the leak",
+          body: "We see where time, money, or control is being lost.",
         },
         {
           number: "02",
-          title: "Architecture blueprint",
-          body: "We define data sources, agents, permissions, automations, and implementation priorities.",
+          title: "Choose the priority",
+          body: "We decide what to solve first and what can wait.",
         },
         {
           number: "03",
-          title: "Modular build",
-          body: "We implement useful pieces first: the modules that recover margin or remove repetitive work with high impact.",
+          title: "Build it with you",
+          body: "We implement one useful piece and test it in real work.",
         },
         {
           number: "04",
-          title: "Adoption and iteration",
-          body: "Your team learns to use, measure, and improve the system so it does not depend on a pretty demo.",
+          title: "Your team adopts it",
+          body: "I support the rollout until the improvement becomes part of daily operations.",
         },
       ],
     },
     calculator: {
-      eyebrow: "Quick calculator",
-      title: "Estimate how much budget you can convert into ownership.",
-      body: "This is not a quote; it is a quick way to see how much money gets trapped in software rent and repetitive work.",
-      toolsLabel: "Monthly SaaS spend",
-      hoursLabel: "Repetitive hours per week",
+      eyebrow: "Run the numbers",
+      title: "Measure what staying the same costs you.",
+      body: "Add up tool spending and the time your team loses to repetitive work.",
+      toolsLabel: "Monthly tool spending",
+      hoursLabel: "Hours of repetitive work per week",
       rateLabel: "Team hourly cost",
-      monthlyLeak: "Estimated monthly leak",
-      yearlyLeak: "Recoverable yearly budget",
-      note: "The diagnosis grounds this number in your real workflows, tools, and data.",
-      cta: "Audit my operation",
+      monthlyLeak: "Monthly cost of staying the same",
+      yearlyLeak: "Estimated yearly cost",
+      note: "In the diagnosis, we check how much can actually be recovered and where to begin.",
+      cta: "Find the leak",
     },
     blueprint: {
-      eyebrow: "Architecture, not spectacle",
-      title: "Serious AI is built in layers.",
-      body: "We do not start with a tool. We start with your data, your processes, and your repeated decisions. Then we design the intelligence that connects them.",
+      eyebrow: "How it holds together",
+      title: "First we organize. Then we automate.",
+      body: "Technology comes last. First we clarify what information matters, how work should move, and who stays in control.",
       metrics: [
-        { icon: icons.time, title: "Recovered time", body: "Automation of repetitive work to free up team capacity." },
-        { icon: icons.data, title: "Data under control", body: "Unified information so you stop guessing and start deciding." },
-        { icon: icons.savings, title: "Rent converted", body: "Savings stop being a cut and become budget to build assets." },
+        { icon: icons.time, title: "Time for your team", body: "Fewer repeated tasks and more room to solve problems." },
+        { icon: icons.data, title: "Reliable information", body: "Data stops living across scattered email and sheets." },
+        { icon: icons.savings, title: "Better use of budget", body: "Spending goes toward what the company actually needs." },
       ],
       layers: [
-        { number: "03", title: "Validation, trust, and control", body: "Auditing, permissions, traceability, and rules so AI works with operational judgment.", label: "CONTROL" },
-        { number: "02", title: "AI operating framework", body: "Agents, automations, memory, evaluations, and workflows that connect decisions with execution.", label: "OPERATION" },
-        { number: "01", title: "Owned data foundation", body: "Unified information, internal knowledge, critical processes, and sources of truth under your domain.", label: "OWNERSHIP" },
+        { number: "03", title: "Rules and control", body: "Permissions, review, and clear boundaries.", label: "CONTROL" },
+        { number: "02", title: "Processes that move on their own", body: "Follow-ups and tasks that stop depending on reminders.", label: "FLOW" },
+        { number: "01", title: "Organized information", body: "A reliable base for working and deciding.", label: "BASE" },
       ],
     },
     bio: {
       imageAlt: "Artemio, AI strategy consultant and operating architecture specialist",
       label: "I am Artemio",
-      cardTitle: "AI architect for operations that need control.",
+      cardTitle: "Consultant for companies that need control again.",
       eyebrow: "Who works with you",
-      title: "I am not a software vendor. I am the architect who enters the chaos with you.",
-      body: "My job is to understand how your company operates, detect where time, margin, and control are being lost, and turn that into owned AI systems your team can use every day.",
-      cta: "Book a free audit",
+      title: "First I understand your operation. Then I build.",
+      body: "I do not arrive with off-the-shelf software. I enter the problem with you, find its cause, and stay until the solution works for your team.",
+      cta: "Book a free diagnosis",
     },
     manifesto: {
       eyebrow: "Operating manifesto",
       title: "You are not a user of your operation. You own it.",
-      p1: "AI is not something you buy as a subscription and hope it performs magic. It is designed around your workflows, your data, and your decisions.",
-      p2: "My work is to enter the operational chaos with you, find where time, margin, and control are leaking, and turn that into architecture your team can use every day.",
-      cta: "Start with a diagnosis",
+      p1: "You do not need to buy more technology hoping something changes. You need a way of working designed around your company.",
+      p2: "My work is to find what holds you back, build the solution with you, and leave your team with more time, margin, and control.",
+      cta: "Find my next step",
     },
     faq: {
-      eyebrow: "Common questions",
-      title: "What people usually ask before building serious AI.",
+      eyebrow: "Before we begin",
+      title: "The questions worth answering before we start.",
       items: [
         {
-          question: "What is included in the free audit?",
-          answer: "A 30-minute conversation to understand your operation, detect time or software leakage, and decide whether an owned AI architecture makes sense.",
+          question: "What do I get from the free diagnosis?",
+          answer: "In 30 minutes, we review your main bottleneck, the tools your team uses, and the work being repeated. I tell you where I would start, what I would not automate yet, and whether working together makes sense. No obligation.",
         },
         {
-          question: "Does this replace ChatGPT Enterprise or Copilot?",
-          answer: "Not necessarily. Sometimes they become one layer of the system. The difference is that the architecture is designed around your data, workflows, and rules instead of a generic subscription.",
+          question: "Do I have to replace all my tools?",
+          answer: "No. We use what already works first. We only replace or connect what duplicates work, traps your data, or costs more than it contributes.",
         },
         {
           question: "How long does implementation take?",
-          answer: "It depends on scope, but it is usually better to start with a high-impact module in weeks, not a huge project that takes months to prove value.",
+          answer: "It depends on scope. We usually start with a concrete improvement that can be tested in weeks instead of waiting months to learn whether it works.",
         },
         {
-          question: "Do my data need to be perfectly organized?",
-          answer: "No. Part of the work is identifying sources of truth, cleaning what matters, and designing a useful base so AI can operate with context.",
+          question: "Does my information need to be perfectly organized?",
+          answer: "No. Part of the work is finding what matters, organizing it, and creating a reliable base for the system.",
         },
       ],
     },
     whatsapp: {
       label: "Ask on WhatsApp",
       title: "Quick questions",
-      body: "Ask about AI, owned data, and SaaS savings.",
+      body: "Tell me what is slowing your team down.",
       message:
-        "Hi Artemio, I came from your website. I want to ask about turning AI into owned operating infrastructure.",
+        "Hi Artemio, I came from your website. I want to tell you what is slowing my team down and ask where to start.",
+    },
+    footer: {
+      tagline:
+        "I find what is holding your operation back and build a simpler way to work with you.",
+      navTitle: "Sections",
+      contactTitle: "Contact",
+      cta: "Book a free diagnosis",
+      rights: "All rights reserved.",
+      origin: "Made in Mexico.",
     },
   },
 } as const;
@@ -475,20 +557,93 @@ const reveal = {
   visible: { opacity: 1, y: 0 },
 };
 
-function BrandMark() {
+/*
+ * Una sola curva para todo el sitio.
+ *
+ * Es expo.out: sale rápido y frena largo. Que TODO use la misma es la mitad de
+ * la diferencia entre una página que parece animada y una que parece dirigida
+ * — el ojo detecta la incoherencia de easings aunque no sepa nombrarla.
+ */
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/** Secuencia de entrada del hero. Los hijos llegan en orden, no todos juntos. */
+const sequence = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.065, delayChildren: 0.2 } },
+};
+
+const rise = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
+};
+
+/*
+ * Las reglas se dibujan solas antes de que llegue el texto.
+ *
+ * La marca dice "arquitectura": empezar por trazar la retícula y después
+ * colocar el contenido encima es el gesto de un plano levantándose. Cuesta dos
+ * líneas y es lo que se recuerda de la entrada.
+ */
+const drawX = {
+  hidden: { scaleX: 0 },
+  visible: { scaleX: 1, transition: { duration: 1.15, ease: EASE } },
+};
+const drawY = {
+  hidden: { scaleY: 0 },
+  visible: { scaleY: 1, transition: { duration: 1.4, ease: EASE, delay: 0.25 } },
+};
+
+/**
+ * Titular con máscara por palabra: cada palabra sube desde detrás de su propio
+ * recorte en vez de aparecer con opacidad. Es el gesto que separa un titular
+ * animado de uno que sólo se enciende.
+ *
+ * El `pb`/`-mb` existe porque el recorte cortaría las colas de la j y la g.
+ */
+function MaskedWords({ text, delay = 0.12 }: { text: string; delay?: number }) {
+  const prefersReducedMotion = useReducedMotion();
+  if (prefersReducedMotion) return <>{text}</>;
+
   return (
-    <span className="flex items-center gap-3" aria-label="SoyArtemio">
-      <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden border border-[#171717] bg-[#171717] text-[#f4f0e8]">
-        <span className="absolute inset-0 opacity-25 [background-image:linear-gradient(#f4f0e8_1px,transparent_1px),linear-gradient(90deg,#f4f0e8_1px,transparent_1px)] [background-size:9px_9px]" />
-        <span className="relative text-[11px] font-black uppercase tracking-[-0.03em]">sa</span>
-        <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[#b8954f]" />
-      </span>
-      <span className="leading-none">
-        <span className="block text-sm font-black tracking-[0.22em] text-[#171717]">SOYARTEMIO</span>
-        <span className="mt-1 hidden text-[9px] font-black uppercase tracking-[0.22em] text-[#171717]/45 sm:block">
-          IA architecture
+    <span aria-hidden="true">
+      {text.split(" ").map((word, index) => (
+        <span
+          key={`${word}-${index}`}
+          className="mr-[0.24em] inline-block overflow-hidden pb-[0.16em] align-bottom -mb-[0.16em]"
+        >
+          <motion.span
+            className="inline-block"
+            initial={{ y: "115%" }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.82, ease: EASE, delay: delay + index * 0.045 }}
+          >
+            {word}
+          </motion.span>
         </span>
-      </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Wordmark 04 · Terminal — brand board v01.
+ * El dominio es la marca; el cursor de bloque es el unico elemento propio.
+ * Spec: output/brandkit/spec-brandkit.md
+ */
+function BrandMark({ inverted = false }: { inverted?: boolean }) {
+  return (
+    <span
+      aria-label="soyartemio.me"
+      className={`flex items-baseline font-mono text-[15px] font-semibold leading-none tracking-[-0.02em] sm:text-[17px] ${
+        inverted ? "text-[#f4f0e8]" : "text-[#171717]"
+      }`}
+    >
+      soyartemio
+      <span className={inverted ? "text-[#b8954f]" : "text-[#7a6030]"}>.me</span>
+      <span
+        aria-hidden="true"
+        className="ml-[0.11em] inline-block h-[0.84em] w-[0.52em] bg-[#b8954f] motion-safe:animate-[brand-caret_1.15s_steps(1)_infinite]"
+      />
     </span>
   );
 }
@@ -537,7 +692,7 @@ function AnimatedDataAct({ locale }: { locale: Locale }) {
           </motion.div>
         </div>
 
-        <div className="relative grid min-w-0 gap-4 py-5 md:grid-cols-[0.95fr_1.1fr_0.95fr]">
+        <div className="relative grid min-w-0 gap-4 py-[26px] md:grid-cols-[0.618fr_1fr_0.618fr]">
           <motion.div
             aria-hidden="true"
             className="absolute left-[18%] top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[#b8954f] to-transparent md:block"
@@ -613,14 +768,14 @@ function AnimatedDataAct({ locale }: { locale: Locale }) {
             transition={{ delay: 0.65 }}
             className="relative min-w-0 border border-[#171717]/20 bg-[#f4f0e8] p-4"
           >
-            <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#8b6f35]">
+            <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#7a6030]">
               <Sparkles className="h-3.5 w-3.5" />
               {copy.generated}
             </p>
             <div className="mt-4 space-y-3">
               {copy.transformations.map((item) => (
                 <div key={item.after} className="flex items-center gap-2 border-b border-[#171717]/10 pb-2 last:border-b-0">
-                  <Check className="h-3.5 w-3.5 shrink-0 text-[#8b6f35]" />
+                  <Check className="h-3.5 w-3.5 shrink-0 text-[#7a6030]" />
                   <span className="text-sm font-black text-[#171717]">{item.after}</span>
                 </div>
               ))}
@@ -628,7 +783,7 @@ function AnimatedDataAct({ locale }: { locale: Locale }) {
           </motion.div>
         </div>
 
-        <div className="grid min-w-0 gap-4 md:grid-cols-[1fr_1.25fr]">
+        <div className="grid min-w-0 gap-4 md:grid-cols-[0.618fr_1fr]">
           <div className="border border-[#171717] bg-[#171717] p-5 text-[#f4f0e8]">
             <p className="text-xs font-black uppercase tracking-[0.28em] text-[#b8954f]">
               {copy.result}
@@ -667,7 +822,7 @@ function AnimatedDataAct({ locale }: { locale: Locale }) {
 
         <div id="ahorro" className="mt-4 flex flex-col gap-3 border-t border-[#171717] pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <CircleDollarSign className="h-6 w-6 text-[#8b6f35]" />
+            <CircleDollarSign className="h-6 w-6 text-[#7a6030]" />
             <p className="text-sm font-black">
               {copy.savingsLine}
             </p>
@@ -685,21 +840,21 @@ function BlueprintPyramid({ locale }: { locale: Locale }) {
   const copy = content[locale].blueprint;
 
   return (
-    <section id="propiedad" className="relative overflow-hidden bg-[#090b0c] px-5 py-24 text-[#f4f0e8] md:px-10 md:py-32">
+    <section id="propiedad" className="relative overflow-hidden bg-[#090b0c] px-5 py-[68px] text-[#f4f0e8] md:px-10 md:py-[110px]">
       <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(#ffffff_1px,transparent_1px),linear-gradient(90deg,#ffffff_1px,transparent_1px)] [background-size:64px_64px]" />
       <div className="absolute left-1/2 top-0 h-full w-px bg-[#f4f0e8]/10" />
-      <div className="relative mx-auto grid max-w-7xl gap-16 xl:grid-cols-[0.82fr_1.18fr]">
+      <div className="relative mx-auto grid max-w-7xl gap-[42px] xl:grid-cols-[0.618fr_1fr] xl:gap-[68px]">
         <motion.div variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-120px" }} transition={{ duration: 0.7 }}>
           <p className="mb-5 text-xs font-black uppercase tracking-[0.34em] text-[#b8954f]">
             {copy.eyebrow}
           </p>
-          <h2 className="max-w-3xl text-[clamp(2.7rem,6vw,6.2rem)] font-black leading-[0.92] tracking-normal">
+          <h2 className="max-w-[16ch] text-[clamp(2.625rem,5vw,4.25rem)] font-black leading-[0.92] tracking-[-0.025em]">
             {copy.title}
           </h2>
-          <p className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-[#f4f0e8]/68">
+          <p className="mt-[26px] max-w-[42ch] text-lg font-medium leading-relaxed text-[#f4f0e8]/68">
             {copy.body}
           </p>
-          <div className="mt-10 grid gap-4">
+          <div className="mt-[42px] grid gap-4">
             {copy.metrics.map((item) => (
               <div key={item.title} className="flex gap-4 border-t border-[#f4f0e8]/12 pt-5">
                 <item.icon className="mt-1 h-5 w-5 shrink-0 text-[#b8954f]" />
@@ -722,7 +877,7 @@ function BlueprintPyramid({ locale }: { locale: Locale }) {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
-                className={`${baseLayerClasses[index]} relative overflow-hidden rounded-[18px] border p-6 shadow-2xl`}
+                className={`${baseLayerClasses[index]} relative overflow-hidden rounded-[18px] border p-[26px] shadow-2xl`}
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.18),transparent_32%)]" />
                 <div className="relative flex items-center gap-6">
@@ -748,14 +903,14 @@ function ServiceGrid({ locale }: { locale: Locale }) {
   const copy = content[locale].services;
 
   return (
-    <section id="diagnostico" className="relative bg-[#0f1010] px-5 py-20 text-white md:px-10 md:py-24">
+    <section id="diagnostico" className="relative bg-[#0f1010] px-5 py-[68px] text-white md:px-10 md:py-[110px]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(184,149,79,0.13),transparent_32%),radial-gradient(circle_at_78%_58%,rgba(86,182,178,0.10),transparent_28%)]" />
       <div className="relative mx-auto max-w-7xl">
-        <motion.div variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-120px" }} transition={{ duration: 0.7 }} className="mb-10 max-w-4xl">
+        <motion.div variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-120px" }} transition={{ duration: 0.7 }} className="mb-[42px] max-w-[68rem]">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#56b6b2]">
             {copy.eyebrow}
           </p>
-          <h2 className="text-[clamp(2.2rem,4.8vw,4.9rem)] font-black leading-[0.96] tracking-normal">
+          <h2 className="max-w-[18ch] text-[clamp(2.625rem,4.8vw,4.25rem)] font-black leading-[0.94] tracking-[-0.025em]">
             {copy.title}
           </h2>
         </motion.div>
@@ -768,14 +923,14 @@ function ServiceGrid({ locale }: { locale: Locale }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.55, delay: index * 0.08 }}
-              className="group relative min-h-[250px] overflow-hidden rounded-[14px] border border-white/12 bg-white/[0.04] p-7 transition duration-500 hover:border-[#56b6b2]/50 hover:bg-white/[0.065] md:p-8"
+              className="group relative min-h-[260px] overflow-hidden rounded-[14px] border border-white/12 bg-white/[0.04] p-[26px] transition duration-500 hover:border-[#56b6b2]/50 hover:bg-white/[0.065]"
             >
               <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 [background-image:linear-gradient(120deg,transparent,rgba(86,182,178,0.12),transparent)]" />
               <div className="relative">
-                <div className="mb-7 flex h-11 w-11 items-center justify-center border border-white/15 bg-white/[0.04] text-[#56b6b2]">
+                <div className="mb-[26px] flex h-[42px] w-[42px] items-center justify-center border border-white/15 bg-white/[0.04] text-[#56b6b2]">
                   <card.icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-xl font-black md:text-2xl">{card.title}</h3>
+                <h3 className="text-[26px] font-black leading-tight">{card.title}</h3>
                 <p className="mt-2 text-base font-medium text-white/78 md:text-lg">{card.subtitle}</p>
                 <div className="my-5 h-px bg-white/12" />
                 <p className="max-w-2xl text-sm font-medium leading-relaxed text-white/55 md:text-base">{card.body}</p>
@@ -792,9 +947,9 @@ function UseCasesSection({ locale }: { locale: Locale }) {
   const copy = content[locale].useCases;
 
   return (
-    <section className="bg-[#f4f0e8] px-5 py-20 md:px-10 md:py-24">
+    <section className="bg-[#f4f0e8] px-5 py-[68px] md:px-10 md:py-[110px]">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-8 border-y border-[#171717]/15 py-12 lg:grid-cols-[0.82fr_1.18fr]">
+        <div className="grid gap-[42px] border-y border-[#171717]/15 py-[42px] lg:grid-cols-[0.618fr_1fr] lg:gap-[68px] lg:py-[68px]">
           <motion.div
             variants={reveal}
             initial="hidden"
@@ -802,32 +957,38 @@ function UseCasesSection({ locale }: { locale: Locale }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.65 }}
           >
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#8b6f35]">
+            <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#7a6030]">
               {copy.eyebrow}
             </p>
-            <h2 className="max-w-3xl text-[clamp(2.2rem,4.6vw,4.8rem)] font-black leading-[0.96] tracking-normal">
+            <h2 className="max-w-[16ch] text-[clamp(2.625rem,4.6vw,4.25rem)] font-black leading-[0.94] tracking-[-0.025em]">
               {copy.title}
             </h2>
-            <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-[#171717]/64">
+            <p className="mt-[26px] max-w-[42ch] text-lg font-medium leading-relaxed text-[#171717]/64">
               {copy.body}
             </p>
           </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="border-y border-[#171717]/18">
             {copy.cases.map((item, index) => (
               <motion.article
                 key={item.title}
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.5, delay: index * 0.06 }}
-                className="min-h-[230px] border border-[#171717]/18 bg-[#fbf7ef] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#171717] hover:shadow-[8px_8px_0_#171717]"
+                className="group relative grid min-h-[160px] gap-4 border-b border-[#171717]/18 py-[26px] last:border-b-0 sm:grid-cols-[42px_0.618fr_1fr] sm:items-start sm:gap-[26px]"
               >
-                <div className="mb-6 flex h-11 w-11 items-center justify-center border border-[#171717] bg-[#171717] text-[#f4f0e8]">
+                <span className="absolute inset-y-0 left-0 w-0 bg-[#171717] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full motion-reduce:transition-none" />
+                <div className="relative flex h-10 w-10 items-center justify-center border border-[#171717] text-[#171717] transition-colors duration-300 group-hover:border-[#b8954f] group-hover:text-[#b8954f]">
                   <item.icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-xl font-black">{item.title}</h3>
-                <p className="mt-3 text-sm font-semibold leading-relaxed text-[#171717]/58">
+                <div className="relative">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#7a6030] transition-colors duration-300 group-hover:text-[#b8954f]">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black transition-colors duration-300 group-hover:text-[#f4f0e8]">{item.title}</h3>
+                </div>
+                <p className="relative text-sm font-semibold leading-relaxed text-[#171717]/58 transition-colors duration-300 group-hover:text-[#f4f0e8]/62 sm:pt-6">
                   {item.body}
                 </p>
               </motion.article>
@@ -843,7 +1004,7 @@ function ProcessSection({ locale }: { locale: Locale }) {
   const copy = content[locale].process;
 
   return (
-    <section className="bg-[#f4f0e8] px-5 pb-20 md:px-10 md:pb-24">
+    <section className="bg-[#f4f0e8] px-5 pb-[68px] md:px-10 md:pb-[110px]">
       <div className="mx-auto max-w-7xl">
         <motion.div
           variants={reveal}
@@ -853,15 +1014,15 @@ function ProcessSection({ locale }: { locale: Locale }) {
           transition={{ duration: 0.65 }}
           className="max-w-4xl"
         >
-          <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#8b6f35]">
+          <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#7a6030]">
             {copy.eyebrow}
           </p>
-          <h2 className="text-[clamp(2.2rem,4.8vw,5rem)] font-black leading-[0.96] tracking-normal">
+          <h2 className="max-w-[18ch] text-[clamp(2.625rem,4.8vw,4.25rem)] font-black leading-[0.94] tracking-[-0.025em]">
             {copy.title}
           </h2>
         </motion.div>
 
-        <div className="mt-10 grid border-t border-[#171717]/15 md:grid-cols-4">
+        <div className="mt-[42px] grid border-t border-[#171717]/15 md:grid-cols-4">
           {copy.steps.map((step, index) => (
             <motion.article
               key={step.number}
@@ -869,11 +1030,11 @@ function ProcessSection({ locale }: { locale: Locale }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: index * 0.06 }}
-              className="min-h-[260px] border-b border-[#171717]/15 py-7 md:border-b-0 md:border-r md:px-5 md:last:border-r-0"
+              className="min-h-[260px] border-b border-[#171717]/15 py-[26px] md:border-b-0 md:border-r md:px-[16px] md:last:border-r-0"
             >
-              <p className="text-sm font-black tracking-[0.22em] text-[#8b6f35]">{step.number}</p>
-              <h3 className="mt-6 text-2xl font-black leading-tight">{step.title}</h3>
-              <p className="mt-4 text-sm font-semibold leading-relaxed text-[#171717]/58">{step.body}</p>
+              <p className="text-sm font-black tracking-[0.22em] text-[#7a6030]">{step.number}</p>
+              <h3 className="mt-[26px] text-[26px] font-black leading-tight">{step.title}</h3>
+              <p className="mt-4 max-w-[26ch] text-sm font-semibold leading-relaxed text-[#171717]/58">{step.body}</p>
             </motion.article>
           ))}
         </div>
@@ -903,8 +1064,8 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
   const yearlyLeak = monthlyLeak * 12;
 
   return (
-    <section id="calculadora" className="bg-[#171717] px-5 py-20 text-[#f4f0e8] md:px-10 md:py-24">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+    <section id="calculadora" className="bg-[#171717] px-5 py-[68px] text-[#f4f0e8] md:px-10 md:py-[110px]">
+      <div className="mx-auto grid max-w-7xl gap-[42px] lg:grid-cols-[0.618fr_1fr] lg:items-start lg:gap-[68px]">
         <motion.div
           variants={reveal}
           initial="hidden"
@@ -915,10 +1076,10 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
           <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#56b6b2]">
             {copy.eyebrow}
           </p>
-          <h2 className="max-w-3xl text-[clamp(2.4rem,5vw,5.2rem)] font-black leading-[0.94] tracking-normal">
+          <h2 className="max-w-[16ch] text-[clamp(2.625rem,5vw,4.25rem)] font-black leading-[0.92] tracking-[-0.025em]">
             {copy.title}
           </h2>
-          <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-[#f4f0e8]/62">
+          <p className="mt-[26px] max-w-[42ch] text-lg font-medium leading-relaxed text-[#f4f0e8]/62">
             {copy.body}
           </p>
         </motion.div>
@@ -928,9 +1089,9 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="border border-[#f4f0e8]/18 bg-[#f4f0e8] p-5 text-[#171717] shadow-[14px_14px_0_#56b6b2] md:p-7"
+          className="border border-[#f4f0e8]/18 bg-[#f4f0e8] p-[26px] text-[#171717] shadow-[16px_16px_0_#56b6b2]"
         >
-          <div className="grid gap-6">
+          <div className="grid gap-[26px]">
             {[
               { label: copy.toolsLabel, value: monthlySaas, min: 0, max: 30000, step: 250, setValue: setMonthlySaas },
               { label: copy.hoursLabel, value: weeklyHours, min: 0, max: 120, step: 1, setValue: setWeeklyHours },
@@ -962,7 +1123,7 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
             ))}
           </div>
 
-          <div className="mt-8 grid gap-4 border-t border-[#171717] pt-6 sm:grid-cols-2">
+          <div className="mt-[42px] grid gap-4 border-t border-[#171717] pt-[26px] sm:grid-cols-[0.618fr_1fr]">
             <div className="bg-[#171717] p-5 text-[#f4f0e8]">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#f4f0e8]/48">
                 {copy.monthlyLeak}
@@ -981,7 +1142,7 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-4 border-t border-[#171717]/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-[26px] flex flex-col gap-4 border-t border-[#171717]/15 pt-[26px] sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-xl text-sm font-semibold leading-relaxed text-[#171717]/58">{copy.note}</p>
             <a
               href="https://calendly.com/soyartemio/30min"
@@ -997,26 +1158,276 @@ function SavingsCalculator({ locale }: { locale: Locale }) {
   );
 }
 
+function MobileHero({ locale }: { locale: Locale }) {
+  const copy = content[locale];
+
+  return (
+    <section className="relative overflow-hidden bg-[#f4f0e8] px-5 pb-[68px] pt-[26px] md:hidden">
+      <div className="absolute inset-0 opacity-[0.055] [background-image:linear-gradient(#171717_1px,transparent_1px),linear-gradient(90deg,#171717_1px,transparent_1px)] [background-size:42px_42px]" />
+      <nav className="relative z-10 flex items-center justify-between border-b border-[#171717]/15 pb-4">
+        <Link href="/" className="shrink-0">
+          <BrandMark />
+        </Link>
+        <Link
+          href={copy.nav.localeHref}
+          className="rounded-full border border-[#171717]/25 px-3 py-2 text-[10px] font-black text-[#171717]/70"
+        >
+          {copy.nav.localeLabel}
+        </Link>
+      </nav>
+
+      <div className="relative z-10 pt-[68px]">
+        <p className="inline-flex border-y border-[#171717]/20 py-2 text-[9px] font-black uppercase tracking-[0.18em] text-[#7a6030]">
+          {copy.mobile.eyebrow}
+        </p>
+        <h1 className="mt-[26px] max-w-[9ch] text-[clamp(3.15rem,15vw,4.25rem)] font-black leading-[0.84] tracking-[-0.055em]">
+          {copy.mobile.heroTitle}
+        </h1>
+        <p className="mt-[26px] max-w-[32ch] text-base font-semibold leading-relaxed text-[#171717]/68">
+          {copy.mobile.heroBody}
+        </p>
+
+        <div className="mt-[42px] grid gap-3">
+          <a
+            href="https://calendly.com/soyartemio/30min"
+            className="inline-flex min-h-14 items-center justify-between rounded-full bg-[#171717] px-[26px] text-base font-black text-[#f4f0e8]"
+          >
+            {copy.mobile.primaryCta}
+            <ArrowRight className="h-5 w-5" />
+          </a>
+          <a
+            href="#calculadora-mobile"
+            className="inline-flex min-h-14 items-center justify-between rounded-full border border-[#171717]/25 px-[26px] text-sm font-black text-[#171717]"
+          >
+            {copy.mobile.secondaryCta}
+            <ChevronRight className="h-4 w-4" />
+          </a>
+        </div>
+        <p className="mt-4 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#171717]/48">
+          {copy.hero.auditNote}
+        </p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.72, delay: 0.18, ease: EASE }}
+          className="mt-[68px] border border-[#171717] bg-[#fbf7ef] p-[26px] shadow-[10px_10px_0_#171717]"
+        >
+          <div className="border-b border-[#171717] pb-[26px]">
+            <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#7a6030]">
+              {copy.mobile.receiptLabel}
+            </p>
+            <h2 className="mt-4 max-w-[11ch] text-[42px] font-black leading-[0.9] tracking-[-0.04em]">
+              {copy.mobile.receiptTitle}
+            </h2>
+          </div>
+
+          <div className="divide-y divide-[#171717]/15">
+            {copy.act.transformations.map((item) => (
+              <div key={item.before} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 py-4">
+                <span className="text-xs font-bold leading-tight text-[#171717]/42 line-through decoration-[#b8954f] decoration-2">
+                  {item.before}
+                </span>
+                <ArrowRight className="h-4 w-4 text-[#7a6030]" />
+                <span className="text-right text-sm font-black leading-tight">{item.after}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-end justify-between border-t border-[#171717] pt-[26px]">
+            <p className="max-w-[18ch] text-xs font-bold leading-relaxed text-[#171717]/55">
+              {copy.mobile.receiptNote}
+            </p>
+            <div className="text-right">
+              <p className="text-[42px] font-black leading-none">0</p>
+              <p className="mt-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#171717]/45">{copy.act.lockIn}</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function MobileOffer({ locale }: { locale: Locale }) {
+  const copy = content[locale];
+
+  return (
+    <section id="oferta-mobile" className="bg-[#0f1010] px-5 py-[68px] text-[#f4f0e8] md:hidden">
+      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#56b6b2]">
+        {copy.mobile.offerEyebrow}
+      </p>
+      <h2 className="mt-4 max-w-[9ch] text-[42px] font-black leading-[0.9] tracking-[-0.04em]">
+        {copy.mobile.offerTitle}
+      </h2>
+      <p className="mt-[26px] max-w-[30ch] text-base font-medium leading-relaxed text-[#f4f0e8]/58">
+        {copy.mobile.offerBody}
+      </p>
+
+      <div className="mt-[42px] border-y border-[#f4f0e8]/15">
+        {copy.services.cards.map((card) => (
+          <article key={card.title} className="grid grid-cols-[42px_1fr] gap-4 border-b border-[#f4f0e8]/12 py-[26px] last:border-b-0">
+            <div className="flex h-[42px] w-[42px] items-center justify-center border border-[#56b6b2]/45 text-[#56b6b2]">
+              <card.icon className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black leading-tight">{card.title}</h3>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-[#f4f0e8]/48">{card.subtitle}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-[68px]">
+        <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#b8954f]">
+          {copy.mobile.methodEyebrow}
+        </p>
+        <h3 className="mt-4 max-w-[12ch] text-[26px] font-black leading-tight">
+          {copy.mobile.methodTitle}
+        </h3>
+        <ol className="mt-[26px] border-t border-[#f4f0e8]/15">
+          {copy.mobile.methodSteps.map((step, index) => (
+            <li key={step} className="flex items-center gap-[26px] border-b border-[#f4f0e8]/12 py-4">
+              <span className="font-mono text-[10px] font-black text-[#b8954f]">0{index + 1}</span>
+              <span className="text-base font-black">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+function MobileSavingsCalculator({ locale }: { locale: Locale }) {
+  const copy = content[locale];
+  const [monthlySaas, setMonthlySaas] = useState(4500);
+  const [weeklyHours, setWeeklyHours] = useState(28);
+  const [hourlyCost, setHourlyCost] = useState(35);
+
+  const yearlyLeak = useMemo(
+    () => (monthlySaas + weeklyHours * hourlyCost * 4.33) * 12,
+    [monthlySaas, weeklyHours, hourlyCost]
+  );
+
+  const controls = [
+    { label: copy.calculator.toolsLabel, value: monthlySaas, display: formatCurrency(monthlySaas, locale), min: 0, max: 30000, step: 250, setValue: setMonthlySaas },
+    { label: copy.calculator.hoursLabel, value: weeklyHours, display: `${weeklyHours} h`, min: 0, max: 120, step: 1, setValue: setWeeklyHours },
+    { label: copy.calculator.rateLabel, value: hourlyCost, display: `${formatCurrency(hourlyCost, locale)} / h`, min: 5, max: 150, step: 5, setValue: setHourlyCost },
+  ];
+
+  return (
+    <section id="calculadora-mobile" className="bg-[#f4f0e8] px-5 py-[68px] md:hidden">
+      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#7a6030]">
+        {copy.mobile.calculatorEyebrow}
+      </p>
+      <h2 className="mt-4 max-w-[11ch] text-[42px] font-black leading-[0.9] tracking-[-0.04em]">
+        {copy.mobile.calculatorTitle}
+      </h2>
+      <p className="mt-[26px] max-w-[30ch] text-base font-medium leading-relaxed text-[#171717]/58">
+        {copy.mobile.calculatorBody}
+      </p>
+
+      <div className="mt-[42px] border border-[#171717] bg-[#fbf7ef] p-[26px] shadow-[10px_10px_0_#56b6b2]">
+        <div className="grid gap-[26px]">
+          {controls.map((control) => (
+            <label key={control.label} className="grid gap-3">
+              <span className="flex items-end justify-between gap-4">
+                <span className="max-w-[18ch] text-xs font-black leading-tight">{control.label}</span>
+                <span className="shrink-0 font-mono text-xs font-black text-[#7a6030]">{control.display}</span>
+              </span>
+              <input
+                type="range"
+                min={control.min}
+                max={control.max}
+                step={control.step}
+                value={control.value}
+                onChange={(event) => control.setValue(Number(event.target.value))}
+                className="w-full accent-[#171717]"
+              />
+            </label>
+          ))}
+        </div>
+
+        <div className="mt-[42px] bg-[#171717] p-[26px] text-[#f4f0e8]">
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#b8954f]">
+            {copy.mobile.calculatorResult}
+          </p>
+          <p className="mt-4 text-[42px] font-black leading-none tracking-[-0.035em]">
+            {formatCurrency(yearlyLeak, locale)}
+          </p>
+        </div>
+
+        <a
+          href="https://calendly.com/soyartemio/30min"
+          className="mt-[26px] inline-flex min-h-14 w-full items-center justify-between rounded-full bg-[#171717] px-[26px] text-sm font-black text-[#f4f0e8]"
+        >
+          {copy.mobile.calculatorCta}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function MobileBio({ locale }: { locale: Locale }) {
+  const copy = content[locale];
+
+  return (
+    <section className="bg-[#f4f0e8] px-5 py-[68px] md:hidden">
+      <div className="grid grid-cols-[0.618fr_1fr] items-stretch gap-[26px] border-y border-[#171717]/15 py-[42px]">
+        <div className="relative min-h-[210px] overflow-hidden border border-[#171717] bg-[#171717]">
+          <Image
+            src="/assets/miimagen.jpg"
+            alt={copy.bio.imageAlt}
+            fill
+            sizes="38vw"
+            className="object-cover object-top grayscale"
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#171717]/65 to-transparent" />
+        </div>
+        <div className="flex flex-col justify-between py-1">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#7a6030]">
+              {copy.mobile.bioEyebrow}
+            </p>
+            <h2 className="mt-4 text-[26px] font-black leading-[0.95] tracking-[-0.035em]">
+              {copy.mobile.bioTitle}
+            </h2>
+            <p className="mt-4 text-sm font-semibold leading-relaxed text-[#171717]/58">
+              {copy.mobile.bioBody}
+            </p>
+          </div>
+          <a href="https://calendly.com/soyartemio/30min" className="mt-[26px] inline-flex items-center gap-2 text-sm font-black">
+            {copy.mobile.primaryCta}
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FaqSection({ locale }: { locale: Locale }) {
   const copy = content[locale].faq;
 
   return (
-    <section className="bg-[#f4f0e8] px-5 py-20 md:px-10 md:py-24">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+    <section className="bg-[#f4f0e8] px-5 py-[68px] md:px-10 md:py-[110px]">
+      <div className="mx-auto grid max-w-7xl gap-[42px] lg:grid-cols-[0.618fr_1fr] lg:gap-[68px]">
         <div>
-          <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#8b6f35]">
+          <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#7a6030]">
             {copy.eyebrow}
           </p>
-          <h2 className="max-w-3xl text-[clamp(2.2rem,4.6vw,4.8rem)] font-black leading-[0.96] tracking-normal">
+          <h2 className="max-w-[16ch] text-[clamp(2.625rem,4.6vw,4.25rem)] font-black leading-[0.94] tracking-[-0.025em]">
             {copy.title}
           </h2>
         </div>
         <div className="divide-y divide-[#171717]/15 border-y border-[#171717]/15">
           {copy.items.map((item) => (
-            <details key={item.question} className="group py-6">
+            <details key={item.question} className="group py-[26px]">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-xl font-black leading-tight">
                 {item.question}
-                <span className="mt-1 text-[#8b6f35] transition group-open:rotate-90">
+                <span className="mt-1 text-[#7a6030] transition group-open:rotate-90">
                   <ChevronRight className="h-5 w-5" />
                 </span>
               </summary>
@@ -1031,14 +1442,108 @@ function FaqSection({ locale }: { locale: Locale }) {
   );
 }
 
+function SiteFooter({ locale }: { locale: Locale }) {
+  const copy = content[locale];
+  const links = [
+    { href: "#diagnostico", label: copy.nav.diagnosis },
+    { href: "#propiedad", label: copy.nav.blueprint },
+    { href: "#calculadora", label: copy.nav.savings },
+  ];
+
+  return (
+    <footer className="bg-[#171717] px-5 py-[68px] text-[#f4f0e8] md:px-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-[42px] border-b border-[#f4f0e8]/15 pb-[42px] md:grid-cols-[1fr_0.382fr_0.618fr] md:gap-[68px]">
+          <div>
+            <BrandMark inverted />
+            <p className="mt-[26px] max-w-[42ch] text-sm font-medium leading-relaxed text-[#f4f0e8]/60">
+              {copy.footer.tagline}
+            </p>
+            <a
+              href="https://calendly.com/soyartemio/30min"
+              className="mt-[26px] inline-flex items-center gap-3 rounded-full bg-[#f4f0e8] px-[26px] py-4 text-sm font-black text-[#171717] transition hover:bg-white"
+            >
+              {copy.footer.cta}
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <nav aria-label={copy.footer.navTitle} className="hidden md:block">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#b8954f]">
+              {copy.footer.navTitle}
+            </p>
+            <ul className="mt-5 grid gap-3 text-sm font-semibold text-[#f4f0e8]/65">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href} className="transition hover:text-[#f4f0e8]">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <Link href={copy.nav.localeHref} className="transition hover:text-[#f4f0e8]">
+                  {copy.nav.localeLabel}
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#b8954f]">
+              {copy.footer.contactTitle}
+            </p>
+            <ul className="mt-5 grid gap-3 text-sm font-semibold text-[#f4f0e8]/65">
+              <li>
+                <a href="mailto:yo@soyartemio.me" className="font-mono transition hover:text-[#f4f0e8]">
+                  yo@soyartemio.me
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/soyartemio/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-[#f4f0e8]"
+                >
+                  LinkedIn
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 pt-[26px] text-xs font-semibold text-[#f4f0e8]/45 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            © {new Date().getFullYear()} SoyArtemio. {copy.footer.rights}
+          </p>
+          <p>{copy.footer.origin}</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function ConceptExperience({ locale = "es" }: { locale?: Locale }) {
   const copy = content[locale];
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <main className="min-h-screen bg-[#f4f0e8] text-[#171717]">
-      <section className="relative min-h-screen overflow-hidden px-5 py-6 md:px-10">
-        <div className="absolute inset-x-0 top-0 h-px bg-[#171717]/20" />
-        <div className="absolute inset-y-0 left-[52%] hidden w-px bg-[#171717]/10 xl:block" />
+      <MobileHero locale={locale} />
+
+      <section className="relative hidden min-h-screen overflow-hidden px-5 py-6 md:block md:px-10">
+        <motion.div
+          variants={drawX}
+          initial="hidden"
+          animate="visible"
+          className="absolute inset-x-0 top-0 h-px origin-left bg-[#171717]/20"
+        />
+        <motion.div
+          variants={drawY}
+          initial="hidden"
+          animate="visible"
+          className="absolute inset-y-0 left-[52%] hidden w-px origin-top bg-[#171717]/10 xl:block"
+        />
 
         <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between border-b border-[#171717]/15 pb-5">
           <Link href="/" className="shrink-0 transition opacity-95 hover:opacity-70">
@@ -1069,45 +1574,62 @@ export default function ConceptExperience({ locale = "es" }: { locale?: Locale }
           </a>
         </nav>
 
-        <div className="relative z-10 mx-auto grid max-w-7xl min-w-0 items-center gap-10 py-10 md:py-16 xl:min-h-[calc(100vh-84px)] xl:grid-cols-[0.95fr_1.05fr]">
-          <motion.div variants={reveal} initial="hidden" animate="visible" transition={{ duration: 0.7 }} className="min-w-0 max-w-[calc(100vw-2.5rem)] sm:max-w-none">
-            <div className="mb-7 inline-flex max-w-full items-center gap-3 border-y border-[#171717]/20 py-2 pr-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#171717]/70 sm:text-xs sm:tracking-[0.28em]">
-              <span className="h-2 w-2 rounded-full bg-[#b8954f]" />
-              <span className="truncate">{copy.hero.eyebrow}</span>
-            </div>
+        <div className="relative z-10 mx-auto grid max-w-7xl min-w-0 items-center gap-[42px] py-[42px] md:py-[68px] xl:min-h-[calc(100vh-84px)] xl:grid-cols-[0.618fr_1fr] xl:gap-[68px]">
+          <motion.div variants={sequence} initial="hidden" animate="visible" className="min-w-0 max-w-[calc(100vw-2.5rem)] sm:max-w-none">
+            <motion.div variants={rise} className="mb-7 inline-flex max-w-full items-center gap-3 border-y border-[#171717]/20 py-2 pr-2 text-[9px] font-black uppercase tracking-[0.15em] text-[#171717]/70 sm:pr-4 sm:text-xs sm:tracking-[0.28em]">
+              <motion.span
+                className="h-2 w-2 shrink-0 rounded-full bg-[#b8954f]"
+                animate={prefersReducedMotion ? undefined : { scale: [1, 1.45, 1], opacity: [1, 0.55, 1] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <span className="whitespace-nowrap">{copy.hero.eyebrow}</span>
+            </motion.div>
 
-            <h1 className="max-w-[21rem] text-[clamp(2.4rem,10vw,8.7rem)] font-black leading-[0.92] tracking-normal text-[#171717] sm:max-w-4xl">
-              {copy.hero.title}
+            {/*
+              El tamaño se calcula contra la COLUMNA, no contra el viewport: con
+              10vw el titular medía 139px dentro de una columna de 640 y se
+              partía en cinco renglones. El tracking se cierra a −0.03em porque
+              a este cuerpo el espaciado por defecto se ve suelto.
+            */}
+            <h1 className="max-w-[21rem] text-[clamp(2.625rem,5.6vw,5.5rem)] font-black leading-[0.9] tracking-[-0.035em] text-balance text-[#171717] sm:max-w-[15ch]">
+              <span className="sr-only">{copy.hero.title}</span>
+              <MaskedWords text={copy.hero.title} />
             </h1>
 
-            <p className="mt-7 max-w-[21rem] text-[clamp(1.02rem,2vw,1.65rem)] font-medium leading-snug text-[#2f2f2f] sm:max-w-2xl">
+            <motion.p variants={rise} className="mt-[26px] max-w-[21rem] text-[clamp(1rem,1.5vw,1.3125rem)] font-medium leading-snug text-[#2f2f2f] sm:max-w-[42ch]">
               {copy.hero.body}
-            </p>
+            </motion.p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <motion.div variants={rise} className="mt-[42px] flex flex-col gap-3 sm:flex-row">
+              {/* El relleno entra por la izquierda en vez de cambiar de color de
+                  golpe: un botón que se llena se siente construido. */}
               <a
                 href="https://calendly.com/soyartemio/30min"
-                className="inline-flex items-center justify-center gap-3 rounded-full bg-[#171717] px-7 py-4 text-base font-black text-[#f4f0e8] transition hover:bg-[#2b2b2b]"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-[#171717] px-[26px] py-4 text-base font-black text-[#f4f0e8] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
               >
-                {copy.hero.primaryCta}
-                <ArrowRight className="h-5 w-5" />
+                <span className="absolute inset-0 origin-left scale-x-0 bg-[#b8954f] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 motion-reduce:transition-none" />
+                <span className="relative transition-colors duration-300 group-hover:text-[#171717]">{copy.hero.primaryCta}</span>
+                <ArrowRight className="relative h-5 w-5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:text-[#171717]" />
               </a>
               <a
-            href="#calculadora"
-                className="inline-flex items-center justify-center gap-3 rounded-full border border-[#171717]/30 px-7 py-4 text-base font-black text-[#171717] transition hover:border-[#171717]"
+                href="#calculadora"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full border border-[#171717]/30 px-[26px] py-4 text-base font-black text-[#171717] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-[#171717] motion-reduce:hover:translate-y-0"
               >
                 {copy.hero.secondaryCta}
               </a>
-            </div>
+            </motion.div>
+            <motion.p variants={rise} className="mt-4 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[#171717]/48">
+              {copy.hero.auditNote}
+            </motion.p>
 
-            <div className="mt-10 grid max-w-[21rem] gap-3 border-l border-[#171717]/20 pl-5 sm:max-w-2xl">
+            <motion.div variants={rise} className="mt-[42px] grid max-w-[21rem] gap-4 border-l border-[#171717]/20 pl-[26px] sm:max-w-[68ch]">
               {copy.hero.outcomes.map((item) => (
                 <p key={item} className="flex items-start gap-3 text-sm font-semibold leading-relaxed text-[#171717]/70">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#8b6f35]" />
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#7a6030]" />
                   {item}
                 </p>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
 
           <AnimatedDataAct locale={locale} />
@@ -1115,114 +1637,136 @@ export default function ConceptExperience({ locale = "es" }: { locale?: Locale }
 
         <div className="relative z-10 mx-auto grid max-w-7xl border-y border-[#171717]/15 md:grid-cols-4">
           {copy.hero.proofStrip.map((item, index) => (
-            <a key={item.label} href={item.href} className="group grid min-h-[132px] content-between border-b border-[#171717]/15 py-5 text-[#171717] transition duration-300 hover:bg-[#171717] hover:px-5 hover:text-[#f4f0e8] md:border-b-0 md:border-r md:px-4 md:first:pl-0 md:last:border-r-0">
-              <span className="flex items-center justify-between gap-4 text-[11px] font-black uppercase tracking-[0.24em] text-current/45 transition group-hover:text-[#b8954f]">
+            /* La tinta sube desde abajo en vez de encenderse de golpe: el hover
+               tiene dirección, y esa dirección es la que se siente cara. */
+            <motion.a
+              key={item.label}
+              href={item.href}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.72, ease: EASE, delay: 0.62 + index * 0.075 }}
+              className="group relative grid min-h-[110px] content-between overflow-hidden border-b border-[#171717]/15 px-0 py-[26px] text-[#171717] md:border-b-0 md:border-r md:px-4 md:first:pl-0 md:last:border-r-0"
+            >
+              <span className="absolute inset-0 origin-bottom scale-y-0 bg-[#171717] transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100 motion-reduce:transition-none" />
+              <span className="relative flex items-center justify-between gap-4 px-0 text-[11px] font-black uppercase tracking-[0.24em] text-[#171717]/45 transition-colors duration-300 group-hover:text-[#b8954f] md:px-1">
                 <span>{String(index + 1).padStart(2, "0")} / {item.label}</span>
-                <ChevronRight className="h-4 w-4 text-current/50 transition group-hover:translate-x-1 group-hover:text-[#b8954f]" />
+                <ChevronRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" />
               </span>
-              <span>
-                <span className="block text-lg font-black leading-tight tracking-normal">{item.title}</span>
-                <span className="mt-2 block text-sm font-semibold leading-snug text-current/55">{item.body}</span>
+              <span className="relative md:px-1">
+                <span className="block text-lg font-black leading-tight tracking-[-0.01em] transition-colors duration-300 group-hover:text-[#f4f0e8]">{item.title}</span>
+                <span className="mt-2 block text-sm font-semibold leading-snug text-[#171717]/55 transition-colors duration-300 group-hover:text-[#f4f0e8]/60">{item.body}</span>
               </span>
-            </a>
+            </motion.a>
           ))}
         </div>
       </section>
 
-      <ServiceGrid locale={locale} />
-      <UseCasesSection locale={locale} />
-      <ProcessSection locale={locale} />
-      <SavingsCalculator locale={locale} />
-      <BlueprintPyramid locale={locale} />
+      <div className="hidden md:block">
+        <ServiceGrid locale={locale} />
+        <UseCasesSection locale={locale} />
+        <ProcessSection locale={locale} />
+        <SavingsCalculator locale={locale} />
+        <BlueprintPyramid locale={locale} />
 
-      <section className="bg-[#f4f0e8] px-5 py-20 md:px-10">
-        <div className="mx-auto grid max-w-7xl gap-10 border-y border-[#171717]/15 py-12 md:grid-cols-[0.72fr_1.28fr] md:items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="relative h-[340px] overflow-hidden border border-[#171717] bg-[#171717]"
-          >
-            <Image
-              src="/assets/miimagen.jpg"
-              alt={copy.bio.imageAlt}
-              fill
-              sizes="(max-width: 768px) 100vw, 36vw"
-              className="object-cover object-top grayscale"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#171717] via-transparent to-transparent" />
-            <div className="absolute bottom-5 left-5 right-5 text-[#f4f0e8]">
-              <p className="text-xs font-black uppercase tracking-[0.28em] text-[#b8954f]">{copy.bio.label}</p>
-              <p className="mt-2 text-xl font-black">{copy.bio.cardTitle}</p>
-            </div>
-          </motion.div>
+        <section className="bg-[#f4f0e8] px-5 py-[68px] md:px-10 md:py-[110px]">
+          <div className="mx-auto grid max-w-7xl gap-[42px] border-y border-[#171717]/15 py-[42px] md:grid-cols-[0.618fr_1fr] md:items-center md:gap-[68px] md:py-[68px]">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative h-[336px] overflow-hidden border border-[#171717] bg-[#171717] md:h-[420px]"
+            >
+              <Image
+                src="/assets/miimagen.jpg"
+                alt={copy.bio.imageAlt}
+                fill
+                sizes="36vw"
+                className="object-cover object-top grayscale"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#171717] via-transparent to-transparent" />
+              <div className="absolute bottom-5 left-5 right-5 text-[#f4f0e8]">
+                <p className="text-xs font-black uppercase tracking-[0.28em] text-[#b8954f]">{copy.bio.label}</p>
+                <p className="mt-2 text-xl font-black">{copy.bio.cardTitle}</p>
+              </div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.08 }}
-          >
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#8b6f35]">{copy.bio.eyebrow}</p>
-            <h2 className="max-w-4xl text-[clamp(2.3rem,5vw,5rem)] font-black leading-[0.95] tracking-normal">
-              {copy.bio.title}
-            </h2>
-            <p className="mt-6 max-w-3xl text-lg font-medium leading-relaxed text-[#171717]/68">
-              {copy.bio.body}
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="https://calendly.com/soyartemio/30min"
-                className="inline-flex items-center justify-center gap-3 rounded-full bg-[#171717] px-7 py-4 text-base font-black text-[#f4f0e8] transition hover:bg-[#2b2b2b]"
-              >
-                {copy.bio.cta}
-                <ArrowRight className="h-5 w-5" />
-              </a>
-              <a
-                href="mailto:yo@soyartemio.me"
-                className="inline-flex items-center justify-center rounded-full border border-[#171717]/30 px-7 py-4 text-base font-black text-[#171717] transition hover:border-[#171717]"
-              >
-                yo@soyartemio.me
-              </a>
-              <a
-                href="https://www.linkedin.com/in/soyartemio/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-[#171717]/30 px-7 py-4 text-base font-black text-[#171717] transition hover:border-[#171717]"
-              >
-                LinkedIn
-              </a>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="bg-[#f4f0e8] px-5 py-20 md:px-10">
-        <div className="mx-auto grid max-w-7xl gap-10 border-t border-[#171717]/15 pt-12 md:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#8b6f35]">{copy.manifesto.eyebrow}</p>
-            <h2 className="text-[clamp(2.2rem,4vw,4.2rem)] font-black leading-none tracking-normal">
-              {copy.manifesto.title}
-            </h2>
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.08 }}
+            >
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.34em] text-[#7a6030]">{copy.bio.eyebrow}</p>
+              <h2 className="max-w-[16ch] text-[clamp(2.625rem,5vw,4.25rem)] font-black leading-[0.92] tracking-[-0.025em]">
+                {copy.bio.title}
+              </h2>
+              <p className="mt-[26px] max-w-[42ch] text-lg font-medium leading-relaxed text-[#171717]/68">
+                {copy.bio.body}
+              </p>
+              <div className="mt-[42px] flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="https://calendly.com/soyartemio/30min"
+                  className="inline-flex items-center justify-center gap-3 rounded-full bg-[#171717] px-[26px] py-4 text-base font-black text-[#f4f0e8] transition hover:bg-[#2b2b2b]"
+                >
+                  {copy.bio.cta}
+                  <ArrowRight className="h-5 w-5" />
+                </a>
+                <a
+                  href="mailto:yo@soyartemio.me"
+                  className="inline-flex items-center justify-center rounded-full border border-[#171717]/30 px-[26px] py-4 text-base font-black text-[#171717] transition hover:border-[#171717]"
+                >
+                  yo@soyartemio.me
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/soyartemio/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-full border border-[#171717]/30 px-[26px] py-4 text-base font-black text-[#171717] transition hover:border-[#171717]"
+                >
+                  LinkedIn
+                </a>
+              </div>
+            </motion.div>
           </div>
-          <div className="grid gap-5 text-lg font-medium leading-relaxed text-[#171717]/68">
-            <p>
-              {copy.manifesto.p1}
-            </p>
-            <p>
-              {copy.manifesto.p2}
-            </p>
-            <a href="https://calendly.com/soyartemio/30min" className="mt-3 inline-flex w-max items-center gap-3 rounded-full bg-[#171717] px-7 py-4 text-base font-black text-[#f4f0e8] transition hover:bg-[#2b2b2b]">
-              {copy.manifesto.cta}
-              <Zap className="h-5 w-5" />
-            </a>
+        </section>
+      </div>
+
+      <MobileOffer locale={locale} />
+      <MobileSavingsCalculator locale={locale} />
+      <MobileBio locale={locale} />
+
+      <section className="relative overflow-hidden bg-[#b8954f] px-5 py-[68px] text-[#171717] md:px-10 md:py-[110px]">
+        <div className="absolute inset-0 opacity-[0.1] [background-image:linear-gradient(#171717_1px,transparent_1px),linear-gradient(90deg,#171717_1px,transparent_1px)] [background-size:52px_52px]" />
+        <div className="absolute -bottom-40 -right-24 h-[520px] w-[520px] rounded-full border border-[#171717]/15" />
+        <div className="relative mx-auto max-w-7xl">
+          <p className="mb-7 text-xs font-black uppercase tracking-[0.34em] text-[#171717]/62">{copy.manifesto.eyebrow}</p>
+          <motion.h2
+            initial={{ opacity: 0, y: 36 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.72, ease: EASE }}
+            className="max-w-[16ch] text-[clamp(4.25rem,9vw,8.875rem)] font-black leading-[0.82] tracking-[-0.055em]"
+          >
+            {copy.manifesto.title}
+          </motion.h2>
+          <div className="mt-[68px] grid gap-[26px] border-t border-[#171717]/25 pt-[26px] md:grid-cols-[0.382fr_0.618fr_1fr] md:gap-[42px]">
+            <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-[#171717]/58">SOYARTEMIO / 01</p>
+            <p className="text-lg font-bold leading-relaxed text-[#171717]/75">{copy.manifesto.p1}</p>
+            <div>
+              <p className="hidden text-lg font-bold leading-relaxed text-[#171717]/75 md:block">{copy.manifesto.p2}</p>
+              <a href="https://calendly.com/soyartemio/30min" className="group mt-[26px] inline-flex w-max items-center gap-3 rounded-full bg-[#171717] px-[26px] py-4 text-base font-black text-[#f4f0e8] transition hover:bg-[#071312]">
+                {copy.manifesto.cta}
+                <Zap className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
       <FaqSection locale={locale} />
-      <ChatbotWidget locale={locale} />
+      <SiteFooter locale={locale} />
+      <VoiceAgent locale={locale} />
     </main>
   );
 }

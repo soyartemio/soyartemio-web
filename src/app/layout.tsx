@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ui/navbar/Navbar";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
@@ -17,16 +16,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Artemio | Consultoría Estratégica en IA y Arquitectura Cloud",
+    default: "SoyArtemio | Menos caos operativo. Más control.",
     template: "%s | SoyArtemio"
   },
-  description: "Ayudo a empresas a transformar sus operaciones con arquitecturas basadas en Inteligencia Artificial y Soberanía Tecnológica.",
+  description: "Encuentro dónde tu empresa pierde tiempo y dinero, y construyo contigo una forma más simple de operar.",
   openGraph: {
-    title: "Artemio | Consultoría Estratégica en IA",
-    description: "Transformando negocios mediante IA, automatización y arquitecturas tecnológicas robustas.",
+    title: "SoyArtemio | Menos caos operativo. Más control.",
+    description: "No necesitas otro software. Necesitas una operación que funcione.",
     url: SITE_URL,
     siteName: SITE_NAME,
-    locale: "es_ES",
+    locale: "es_MX",
     type: "website",
   },
   robots: {
@@ -41,7 +40,8 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "Artemio | Estratega de IA",
+    title: "SoyArtemio | Menos caos operativo. Más control.",
+    description: "Encuentro lo que frena tu operación y construyo contigo una forma más simple de trabajar.",
     card: "summary_large_image",
   },
 };
@@ -53,10 +53,10 @@ const jsonLd = {
       "@type": "Person",
       "@id": `${SITE_URL}/#person`,
       "name": "Artemio",
-      "jobTitle": "Estratega de Inteligencia Artificial & Arquitecto Cloud",
+      "jobTitle": "Consultor de operaciones e inteligencia artificial",
       "url": SITE_URL,
       "sameAs": [
-        "https://linkedin.com/in/artemio"
+        "https://www.linkedin.com/in/soyartemio/"
       ]
     },
     {
@@ -83,7 +83,7 @@ const jsonLd = {
         "Arquitectura de datos e IA",
         "Implementación de agentes de IA"
       ],
-      "description": "Diseño e implementación de infraestructura de IA propia para automatizar operaciones, ordenar datos y reducir rentas de software."
+      "description": "Diagnóstico, automatización e implementación para empresas que quieren ahorrar tiempo, ordenar su información y operar con más control."
     },
     {
       "@type": "FAQPage",
@@ -91,18 +91,18 @@ const jsonLd = {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "¿Qué incluye la auditoría gratuita de IA?",
+          "name": "¿Qué recibo en el diagnóstico gratuito?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Incluye una conversación de 30 minutos para entender la operación, detectar fugas de tiempo o software y definir si tiene sentido construir una arquitectura de IA propia."
+            "text": "En 30 minutos revisamos el principal cuello de botella, las herramientas del equipo y el trabajo que se repite. Al final definimos un siguiente paso claro y qué no conviene automatizar todavía."
           }
         },
         {
           "@type": "Question",
-          "name": "¿Esto reemplaza ChatGPT Enterprise o Copilot?",
+          "name": "¿Tengo que cambiar todas mis herramientas?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No necesariamente. Pueden integrarse como una capa del sistema. La diferencia es que la arquitectura se diseña alrededor de los datos, procesos y reglas de la empresa."
+            "text": "No. Primero aprovechamos lo que ya funciona y sólo reemplazamos o conectamos lo que duplica trabajo, encierra datos o cuesta más de lo que aporta."
           }
         },
         {
@@ -110,7 +110,7 @@ const jsonLd = {
           "name": "¿Cuánto tarda una implementación de IA?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Depende del alcance, pero conviene iniciar con un módulo de alto impacto en semanas para demostrar valor antes de ampliar la arquitectura."
+            "text": "Depende del alcance. Normalmente empezamos con una mejora concreta que pueda probarse en semanas, sin esperar meses para saber si funciona."
           }
         }
       ]
@@ -126,6 +126,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Estilos de S1gnal. Van aquí y no en el componente para que el panel
+            nunca se pinte sin CSS. */}
+        <link rel="stylesheet" href="/voz/voice-widget.css" />
+        <link rel="stylesheet" href="/voz/soyartemio.css?v=20260812" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -134,7 +138,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
         {children}
       </body>
     </html>

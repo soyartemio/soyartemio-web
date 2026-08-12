@@ -3,9 +3,9 @@ import ConceptExperience from "./concept/ConceptExperience";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Arquitectura de IA Operativa | SoyArtemio",
+  title: "Consultoría de IA y automatización para empresas",
   description:
-    "Convierte la IA en infraestructura operativa propia: automatización, control de datos y menos renta de software para empresas que quieren operar con margen.",
+    "Encuentro dónde tu empresa pierde tiempo y dinero, y construyo contigo una forma más simple de operar. Diagnóstico gratuito de 30 minutos.",
   alternates: {
     canonical: "/",
     languages: {
@@ -14,9 +14,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: `${SITE_NAME} | Arquitectura de IA Operativa`,
+    title: `${SITE_NAME} | Menos caos operativo. Más control.`,
     description:
-      "Deja de usar la IA como un juguete. Construye sistemas propios que automaticen tu operación, protejan tus datos y reduzcan rentas de software.",
+      "No necesitas otro software. Necesitas una operación que funcione.",
     url: SITE_URL,
     siteName: SITE_NAME,
     locale: "es_MX",
