@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import VoiceAgent from "../../components/ui/voice/VoiceAgent";
 import {
@@ -94,6 +94,18 @@ const content = {
       primaryCta: "Agendar diagnóstico",
       secondaryCta: "Calcular lo que pierdo al año",
       auditNote: "30 min · sin costo · sales con el siguiente paso claro.",
+      responses: [
+        "Empieza a usarla estratégicamente.",
+        "Empieza a usarla para recuperar tiempo.",
+        "Empieza a usarla para dejar de operar a mano.",
+        "Empieza a usarla donde sí mueve el negocio.",
+        "Empieza a usarla para recuperar margen.",
+        "Empieza a usarla para ordenar tu operación.",
+        "Empieza a usarla para decidir con información.",
+        "Empieza a usarla para que tu equipo avance.",
+        "Empieza a usarla para dejar de perseguir reportes.",
+        "Empieza a usarla para volver a tener control.",
+      ],
       outcomes: [
         "Detectamos dónde se atasca el trabajo.",
         "Decidimos qué conviene automatizar y qué no.",
@@ -344,6 +356,18 @@ const content = {
       primaryCta: "Book a diagnosis",
       secondaryCta: "Calculate my yearly loss",
       auditNote: "30 min · free · leave with a clear next step.",
+      responses: [
+        "Start using it strategically.",
+        "Start using it to recover time.",
+        "Start using it to leave manual work behind.",
+        "Start using it where it moves the business.",
+        "Start using it to recover margin.",
+        "Start using it to organize your operation.",
+        "Start using it to decide with real information.",
+        "Start using it to help your team move forward.",
+        "Start using it to stop chasing reports.",
+        "Start using it to take back control.",
+      ],
       outcomes: [
         "We find where work gets stuck.",
         "We decide what is worth automating and what is not.",
@@ -593,35 +617,186 @@ const drawY = {
   visible: { scaleY: 1, transition: { duration: 1.4, ease: EASE, delay: 0.25 } },
 };
 
+type TypewriterPhase =
+  | "typing-initial"
+  | "idle-initial"
+  | "erasing"
+  | "typing-response"
+  | "idle-response";
+
+type HeroResponseWindow = Window & {
+  __soyartemioHeroResponse?: Partial<Record<Locale, string>>;
+};
+
+const subscribeToHydration = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+function chooseHeroResponse(locale: Locale, responses: readonly string[]) {
+  const heroWindow = window as HeroResponseWindow;
+  const cached = heroWindow.__soyartemioHeroResponse?.[locale];
+  if (cached) return cached;
+
+  const previousKey = `soyartemio:hero-response:${locale}`;
+  const entropy = new Uint32Array(1);
+  window.crypto.getRandomValues(entropy);
+  let nextIndex = entropy[0] % responses.length;
+
+  try {
+    const previousIndex = Number(window.sessionStorage.getItem(previousKey));
+    if (Number.isInteger(previousIndex) && previousIndex === nextIndex && responses.length > 1) {
+      nextIndex = (nextIndex + 1 + (entropy[0] % (responses.length - 1))) % responses.length;
+    }
+    window.sessionStorage.setItem(previousKey, String(nextIndex));
+  } catch {
+    // La animación sigue funcionando aunque el navegador bloquee sessionStorage.
+  }
+
+  const selected = responses[nextIndex];
+  heroWindow.__soyartemioHeroResponse = {
+    ...heroWindow.__soyartemioHeroResponse,
+    [locale]: selected,
+  };
+  return selected;
+}
+
 /**
- * Titular con máscara por palabra: cada palabra sube desde detrás de su propio
- * recorte en vez de aparecer con opacidad. Es el gesto que separa un titular
- * animado de uno que sólo se enciende.
- *
- * El `pb`/`-mb` existe porque el recorte cortaría las colas de la j y la g.
+ * El cursor del wordmark se convierte en conducta: escribe la tesis al cargar
+ * y, con el primer scroll hacia abajo, la reemplaza una sola vez por un uso
+ * concreto. La altura se reserva para evitar saltos de layout.
  */
-function MaskedWords({ text, delay = 0.12 }: { text: string; delay?: number }) {
+function TypewriterHeadline({
+  locale,
+  initialText,
+  responses,
+  className,
+  initialClassName = "",
+  responseClassName = "",
+}: {
+  locale: Locale;
+  initialText: string;
+  responses: readonly string[];
+  className: string;
+  initialClassName?: string;
+  responseClassName?: string;
+}) {
   const prefersReducedMotion = useReducedMotion();
-  if (prefersReducedMotion) return <>{text}</>;
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerSnapshot,
+  );
+  const shouldReduceMotion = isHydrated && Boolean(prefersReducedMotion);
+  const [displayText, setDisplayText] = useState("");
+  const [phase, setPhase] = useState<TypewriterPhase>("typing-initial");
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    let cancelled = false;
+    let timer: number | undefined;
+    let initialFinished = false;
+    let scrollRequested = false;
+    let transformed = false;
+    let selectedResponse = responses[0];
+    let previousScrollY = window.scrollY;
+
+    const schedule = (callback: () => void, delay: number) => {
+      timer = window.setTimeout(callback, delay);
+    };
+
+    const typeText = (text: string, index: number, onDone: () => void) => {
+      if (cancelled) return;
+      setDisplayText(text.slice(0, index));
+
+      if (index >= text.length) {
+        schedule(onDone, 260);
+        return;
+      }
+
+      const character = text[index - 1];
+      const delay = character === " " ? 22 : character === "." ? 170 : 34 + (index % 4) * 5;
+      schedule(() => typeText(text, index + 1, onDone), delay);
+    };
+
+    const typeResponse = () => {
+      setPhase("typing-response");
+      typeText(selectedResponse, 1, () => setPhase("idle-response"));
+    };
+
+    const eraseInitial = (remaining: number) => {
+      if (cancelled) return;
+      setDisplayText(initialText.slice(0, remaining));
+
+      if (remaining <= 0) {
+        schedule(typeResponse, 140);
+        return;
+      }
+
+      schedule(() => eraseInitial(remaining - 1), 14);
+    };
+
+    const beginTransformation = () => {
+      if (!initialFinished || !scrollRequested || transformed) return;
+      transformed = true;
+      setPhase("erasing");
+      schedule(() => eraseInitial(initialText.length - 1), 180);
+    };
+
+    const handleScroll = () => {
+      const nextScrollY = window.scrollY;
+      const movedDown = nextScrollY > previousScrollY + 2 && nextScrollY > 12;
+      previousScrollY = nextScrollY;
+      if (!movedDown || scrollRequested) return;
+
+      scrollRequested = true;
+      selectedResponse = chooseHeroResponse(locale, responses);
+      window.removeEventListener("scroll", handleScroll);
+      beginTransformation();
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    schedule(
+      () =>
+        typeText(initialText, 1, () => {
+          initialFinished = true;
+          setPhase("idle-initial");
+          beginTransformation();
+        }),
+      180,
+    );
+
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [initialText, locale, responses, shouldReduceMotion]);
+
+  const isResponse = phase === "typing-response" || phase === "idle-response";
+  const isActive = phase === "typing-initial" || phase === "typing-response" || phase === "erasing";
+  const visibleText = shouldReduceMotion ? initialText : displayText;
 
   return (
-    <span aria-hidden="true">
-      {text.split(" ").map((word, index) => (
+    <h1
+      className={className}
+      data-typewriter-phase={shouldReduceMotion ? "reduced-motion" : phase}
+    >
+      <span className="sr-only">{initialText}</span>
+      <span
+        aria-hidden="true"
+        className={`block ${isResponse ? responseClassName : `text-balance ${initialClassName}`}`}
+      >
+        {visibleText}
         <span
-          key={`${word}-${index}`}
-          className="mr-[0.24em] inline-block overflow-hidden pb-[0.16em] align-bottom -mb-[0.16em]"
-        >
-          <motion.span
-            className="inline-block"
-            initial={{ y: "115%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.82, ease: EASE, delay: delay + index * 0.045 }}
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
-    </span>
+          className={`ml-[0.1em] inline-block h-[0.76em] w-[0.16em] translate-y-[0.04em] bg-[#b8954f] ${
+            !isActive && !shouldReduceMotion
+              ? "motion-safe:animate-[brand-caret_1.15s_steps(1)_infinite]"
+              : ""
+          }`}
+        />
+      </span>
+    </h1>
   );
 }
 
@@ -1180,9 +1355,14 @@ function MobileHero({ locale }: { locale: Locale }) {
         <p className="inline-flex border-y border-[#171717]/20 py-2 text-[9px] font-black uppercase tracking-[0.18em] text-[#7a6030]">
           {copy.mobile.eyebrow}
         </p>
-        <h1 className="mt-[26px] max-w-[9ch] text-[clamp(3.15rem,15vw,4.25rem)] font-black leading-[0.84] tracking-[-0.055em]">
-          {copy.mobile.heroTitle}
-        </h1>
+        <TypewriterHeadline
+          locale={locale}
+          initialText={copy.mobile.heroTitle}
+          responses={copy.hero.responses}
+          className="mt-[26px] min-h-[2.52em] w-full text-[clamp(3.15rem,15vw,4.25rem)] font-black leading-[0.84] tracking-[-0.055em]"
+          initialClassName="max-w-[9ch]"
+          responseClassName="max-w-full text-[0.72em] leading-[0.94] tracking-[-0.04em]"
+        />
         <p className="mt-[26px] max-w-[32ch] text-base font-semibold leading-relaxed text-[#171717]/68">
           {copy.mobile.heroBody}
         </p>
@@ -1591,10 +1771,14 @@ export default function ConceptExperience({ locale = "es" }: { locale?: Locale }
               partía en cinco renglones. El tracking se cierra a −0.03em porque
               a este cuerpo el espaciado por defecto se ve suelto.
             */}
-            <h1 className="max-w-[21rem] text-[clamp(2.625rem,5.6vw,5.5rem)] font-black leading-[0.9] tracking-[-0.035em] text-balance text-[#171717] sm:max-w-[15ch]">
-              <span className="sr-only">{copy.hero.title}</span>
-              <MaskedWords text={copy.hero.title} />
-            </h1>
+            <TypewriterHeadline
+              locale={locale}
+              initialText={copy.hero.title}
+              responses={copy.hero.responses}
+              className="min-h-[3.6em] w-full text-[clamp(2.625rem,5.6vw,5.5rem)] font-black leading-[0.9] tracking-[-0.035em] text-[#171717]"
+              initialClassName="max-w-[21rem] sm:max-w-[15ch]"
+              responseClassName="max-w-[16ch] text-[0.86em] leading-[0.94] tracking-[-0.03em]"
+            />
 
             <motion.p variants={rise} className="mt-[26px] max-w-[21rem] text-[clamp(1rem,1.5vw,1.3125rem)] font-medium leading-snug text-[#2f2f2f] sm:max-w-[42ch]">
               {copy.hero.body}
