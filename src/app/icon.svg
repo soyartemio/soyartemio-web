@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">SoyArtemio</title>
+  <rect width="64" height="64" fill="#171717"/>
+  <!-- Marca corta a + cursor. Relación de anchos 26:16 ≈ φ. -->
+  <path
+    fill="#F4F0E8"
+    fill-rule="evenodd"
+    d="M21 19c-8 0-12 5-12 13s4 13 12 13c4 0 7-2 9-5v5h5V19h-6v4c-2-3-5-4-8-4Zm1 7c5 0 7 2 7 6s-2 6-7 6-6-2-6-6 2-6 6-6Z"
+  />
+  <rect x="39" y="19" width="16" height="26" fill="#B8954F"/>
+</svg>
