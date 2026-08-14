@@ -1468,6 +1468,8 @@ window.addEventListener("pagehide", () => cleanupSession());
 window.s1gnalVoz = {
   /** ¿Hay una sesión de voz viva ahora mismo? */
   activa: () => connected,
+  /** Abre S1gnal desde un CTA de la página sin exponer un teléfono. */
+  abrir: () => openPanel(),
   /**
    * Le dice algo a S1gnal en nombre del sistema, no de la persona.
    * Devuelve falso si no hay sesión: quien llama decide si eso importa.
@@ -1478,5 +1480,16 @@ window.s1gnalVoz = {
     return true;
   },
 };
+
+/*
+ * Los CTA del sitio apuntan a #s1gnal. El clic sigue siendo un gesto real del
+ * usuario, así que Safari permite pedir el micrófono durante openPanel().
+ */
+document.addEventListener("click", (event) => {
+  const trigger = event.target.closest?.('a[href="#s1gnal"]');
+  if (!trigger) return;
+  event.preventDefault();
+  openPanel();
+});
 
 animateIdle();

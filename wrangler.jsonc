@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  "main": "custom-worker.ts",
   "name": "soyartemio-web",
   "compatibility_date": "2025-09-27",
   "compatibility_flags": [
@@ -18,6 +18,19 @@
   ],
   "images": {
     "binding": "IMAGES"
+  },
+  "d1_databases": [
+    {
+      "binding": "WHATSAPP_ALERTS_DB",
+      "database_name": "soyartemio-s1gnal",
+      "database_id": "61d93e70-57ce-4da1-8111-a8e2115834ae",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
   },
   "observability": {
     "enabled": true

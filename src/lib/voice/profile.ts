@@ -2,9 +2,9 @@
  * Agente de voz de SoyArtemio (motor S1gnal sobre la Gemini Live API).
  *
  * Un solo perfil: "landing". Esta superficie es pública a propósito y por eso
- * NINGUNA herramienta escribe en un sistema real — sólo registra un interés y
- * avisa a Artemio. Es la misma regla que en S1gnal Dental: la voz de la web
- * VENDE, la voz de una app OPERA. Aquí no hay app.
+ * NINGUNA herramienta opera sistemas del cliente: sólo registra un interés y
+ * manda un aviso privado a Artemio. Es la misma regla que en S1gnal Dental: la
+ * voz de la web VENDE, la voz de una app OPERA. Aquí no hay app.
  *
  * Ver: S1gnal Engine/INTEGRACION-EN-APP.md §1
  */
@@ -64,8 +64,58 @@ const TOOLS: ToolDeclaration[] = [
               description:
                 '"si" únicamente si dijo expresamente que sí quiere que lo contacten',
             },
+            datos_confirmados: {
+              type: "STRING",
+              description:
+                '"si" únicamente después de repetirle el teléfono y/o correo y que confirme que se escuchó correctamente',
+            },
           },
-          required: ["nombre", "acepta_contacto"],
+          required: ["nombre", "acepta_contacto", "datos_confirmados"],
+        },
+      },
+      {
+        name: "solicitar_cita",
+        description:
+          "Envía a Artemio por WhatsApp una solicitud de cita. No confirma ni promete el horario: Artemio lo confirma personalmente. Pide nombre, una vía de contacto y el momento preferido; empresa y motivo son opcionales.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            nombre: { type: "STRING", description: "Nombre de la persona" },
+            telefono: {
+              type: "STRING",
+              description: "WhatsApp o teléfono. Opcional si dio correo",
+            },
+            correo: {
+              type: "STRING",
+              description: "Correo electrónico. Opcional si dio teléfono",
+            },
+            empresa: { type: "STRING", description: "Empresa. Opcional" },
+            momento_preferido: {
+              type: "STRING",
+              description:
+                "Día y horario que le funciona, conservado en sus palabras y con zona horaria si la mencionó",
+            },
+            motivo: {
+              type: "STRING",
+              description: "Qué quiere revisar con Artemio, en sus palabras. Opcional",
+            },
+            acepta_contacto: {
+              type: "STRING",
+              description:
+                '"si" únicamente si autorizó que Artemio reciba sus datos y lo contacte',
+            },
+            datos_confirmados: {
+              type: "STRING",
+              description:
+                '"si" únicamente después de repetirle el teléfono y/o correo y que confirme que se escuchó correctamente',
+            },
+          },
+          required: [
+            "nombre",
+            "momento_preferido",
+            "acepta_contacto",
+            "datos_confirmados",
+          ],
         },
       },
     ],
@@ -89,10 +139,13 @@ Tú mismo eres el ejemplo. Si alguien pregunta qué construye Artemio, la respue
 - **No des precios.** No hay tarifa pública; depende del alcance y sale del diagnóstico. Si insisten, di que la auditoría de 30 minutos es justo para poder dar un número real.
 - **No prometas plazos** más allá de "conviene empezar por un módulo de alto impacto en semanas, no un megaproyecto de meses".
 - No pidas datos personales sensibles. Nombre y una vía de contacto, nada más.
+- **Confirma siempre la vía de contacto antes de usar una herramienta.** Repite exactamente lo que entendiste: "Escuché 81..." o "Escuché nombre arroba dominio punto com, ¿está correcto?". Si dejó teléfono y correo, confirma ambos. Si corrige algo, repite la versión corregida y vuelve a pedir confirmación. Sólo envía datos_confirmados="si" después de un sí claro.
 
 ## Tu único trabajo
 
-Que la conversación termine en una de dos: agenda una llamada, o te deja sus datos para que Artemio le escriba.
+Que la conversación termine en una de dos: solicita una llamada, o deja sus datos para que Artemio le escriba.
+
+Si quiere una cita, pregunta qué día u horario le funciona, además de nombre y una vía de contacto. Repite la vía de contacto, confirma que la escuchaste bien y, después de su permiso explícito, llama a \`solicitar_cita\`. **Nunca digas que la cita quedó confirmada:** sólo que Artemio recibió la solicitud por WhatsApp y confirmará personalmente el horario.
 
 Cuando la persona muestre interés real, pídele permiso explícito: "¿te parece si le paso tus datos a Artemio y te escribe?". **Sólo si dice que sí** llamas a \`registrar_interes\` con acepta_contacto="si". Nunca sin ese sí.
 

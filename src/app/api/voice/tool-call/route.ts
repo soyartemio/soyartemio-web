@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 
-import { notifyLead } from "@/lib/voice/notify";
+import { notifyAppointment, notifyLead } from "@/lib/voice/notify";
 
 export const dynamic = "force-dynamic";
 
 /*
  * Ejecuta las herramientas que invoca el agente de voz.
  *
- * Esta superficie es pública, así que NADA de aquí escribe en un sistema real.
- * La única herramienta registra un interés y se lo manda a Artemio. Es la
- * misma regla de S1gnal Dental: la voz de la web vende, la de la app opera.
+ * Esta superficie es pública, así que ninguna herramienta opera sistemas del
+ * cliente. La única herramienta registra un interés y manda un aviso privado
+ * a Artemio. Es la misma regla de S1gnal Dental: la voz de la web vende, la de
+ * la app opera.
  */
 
 function json(body: unknown, status = 200) {
@@ -18,6 +19,12 @@ function json(body: unknown, status = 200) {
 
 function text(value: unknown, max = 200) {
   return String(value ?? "").trim().slice(0, max);
+}
+
+function backupFailed(reason?: string) {
+  return ["respaldo-no-disponible", "respaldo-fallo", "respaldo-sin-id"].includes(
+    reason ?? "",
+  );
 }
 
 async function registrarInteres(args: Record<string, unknown>) {
@@ -41,7 +48,14 @@ async function registrarInteres(args: Record<string, unknown>) {
       error: "Falta una vía de contacto. Pide teléfono o correo, el que prefiera.",
     };
 
-  const { delivered } = await notifyLead({
+  if (text(args.datos_confirmados).toLowerCase() !== "si")
+    return {
+      ok: false,
+      error:
+        "Falta confirmar la vía de contacto. Repite el teléfono y/o correo y pregunta si lo escuchaste bien.",
+    };
+
+  const { delivered, reason } = await notifyLead({
     nombre,
     telefono,
     correo,
@@ -50,14 +64,79 @@ async function registrarInteres(args: Record<string, unknown>) {
   });
 
   /*
-   * Se responde ok aunque la entrega falle: el dato ya se capturó y quedó en
-   * el log. Decirle a la persona "no se pudo" la haría repetir su teléfono por
-   * un problema que es de este lado.
+   * Se responde ok aunque WhatsApp falle si D1 ya protegió el dato. Sólo se
+   * rechaza cuando tampoco fue posible crear el respaldo: en ese caso decir
+   * "ya lo tengo" sería mentirle a la persona.
    */
+  if (backupFailed(reason))
+    return {
+      ok: false,
+      error:
+        "No pude guardar tus datos en este momento. Ofrece el correo soyartemio@me.com como alternativa.",
+    };
+
   return {
     ok: true,
     entregado: delivered,
     mensaje: "Listo, ya tengo tus datos. Artemio te escribe personalmente.",
+  };
+}
+
+async function solicitarCita(args: Record<string, unknown>) {
+  if (text(args.acepta_contacto).toLowerCase() !== "si")
+    return {
+      ok: false,
+      error:
+        "La persona todavía no aceptó que la contacten. Pregúntaselo antes de enviar la solicitud.",
+    };
+
+  const nombre = text(args.nombre, 120);
+  if (!nombre) return { ok: false, error: "Falta el nombre." };
+
+  const telefono = text(args.telefono, 40);
+  const correo = text(args.correo, 180).toLowerCase();
+  if (!telefono && !correo)
+    return {
+      ok: false,
+      error: "Falta una vía de contacto. Pide teléfono o correo.",
+    };
+
+  if (text(args.datos_confirmados).toLowerCase() !== "si")
+    return {
+      ok: false,
+      error:
+        "Falta confirmar la vía de contacto. Repite el teléfono y/o correo y pregunta si lo escuchaste bien.",
+    };
+
+  const momento = text(args.momento_preferido, 220);
+  if (!momento)
+    return {
+      ok: false,
+      error: "Falta saber qué día u horario le funciona mejor.",
+    };
+
+  const empresa = text(args.empresa, 160);
+  const motivo = text(args.motivo, 700) || "No explicó el motivo.";
+  const { delivered, reason } = await notifyAppointment({
+    nombre: empresa ? `${nombre} — ${empresa}` : nombre,
+    contacto: [telefono, correo].filter(Boolean).join(" · "),
+    fecha: momento,
+    tipo: "Solicitud de diagnóstico de 30 min",
+    nota: motivo,
+  });
+
+  if (backupFailed(reason))
+    return {
+      ok: false,
+      error:
+        "No pude guardar la solicitud en este momento. Ofrece el correo soyartemio@me.com como alternativa.",
+    };
+
+  return {
+    ok: true,
+    entregado: delivered,
+    mensaje:
+      "Listo, registré tu solicitud. Artemio te confirma personalmente el horario.",
   };
 }
 
@@ -77,6 +156,7 @@ export async function POST(request: Request) {
   const args = body.args ?? {};
 
   if (name === "registrar_interes") return json(await registrarInteres(args));
+  if (name === "solicitar_cita") return json(await solicitarCita(args));
 
   return json({ ok: false, error: `Herramienta desconocida: ${name}` }, 400);
 }
