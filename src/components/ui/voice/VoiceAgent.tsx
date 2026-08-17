@@ -66,7 +66,9 @@ export default function VoiceAgent({ locale = "es" }: { locale?: "es" | "en" }) 
       maxSessionMinutes: 5,
       autoStart: true,
       autoGreet: true,
-      localGreetingUrl: es ? "/voz/saludo-aoede.m4a" : null,
+      // El identificador evita que un 404 guardado antes de publicar el asset
+      // sobreviva al despliegue en algún edge de Cloudflare.
+      localGreetingUrl: es ? "/voz/saludo-aoede.m4a?v=1" : null,
       localGreetingText: es
         ? "Hola, soy Artemio... bueno, su asistente. ¿En qué te puedo ayudar?"
         : null,
