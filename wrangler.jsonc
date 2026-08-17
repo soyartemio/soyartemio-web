@@ -2,6 +2,16 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": "custom-worker.ts",
   "name": "soyartemio-web",
+  "routes": [
+    {
+      "pattern": "soyartemio.me",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.soyartemio.me",
+      "custom_domain": true
+    }
+  ],
   "compatibility_date": "2025-09-27",
   "compatibility_flags": [
     "nodejs_compat"

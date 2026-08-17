@@ -16,12 +16,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // El documento y los payloads RSC cambian de nombre de chunks en cada
+        // despliegue. Safari no debe reutilizar HTML viejo que apunte a assets
+        // que ya no pertenecen a la versión activa.
         source:
           "/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|assets).*)",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=0, s-maxage=300, stale-while-revalidate=300",
+            value: "no-store, max-age=0, must-revalidate",
           },
         ],
       },
