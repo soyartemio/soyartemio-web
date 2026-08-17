@@ -12,8 +12,34 @@ type ScheduledControllerLike = {
   noRetry?: () => void;
 };
 
+const CANONICAL_HOST = "soyartemio.me";
+
 const customWorker = {
-  fetch: handler.fetch,
+  async fetch(
+    request: Request,
+    env: Record<string, unknown>,
+    context: unknown,
+  ) {
+    const url = new URL(request.url);
+    const isPublicHost =
+      url.hostname === CANONICAL_HOST ||
+      url.hostname === `www.${CANONICAL_HOST}`;
+
+    // Este punto corre antes de OpenNext, donde todavía conservamos el
+    // protocolo original de Cloudflare. Así HTTP y `www` nunca dependen de la
+    // normalización interna de Next.js para llegar a la URL canónica.
+    if (
+      isPublicHost &&
+      (url.hostname !== CANONICAL_HOST || url.protocol !== "https:")
+    ) {
+      url.protocol = "https:";
+      url.hostname = CANONICAL_HOST;
+      url.port = "";
+      return Response.redirect(url.toString(), 308);
+    }
+
+    return handler.fetch(request, env, context);
+  },
 
   async scheduled(controller: ScheduledControllerLike, env: DailyDigestEnv) {
     // Un intento por día. Si Meta falla, lo pendiente permanece en D1 y se
