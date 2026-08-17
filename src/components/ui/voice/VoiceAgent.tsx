@@ -66,6 +66,10 @@ export default function VoiceAgent({ locale = "es" }: { locale?: "es" | "en" }) 
       maxSessionMinutes: 5,
       autoStart: true,
       autoGreet: true,
+      localGreetingUrl: es ? "/voz/saludo-aoede.m4a" : null,
+      localGreetingText: es
+        ? "Hola, soy Artemio... bueno, su asistente. ¿En qué te puedo ayudar?"
+        : null,
       startOpen: false,
       position: "right",
       toolWebhookUrl: "/api/voice/tool-call",

@@ -23,6 +23,13 @@ const config = Object.assign(
     // Respaldo para tokens antiguos. En instalaciones actuales lo define el
     // perfil del servidor y viaja junto con el modelo y la duración.
     greetingPrompt: "Inicia la conversación ahora siguiendo tu instrucción de sistema.",
+    // Saludo local opcional. En una landing, una frase fija no necesita esperar
+    // a que el modelo la genere cada vez: puede reproducirse desde un asset
+    // precargado mientras el micrófono y el WebSocket terminan de abrir.
+    // `localGreetingText` mantiene sincronizados audio, transcripción y la
+    // instrucción del agente para que Gemini no repita el saludo.
+    localGreetingUrl: null,
+    localGreetingText: null,
     // Duración máxima de sesión en el cliente (respaldo del límite del Worker).
     maxSessionMinutes: 3,
     // A dónde se envían las tool calls que el modelo invoque en vivo.
@@ -69,7 +76,10 @@ const AUDIO_PROCESSORS = config.audioProcessorsPath
   ? new URL(config.audioProcessorsPath.replace(/\/?$/, "/"), window.location.href).href
   : new URL("../audio-processors/", import.meta.url).href;
 
-const WS_ENDPOINT = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained";
+// Los tokens efímeros actuales sólo están soportados por v1beta. Mantener aquí
+// v1alpha dejaba la sesión sobre una ruta heredada aunque el modelo fuera el
+// correcto, con más riesgo de cierres y comportamiento desigual por aparato.
+const WS_ENDPOINT = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained";
 
 const launcher = document.getElementById("signal-launcher");
 const panel = document.getElementById("signal-panel");
@@ -115,6 +125,7 @@ const chips = document.getElementById("chips");
 let socket;
 let inputContext;
 let outputContext;
+let outputPreparation;
 let inputStream;
 let inputAnalyser;
 let outputAnalyser;
@@ -126,11 +137,25 @@ let pendingPrompt = "";
 let userTranscript = "";
 let modelTranscript = "";
 let sessionTimer;
+let connectionTimer;
 let activeModel = "unknown";
 let sessionGreetingPrompt = config.greetingPrompt;
 let turnMetrics = null;
 let playbackMetrics = { underruns: 0, preloadMs: 0, maxQueuedMs: 0 };
 let sessionMetrics = null;
+let gestureStartedAt = null;
+
+const localGreetingAudio = config.localGreetingUrl
+  ? new Audio(new URL(config.localGreetingUrl, window.location.href).href)
+  : null;
+let localGreetingStarted = false;
+let localGreetingPlaying = false;
+let localGreetingStartedAt = null;
+
+if (localGreetingAudio) {
+  localGreetingAudio.preload = "auto";
+  localGreetingAudio.load();
+}
 
 // Mientras abre el WebSocket, el micrófono ya puede estar disponible. Un
 // pequeño pre-roll conserva la primera palabra en vez de tirarla por no existir
@@ -147,6 +172,26 @@ let earlySpeechDetected = false;
 
 function nowMs() {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
+function clientPlatform() {
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+  if (/Macintosh/i.test(ua)) return "macos";
+  if (/Android/i.test(ua)) return "android";
+  if (/Windows/i.test(ua)) return "windows";
+  return "other";
+}
+
+function clientBrowser() {
+  const ua = navigator.userAgent || "";
+  if (/CriOS/i.test(ua)) return "chrome-ios";
+  if (/FxiOS/i.test(ua)) return "firefox-ios";
+  if (/EdgiOS/i.test(ua)) return "edge-ios";
+  if (/Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg/i.test(ua)) return "safari";
+  if (/Chrome|Chromium/i.test(ua)) return "chrome";
+  if (/Firefox/i.test(ua)) return "firefox";
+  return "other";
 }
 
 function postTelemetry(payload) {
@@ -259,6 +304,12 @@ function flushSessionTelemetry(bufferedSpeech) {
     connectedMs: Math.round(nowMs() - metrics.startedAt),
     warmToken: metrics.warmToken,
     bufferedSpeech,
+    localGreeting: metrics.localGreeting,
+    localGreetingMs: metrics.localGreetingAt
+      ? Math.max(0, Math.round(metrics.localGreetingAt - metrics.startedAt))
+      : null,
+    platform: clientPlatform(),
+    browser: clientBrowser(),
   });
 }
 
@@ -643,32 +694,29 @@ function base64ToFloat(base64) {
   return remuestrear(samples, HZ_DESDE_GEMINI, outputContext?.sampleRate ?? HZ_DESDE_GEMINI);
 }
 
-async function initOutput() {
-  // Idempotente: el precalentado la llama al abrir y startSession la vuelve a
-  // llamar. Levantar un segundo AudioContext dejaría el primero colgado.
-  //
-  // Pero salir sin más dejaba el contexto MUDO para siempre. Desde que la barra
-  // abre sola al cargar la página, el precalentado crea este AudioContext sin
-  // que haya habido un gesto del usuario, y la política de reproducción
-  // automática del navegador lo deja en `suspended`. Cuando después se toca el
-  // micrófono —que sí es un gesto— esta función regresaba en la primera línea y
-  // nunca volvía a intentar el `resume()`.
-  //
-  // Resultado: la sesión conectaba, el micrófono grababa, las herramientas
-  // respondían y la tarjeta aparecía en pantalla… sin una sola palabra de audio.
-  // Reanudar aquí es lo que convierte el gesto en permiso.
-  if (outputContext) {
-    if (outputContext.state === "suspended") await outputContext.resume();
-    return;
-  }
+function prepareOutputGraph() {
+  // Una sola promesa representa TODA la preparación. Safari podía entrar aquí
+  // en reposo y, durante ese mismo trabajo, recibir el toque: la segunda llamada
+  // veía que ya había contexto y continuaba aunque los worklets aún no existían.
+  // El resultado era intermitente por definición: dependía de quién ganara la
+  // carrera. Ahora todas las entradas esperan exactamente el mismo trabajo.
+  if (outputPreparation) return outputPreparation;
+
+  const preparation = (async () => {
   /*
    * Sin forzar frecuencia: se toma la del aparato. Pedir 24 kHz aquí es lo que
    * dejaba mudo al micrófono en iPhone, porque después el de entrada pedía
    * 16 kHz y iOS no admite dos.
-   */
-  outputContext = new AudioContext();
-  await outputContext.audioWorklet.addModule(AUDIO_PROCESSORS + "playback.worklet.js");
-  playbackNode = new AudioWorkletNode(outputContext, "signal-pcm-playback");
+  */
+    outputContext = new AudioContext();
+  // Los dos módulos se traen juntos. Antes `capture.worklet.js` empezaba a
+  // descargarse sólo DESPUÉS de conceder el micrófono, sumando otra espera
+  // visible justo en Safari móvil.
+    await Promise.all([
+      outputContext.audioWorklet.addModule(AUDIO_PROCESSORS + "playback.worklet.js"),
+      outputContext.audioWorklet.addModule(AUDIO_PROCESSORS + "capture.worklet.js"),
+    ]);
+    playbackNode = new AudioWorkletNode(outputContext, "signal-pcm-playback");
   // El worklet es el único que sabe cuándo la bocina se calló de verdad. Ese
   // aviso —y no `turnComplete`— es el que reabre el micrófono.
   playbackNode.port.onmessage = ({ data }) => {
@@ -692,8 +740,31 @@ async function initOutput() {
   outputAnalyser.fftSize = 256;
   // Menos suavizado que la entrada: queremos que el espectro se mueva.
   outputAnalyser.smoothingTimeConstant = 0.6;
-  playbackNode.connect(outputAnalyser).connect(outputContext.destination);
-  await outputContext.resume();
+    playbackNode.connect(outputAnalyser).connect(outputContext.destination);
+  })();
+  outputPreparation = preparation;
+  // Un fallo de caché o de carga no condena todos los intentos posteriores.
+  // Se descarta únicamente esta preparación; el siguiente toque construye una
+  // nueva desde cero.
+  preparation.catch(() => {
+    if (outputPreparation !== preparation) return;
+    outputContext?.close();
+    outputPreparation = undefined;
+    outputContext = outputAnalyser = playbackNode = undefined;
+  });
+
+  return outputPreparation;
+}
+
+async function initOutput() {
+  const preparation = prepareOutputGraph();
+  // `resume()` se invoca antes del primer `await`: si esta llamada nació de un
+  // pointer/click, Safari todavía la reconoce como parte del gesto. Esperar a
+  // que acaben los worklets primero perdería esa ventana de autorización.
+  const resume = outputContext?.state === "suspended"
+    ? outputContext.resume()
+    : Promise.resolve();
+  await Promise.all([preparation, resume]);
 }
 
 async function initInput() {
@@ -717,7 +788,6 @@ async function initInput() {
    */
   await initOutput();
   inputContext = outputContext;
-  await inputContext.audioWorklet.addModule(AUDIO_PROCESSORS + "capture.worklet.js");
   const source = inputContext.createMediaStreamSource(inputStream);
   inputAnalyser = inputContext.createAnalyser();
   inputAnalyser.fftSize = 64;
@@ -808,24 +878,107 @@ async function dispatchToolCall(name, args) {
   }
 }
 
+/* ---------------- Saludo inmediato ----------------
+ *
+ * El saludo es una frase fija. Generarlo en Live en cada sesión añadía entre
+ * 1.8 y 2.3 s DESPUÉS de que iPhone terminara de abrir su audio. Este asset usa
+ * la misma voz Aoede y empieza dentro del gesto de la persona, mientras el
+ * enlace real se levanta por detrás. La instrucción del agente deja asentado
+ * que esa bienvenida ya ocurrió, así que el primer turno entra directo.
+ */
+function terminarSaludoLocal(notify = true) {
+  if (!localGreetingPlaying) return false;
+  localGreetingPlaying = false;
+  localGreetingAudio?.pause();
+  if (localGreetingAudio) localGreetingAudio.currentTime = 0;
+  if (notify) alDejarDeSonar();
+  else marcarQueTermino();
+  return true;
+}
+
+function solicitarSaludoEnVivo() {
+  if (
+    !connected ||
+    !config.autoGreet ||
+    pendingPrompt ||
+    socket?.readyState !== WebSocket.OPEN
+  ) return;
+
+  renderConversation("", "…");
+  reactor.classList.add("thinking");
+  setState("PENSANDO", "PROCESANDO", "UN MOMENTO");
+  beginTurn("greeting");
+  socket.send(JSON.stringify({
+    realtimeInput: { text: sessionGreetingPrompt },
+  }));
+}
+
+function iniciarSaludoLocal() {
+  if (!localGreetingAudio || !config.localGreetingText || localGreetingPlaying) {
+    return false;
+  }
+
+  localGreetingStarted = true;
+  localGreetingPlaying = true;
+  localGreetingStartedAt = nowMs();
+  modeloHablando = true;
+  despedidaPendiente = false;
+  interruptButton.disabled = false;
+  if (isBar) panel.classList.add("is-answering");
+  markTalk();
+  renderConversation("", config.localGreetingText);
+  setState("HABLANDO", `${config.agentName.toUpperCase()} RESPONDE`, "PUEDES INTERRUMPIR");
+  // Sin analizador todavía hay un pulso orgánico; el audio real llegará al
+  // analizador en los turnos del Live API.
+  startVisual(null, `${config.agentName.toUpperCase()} RESPONDE`, "speak");
+
+  localGreetingAudio.onended = () => {
+    if (!localGreetingPlaying) return;
+    localGreetingPlaying = false;
+    localGreetingAudio.currentTime = 0;
+    alDejarDeSonar();
+  };
+  localGreetingAudio.onerror = () => {
+    const habiaEmpezado = localGreetingStarted;
+    terminarSaludoLocal(false);
+    localGreetingStarted = false;
+    if (habiaEmpezado) solicitarSaludoEnVivo();
+  };
+
+  const playback = localGreetingAudio.play();
+  if (playback && typeof playback.catch === "function") {
+    playback.catch(() => {
+      if (!localGreetingPlaying) return;
+      terminarSaludoLocal(false);
+      localGreetingStarted = false;
+      solicitarSaludoEnVivo();
+    });
+  }
+  return true;
+}
+
 async function handleServerMessage(event) {
   const raw = typeof event.data === "string" ? event.data : await event.data.text();
   const message = JSON.parse(raw);
 
   if (message.setupComplete) {
+    window.clearTimeout(connectionTimer);
     connected = true;
     talkButton.classList.add("listening");
     talkButton.setAttribute("aria-label", "Detener conversación");
     interruptButton.disabled = false;
-    setState("TE ESCUCHO", "ESCUCHANDO", "TE ESCUCHO");
-    startVisual(inputAnalyser, "ESCUCHANDO", "listen");
+
+    if (!localGreetingPlaying) {
+      setState("TE ESCUCHO", "ESCUCHANDO", "TE ESCUCHO");
+      startVisual(inputAnalyser, "ESCUCHANDO", "listen");
+    }
     const habloMientrasConectaba = vaciarAudioTemprano();
     flushSessionTelemetry(habloMientrasConectaba);
     if (pendingPrompt) {
       const prompt = pendingPrompt;
       pendingPrompt = "";
       sendText(prompt);
-    } else if (config.autoGreet && !habloMientrasConectaba) {
+    } else if (config.autoGreet && !localGreetingStarted && !habloMientrasConectaba) {
       /*
        * Se le cede el turno con una señal neutra definida por el servidor.
        *
@@ -847,7 +1000,7 @@ async function handleServerMessage(event) {
       socket.send(JSON.stringify({
         realtimeInput: { text: sessionGreetingPrompt },
       }));
-    } else {
+    } else if (!localGreetingStarted) {
       // Sin esto, la conversación se queda anclada en "Iniciando enlace de voz
       // seguro…" aunque la sesión ya esté abierta.
       renderConversation(
@@ -1018,13 +1171,18 @@ async function startSession(prompt = "") {
   chips.style.visibility = "hidden";
   limpiarAudioTemprano();
   sessionMetrics = {
-    startedAt: nowMs(),
+    startedAt: gestureStartedAt || nowMs(),
     micReadyAt: null,
     warmToken: Boolean(tokenVigente()),
+    localGreeting: localGreetingStarted,
+    localGreetingAt: localGreetingStartedAt,
   };
   // Con el enlace precalentado no hay nada que esperar, así que tampoco hay que
   // anunciar una espera: se pasa directo a escuchar.
-  if (tokenVigente()) {
+  if (localGreetingPlaying) {
+    // El saludo ya confirma que el gesto funcionó; cambiar a «conectando» por
+    // encima haría parecer que la voz y la interfaz discrepan.
+  } else if (tokenVigente()) {
     setState("TE ESCUCHO", "ABRIENDO MICRÓFONO", "TE ESCUCHO");
   } else {
     setState("CONECTANDO", "CREANDO ENLACE SEGURO", "UN MOMENTO");
@@ -1041,13 +1199,14 @@ async function startSession(prompt = "") {
     if (sessionMetrics) sessionMetrics.micReadyAt = nowMs();
     // Desde aquí el pre-roll ya conserva voz aunque Gemini siga terminando el
     // enlace. La interfaz puede decir «te escucho» porque ya es verdad.
-    setState("TE ESCUCHO", "ENLACE EN CURSO", "HABLA, YA TE ESCUCHO");
-    renderConversation("", "Habla, ya te escucho.");
+    if (!localGreetingPlaying) {
+      setState("TE ESCUCHO", "ENLACE EN CURSO", "HABLA, YA TE ESCUCHO");
+      renderConversation("", "Habla, ya te escucho.");
+    }
     const credentials = await tomarToken();
     activeModel = credentials.model || "unknown";
     sessionGreetingPrompt =
       credentials.greetingPrompt || config.greetingPrompt;
-
     socket = new WebSocket(`${WS_ENDPOINT}?access_token=${encodeURIComponent(credentials.token)}`);
     /*
      * El navegador NO manda `generationConfig`. La voz no se decide aquí.
@@ -1075,6 +1234,14 @@ async function startSession(prompt = "") {
       if (connected) showError("La sesión terminó. Puedes iniciar una nueva.");
       cleanupSession(false);
     };
+    const openingSocket = socket;
+    connectionTimer = window.setTimeout(() => {
+      if (connected || socket !== openingSocket) return;
+      openingSocket.onclose = null;
+      openingSocket.close();
+      showError("El enlace tardó demasiado. Toca para intentarlo de nuevo.");
+      cleanupSession(false);
+    }, 10 * 1000);
     /*
      * Cuánto dura la sesión lo decide el TOKEN, no la página.
      *
@@ -1123,8 +1290,13 @@ function showError(text) {
 function cleanupSession(closeSocket = true) {
   flushTelemetry("session-ended");
   sessionMetrics = null;
+  terminarSaludoLocal(false);
+  localGreetingStarted = false;
+  localGreetingStartedAt = null;
+  gestureStartedAt = null;
   limpiarAudioTemprano();
   clearTimeout(sessionTimer);
+  clearTimeout(connectionTimer);
   cancelAnimationFrame(animationFrame);
   connected = false;
   if (socket) {
@@ -1143,6 +1315,7 @@ function cleanupSession(closeSocket = true) {
   // Cerrarlo dos veces lanza una excepción que abortaba el resto de la
   // limpieza, y con ella quedaba el micrófono encendido.
   outputContext?.close();
+  outputPreparation = undefined;
   inputContext = outputContext = inputAnalyser = outputAnalyser = captureNode = playbackNode = undefined;
   talkButton.classList.remove("listening");
   interruptButton.disabled = true;
@@ -1644,6 +1817,11 @@ function morphOpen() {
 }
 
 function openPanel() {
+  gestureStartedAt = nowMs();
+  // Primero lo audible. `play()` sigue dentro del gesto y no espera red,
+  // permisos ni worklets; en iPhone eso es la diferencia entre respuesta
+  // inmediata y cuatro segundos de incertidumbre.
+  iniciarSaludoLocal();
   // Abrir la barra ya es un gesto del usuario: aquí se puede levantar audio y
   // pedir el token, para que al encender el micrófono no haya nada que esperar.
   precalentar();
@@ -1707,6 +1885,16 @@ function closePanel() {
   launcher.focus();
 }
 
+// El contexto puede nacer suspendido sin permiso y aun así descargar/compilar
+// los worklets. Al tocar sólo queda reanudarlo. No se abre el micrófono ni se
+// pide token aquí, así que no hay indicador de grabación ni costo de sesión.
+const prepararAudioEnReposo = () => { void prepareOutputGraph().catch(() => {}); };
+if (typeof window.requestIdleCallback === "function") {
+  window.requestIdleCallback(prepararAudioEnReposo, { timeout: 1200 });
+} else {
+  window.setTimeout(prepararAudioEnReposo, 0);
+}
+
 enableBar();
 
 /* Barra ya abierta al cargar: sin cápsula, sin morph y sin robar el foco —
@@ -1732,6 +1920,7 @@ closeButton.addEventListener("click", closePanel);
 // botón de cerrar: son dos cosas distintas y antes eran la misma.
 talkButton.addEventListener("click", alternarMicrofono);
 interruptButton.addEventListener("click", () => {
+  terminarSaludoLocal(false);
   playbackNode?.port.postMessage("interrupt");
   // Quien interrumpe quiere hablar YA: el micrófono se reabre en el acto. Se
   // tiró el colchón, así que la bocina calló de verdad en este instante.

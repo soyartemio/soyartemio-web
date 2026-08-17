@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   const thinkingConfig = lowestLatencyThinking(VOICE_MODEL);
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1alpha/auth_tokens",
+    "https://generativelanguage.googleapis.com/v1beta/auth_tokens",
     {
       method: "POST",
       headers: {

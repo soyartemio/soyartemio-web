@@ -45,6 +45,10 @@ export async function POST(request: Request) {
         connectedMs: number(raw.connectedMs),
         warmToken: raw.warmToken === true,
         bufferedSpeech: raw.bufferedSpeech === true,
+        localGreeting: raw.localGreeting === true,
+        localGreetingMs: number(raw.localGreetingMs),
+        platform: label(raw.platform, 20),
+        browser: label(raw.browser, 20),
       }),
     );
 

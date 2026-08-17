@@ -11,7 +11,7 @@
 // acumuladas, y si la cola se agota a media frase, callar y volver a llenar
 // en vez de reproducir a tirones cada trocito suelto.
 
-// Colchón fijo de 150 ms. Se probó hacerlo adaptativo (crecer tras cada
+// Colchón fijo de 300 ms. Se probó hacerlo adaptativo (crecer tras cada
 // corte) y salió peor: cuando la red entrega justo lo necesario y sin
 // holgura, un colchón mayor nunca alcanza a llenarse y lo único que logra es
 // concentrar el silencio en una pausa más larga. Fijo es predecible y cubre
@@ -20,8 +20,11 @@
 // Ojo: las muestras que llegan aquí YA fueron remuestreadas a la frecuencia
 // del AudioContext. En iPhone y en muchas Macs esa frecuencia es 48 kHz. Usar
 // 24 kHz para calcular el colchón reducía los 150 ms canónicos a 75 ms justo
-// en los equipos donde más holgura hace falta.
-const PRELOAD_MS = 150;
+// en los equipos donde más holgura hace falta. La telemetría real mostró hasta
+// cinco vacíos con 150 ms en una sola respuesta; 300 ms sigue sintiéndose
+// inmediato y absorbe las ráfagas normales de Safari y Wi‑Fi sin convertir
+// cada microcorte en una pausa audible.
+const PRELOAD_MS = 300;
 const PRELOAD = Math.round(sampleRate * PRELOAD_MS / 1000);
 
 class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
