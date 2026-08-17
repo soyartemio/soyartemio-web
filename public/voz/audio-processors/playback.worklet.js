@@ -16,8 +16,13 @@
 // holgura, un colchón mayor nunca alcanza a llenarse y lo único que logra es
 // concentrar el silencio en una pausa más larga. Fijo es predecible y cubre
 // el caso real, que es jitter con ancho de banda de sobra.
-const SAMPLE_RATE = 24000;              // el audio del modelo llega a 24 kHz
-const PRELOAD = SAMPLE_RATE * 0.15;     // 150 ms
+//
+// Ojo: las muestras que llegan aquí YA fueron remuestreadas a la frecuencia
+// del AudioContext. En iPhone y en muchas Macs esa frecuencia es 48 kHz. Usar
+// 24 kHz para calcular el colchón reducía los 150 ms canónicos a 75 ms justo
+// en los equipos donde más holgura hace falta.
+const PRELOAD_MS = 150;
+const PRELOAD = Math.round(sampleRate * PRELOAD_MS / 1000);
 
 class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
   constructor() {
@@ -27,17 +32,16 @@ class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
     this.queued = 0;        // muestras disponibles sin reproducir
     this.playing = false;   // false = acumulando colchón
     this.draining = false;  // el turno terminó: vaciar sin volver a esperar
+    this.turnUnderruns = 0;
+    this.maxQueued = 0;
 
     this.port.onmessage = ({ data }) => {
       if (data === "interrupt") {
-        this.queue = [];
-        this.offset = 0;
-        this.queued = 0;
-        this.playing = false;
-        this.draining = false;
+        this.reset();
       } else if (data === "reset") {
         // Sesión nueva: olvidar lo aprendido de la conexión anterior.
-          } else if (data === "drain") {
+        this.reset();
+      } else if (data === "drain") {
         // El modelo terminó de hablar. Sin esto, el final de la respuesta se
         // quedaría atrapado en el colchón esperando muestras que ya no vienen.
         this.draining = true;
@@ -48,8 +52,19 @@ class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
       } else if (data instanceof Float32Array) {
         this.queue.push(data);
         this.queued += data.length;
+        this.maxQueued = Math.max(this.maxQueued, this.queued);
       }
     };
+  }
+
+  reset() {
+    this.queue = [];
+    this.offset = 0;
+    this.queued = 0;
+    this.playing = false;
+    this.draining = false;
+    this.turnUnderruns = 0;
+    this.maxQueued = 0;
   }
 
   /*
@@ -67,7 +82,17 @@ class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
   avisarQueTermino() {
     this.draining = false;
     this.playing = false;
+    // Sólo números de rendimiento; nunca audio ni transcripción. El hilo
+    // principal decide si los manda a un endpoint de diagnóstico.
+    this.port.postMessage({
+      type: "playback-stats",
+      underruns: this.turnUnderruns,
+      preloadMs: PRELOAD_MS,
+      maxQueuedMs: Math.round(this.maxQueued / sampleRate * 1000),
+    });
     this.port.postMessage("drained");
+    this.turnUnderruns = 0;
+    this.maxQueued = 0;
   }
 
   process(_inputs, outputs) {
@@ -105,7 +130,12 @@ class SignalPCMPlaybackProcessor extends AudioWorkletProcessor {
       // Se agotó a media reproducción: silencio y a rellenar el colchón.
       channel.fill(0, outputIndex);
       this.playing = false;
-      if (this.draining && this.queued === 0) this.avisarQueTermino();
+      if (this.draining && this.queued === 0) {
+        this.avisarQueTermino();
+      } else {
+        this.turnUnderruns += 1;
+        this.port.postMessage({ type: "playback-underrun" });
+      }
     }
 
     return true;

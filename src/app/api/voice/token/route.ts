@@ -21,6 +21,12 @@ export const dynamic = "force-dynamic";
 const TOKEN_LIFETIME_MS = 5 * 60 * 1000;
 const SESSION_START_WINDOW_MS = 60 * 1000;
 
+function lowestLatencyThinking(model: string) {
+  if (model.startsWith("gemini-2.5")) return { thinkingBudget: 0 };
+  if (model.startsWith("gemini-3.1")) return { thinkingLevel: "MINIMAL" };
+  return undefined;
+}
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
     status,
@@ -40,6 +46,7 @@ export async function POST(request: Request) {
 
   const agent = landingAgent();
   const now = Date.now();
+  const thinkingConfig = lowestLatencyThinking(VOICE_MODEL);
 
   const response = await fetch(
     "https://generativelanguage.googleapis.com/v1alpha/auth_tokens",
@@ -58,6 +65,7 @@ export async function POST(request: Request) {
           generationConfig: {
             responseModalities: ["AUDIO"],
             temperature: agent.temperature,
+            ...(thinkingConfig ? { thinkingConfig } : {}),
             speechConfig: {
               voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_NAME } },
             },
@@ -97,6 +105,7 @@ export async function POST(request: Request) {
   return json({
     token: payload.name,
     model: VOICE_MODEL,
+    greetingPrompt: agent.greetingPrompt,
     maxSessionMinutes: agent.maxSessionMinutes,
   });
 }

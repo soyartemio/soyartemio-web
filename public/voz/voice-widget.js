@@ -20,6 +20,9 @@ const config = Object.assign(
     // la pantalla seguía diciendo que arrancaba, así que la gente esperaba en
     // silencio a una señal que no iba a llegar.
     readyMessage: "Listo, te escucho. Habla cuando quieras.",
+    // Respaldo para tokens antiguos. En instalaciones actuales lo define el
+    // perfil del servidor y viaja junto con el modelo y la duración.
+    greetingPrompt: "Inicia la conversación ahora siguiendo tu instrucción de sistema.",
     // Duración máxima de sesión en el cliente (respaldo del límite del Worker).
     maxSessionMinutes: 3,
     // A dónde se envían las tool calls que el modelo invoque en vivo.
@@ -30,6 +33,12 @@ const config = Object.assign(
     // modal). Si lo defines, se usa en vez de toolWebhookUrl.
     // async onToolCall(name, args) => ({ ok: true, ... })
     onToolCall: null,
+    // Una herramienta que no responde no puede congelar la conversación para
+    // siempre. El error vuelve al modelo para que lo diga con honestidad.
+    toolTimeoutMs: 15000,
+    // Diagnóstico opcional y sin contenido: sólo tiempos, conteos, modelo y
+    // frecuencia de audio. Nunca manda voz, transcripción ni argumentos.
+    telemetryEndpoint: null,
     // CTA de producto dentro del panel. APAGADO por defecto: es lead-gen de
     // quien vende el widget, no algo que quiera ver el cliente final en su
     // propio sitio. Actívalo solo en tu web:
@@ -117,6 +126,106 @@ let pendingPrompt = "";
 let userTranscript = "";
 let modelTranscript = "";
 let sessionTimer;
+let activeModel = "unknown";
+let sessionGreetingPrompt = config.greetingPrompt;
+let turnMetrics = null;
+let playbackMetrics = { underruns: 0, preloadMs: 0, maxQueuedMs: 0 };
+
+function nowMs() {
+  return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
+function beginTurn(kind) {
+  if (turnMetrics) return turnMetrics;
+  const now = nowMs();
+  turnMetrics = {
+    kind,
+    startedAt: now,
+    lastInputAt: now,
+    firstAudioMs: null,
+    lastAudioAt: null,
+    maxInterChunkGapMs: 0,
+    audioChunks: 0,
+    audioSeconds: 0,
+    toolCalls: 0,
+    maxToolMs: 0,
+    serverTurnCompleteMs: null,
+  };
+  playbackMetrics = { underruns: 0, preloadMs: 0, maxQueuedMs: 0 };
+  return turnMetrics;
+}
+
+function noteInput(kind = "voice") {
+  const metrics = beginTurn(kind);
+  metrics.lastInputAt = nowMs();
+}
+
+function noteAudio(samples, sampleRate) {
+  const metrics = beginTurn("voice");
+  const now = nowMs();
+  if (metrics.firstAudioMs === null) {
+    metrics.firstAudioMs = Math.round(now - metrics.lastInputAt);
+  }
+  if (metrics.lastAudioAt !== null) {
+    metrics.maxInterChunkGapMs = Math.max(
+      metrics.maxInterChunkGapMs,
+      Math.round(now - metrics.lastAudioAt),
+    );
+  }
+  metrics.lastAudioAt = now;
+  metrics.audioChunks += 1;
+  metrics.audioSeconds += samples / sampleRate;
+}
+
+function noteTool(durationMs) {
+  const metrics = beginTurn("tool");
+  metrics.toolCalls += 1;
+  metrics.maxToolMs = Math.max(metrics.maxToolMs, Math.round(durationMs));
+}
+
+function flushTelemetry(reason) {
+  if (!turnMetrics) return;
+  const metrics = turnMetrics;
+  turnMetrics = null;
+  if (!config.telemetryEndpoint) return;
+
+  // Lista blanca deliberada: no hay textos, argumentos, ids de contacto ni
+  // contenido de audio. El endpoint puede registrar este objeto sin exponer la
+  // conversación.
+  const payload = JSON.stringify({
+    schema: 1,
+    event: "voice_turn",
+    reason,
+    model: activeModel,
+    kind: metrics.kind,
+    sampleRate: outputContext?.sampleRate || 0,
+    firstAudioMs: metrics.firstAudioMs,
+    turnMs: Math.round(nowMs() - metrics.startedAt),
+    serverTurnCompleteMs: metrics.serverTurnCompleteMs,
+    audioChunks: metrics.audioChunks,
+    audioSeconds: Number(metrics.audioSeconds.toFixed(3)),
+    maxInterChunkGapMs: metrics.maxInterChunkGapMs,
+    toolCalls: metrics.toolCalls,
+    maxToolMs: metrics.maxToolMs,
+    playbackUnderruns: playbackMetrics.underruns,
+    preloadMs: playbackMetrics.preloadMs,
+    maxQueuedMs: playbackMetrics.maxQueuedMs,
+  });
+
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(
+      config.telemetryEndpoint,
+      new Blob([payload], { type: "application/json" }),
+    );
+    return;
+  }
+  void fetch(config.telemetryEndpoint, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {});
+}
 
 /* Tolerante con los nodos que falten: desde que el reposo se escribe al cargar
    el módulo, un id ausente en una superficie tumbaría el widget entero antes de
@@ -417,11 +526,13 @@ function remuestrear(muestras, hzOrigen, hzDestino) {
 
 function base64ToFloat(base64) {
   const binary = atob(base64);
-  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-  const view = new DataView(bytes.buffer);
-  const samples = new Float32Array(Math.floor(bytes.length / 2));
+  const samples = new Float32Array(Math.floor(binary.length / 2));
   for (let index = 0; index < samples.length; index += 1) {
-    samples[index] = view.getInt16(index * 2, true) / 32768;
+    const low = binary.charCodeAt(index * 2);
+    const high = binary.charCodeAt(index * 2 + 1);
+    const unsigned = low | (high << 8);
+    const signed = unsigned & 0x8000 ? unsigned - 0x10000 : unsigned;
+    samples[index] = signed / 32768;
   }
   // Gemini contesta a 24 kHz; el contexto corre a la frecuencia del aparato.
   // Sin esta conversión la voz sonaría acelerada o arrastrada según el equipo.
@@ -457,6 +568,18 @@ async function initOutput() {
   // El worklet es el único que sabe cuándo la bocina se calló de verdad. Ese
   // aviso —y no `turnComplete`— es el que reabre el micrófono.
   playbackNode.port.onmessage = ({ data }) => {
+    if (data?.type === "playback-underrun") {
+      playbackMetrics.underruns += 1;
+      return;
+    }
+    if (data?.type === "playback-stats") {
+      playbackMetrics = {
+        underruns: Number(data.underruns) || 0,
+        preloadMs: Number(data.preloadMs) || 0,
+        maxQueuedMs: Number(data.maxQueuedMs) || 0,
+      };
+      return;
+    }
     if (data === "drained") alDejarDeSonar();
   };
   outputAnalyser = outputContext.createAnalyser();
@@ -520,27 +643,54 @@ function sendText(text) {
   userTranscript = text;
   modelTranscript = "";
   renderConversation(userTranscript, "Estoy revisando tu mensaje.");
+  beginTurn("text");
   socket.send(JSON.stringify({ realtimeInput: { text } }));
   reactor.classList.add("thinking");
   setState("PENSANDO", "PROCESANDO", "UN MOMENTO");
 }
 
+function withTimeout(promise, timeoutMs) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timer = window.setTimeout(
+        () => reject(new Error("La herramienta tardó demasiado en responder.")),
+        timeoutMs,
+      );
+    }),
+  ]).finally(() => window.clearTimeout(timer));
+}
+
 async function dispatchToolCall(name, args) {
+  const timeoutMs = Math.min(30000, Math.max(1000, Number(config.toolTimeoutMs) || 15000));
   if (typeof config.onToolCall === "function") {
-    return config.onToolCall(name, args);
+    return withTimeout(Promise.resolve().then(() => config.onToolCall(name, args)), timeoutMs);
   }
   if (!config.toolWebhookUrl) {
     console.warn(`[VoiceWidget] Tool call "${name}" recibida pero no hay toolWebhookUrl ni onToolCall configurados.`);
     return { ok: false, error: "tool_not_wired" };
   }
-  const response = await fetch(config.toolWebhookUrl, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name, args }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `El backend respondió ${response.status}`);
-  return data;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(config.toolWebhookUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, args }),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `El backend respondió ${response.status}`);
+    return data;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("La herramienta tardó demasiado en responder.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 async function handleServerMessage(event) {
@@ -560,7 +710,7 @@ async function handleServerMessage(event) {
       sendText(prompt);
     } else if (config.autoGreet) {
       /*
-       * Se le cede el turno SIN decirle nada.
+       * Se le cede el turno con una señal neutra definida por el servidor.
        *
        * El primer intento le mandaba un texto —«preséntate y pregunta en qué
        * ayudas»— y eso resultó peor que no saludar: el modelo tomó esa frase
@@ -569,14 +719,17 @@ async function handleServerMessage(event) {
        * está escrito con cuidado en su instrucción, se perdió por una línea
        * puesta encima.
        *
-       * Un turno vacío hace lo mismo sin sustituir nada: le dice «te toca» y
-       * quien decide qué decir es su propio guion, que ya ordena saludar breve
-       * y proponer la primera pregunta.
+       * El turno vacío dejó de iniciar respuesta al fijar Gemini 2.5 Live. Una
+       * señal neutra por `realtimeInput` funciona en 2.5 y 3.1, y el contenido
+       * concreto sigue mandado por la instrucción del perfil.
        */
       renderConversation("", "…");
       reactor.classList.add("thinking");
       setState("PENSANDO", "PROCESANDO", "UN MOMENTO");
-      socket.send(JSON.stringify({ clientContent: { turnComplete: true } }));
+      beginTurn("greeting");
+      socket.send(JSON.stringify({
+        realtimeInput: { text: sessionGreetingPrompt },
+      }));
     } else {
       // Sin esto, la conversación se queda anclada en "Iniciando enlace de voz
       // seguro…" aunque la sesión ya esté abierta.
@@ -591,20 +744,27 @@ async function handleServerMessage(event) {
   if (message.toolCall) {
     const functionCalls = message.toolCall.functionCalls || [];
     for (const call of functionCalls) {
+      const toolStartedAt = nowMs();
       try {
         const result = await dispatchToolCall(call.name, call.args || {});
-        socket?.send(JSON.stringify({
-          toolResponse: {
-            functionResponses: [{ response: { output: result }, id: call.id }],
-          },
-        }));
+        if (socket?.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({
+            toolResponse: {
+              functionResponses: [{ response: { output: result }, id: call.id }],
+            },
+          }));
+        }
       } catch (err) {
         console.error(`[VoiceWidget] Error ejecutando tool call "${call.name}":`, err);
-        socket?.send(JSON.stringify({
-          toolResponse: {
-            functionResponses: [{ response: { output: { ok: false, error: String(err.message || err) } }, id: call.id }],
-          },
-        }));
+        if (socket?.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({
+            toolResponse: {
+              functionResponses: [{ response: { output: { ok: false, error: String(err.message || err) } }, id: call.id }],
+            },
+          }));
+        }
+      } finally {
+        noteTool(nowMs() - toolStartedAt);
       }
     }
   }
@@ -614,18 +774,24 @@ async function handleServerMessage(event) {
 
   const inputText = serverContent.inputTranscription?.text;
   const outputText = serverContent.outputTranscription?.text;
-  if (inputText) userTranscript += inputText;
+  if (inputText) {
+    userTranscript += inputText;
+    noteInput("voice");
+  }
   if (outputText) modelTranscript += outputText;
   if (inputText || outputText) renderConversation(userTranscript.trim(), modelTranscript.trim() || "Te escucho…");
 
   for (const part of serverContent.modelTurn?.parts || []) {
     if (part.inlineData?.data) {
       const muestras = base64ToFloat(part.inlineData.data);
-      playbackNode?.port.postMessage(muestras);
+      const outputSampleRate = outputContext?.sampleRate || HZ_DESDE_GEMINI;
+      const seconds = muestras.length / outputSampleRate;
+      noteAudio(muestras.length, outputSampleRate);
+      playbackNode?.port.postMessage(muestras, [muestras.buffer]);
       // Empieza a sonar: se cierra el micrófono para que no se oiga a sí mismo.
       // Se le dice cuánto dura este fragmento para que el vigilante sepa hasta
       // cuándo es normal que siga sonando.
-      marcarQueHabla(muestras.length / (outputContext?.sampleRate || HZ_DESDE_GEMINI));
+      marcarQueHabla(seconds);
       reactor.classList.remove("thinking");
       // Aquí EMPIEZA a responder: es cuando se puede interrumpir, no antes.
       if (isBar) panel.classList.add("is-answering");
@@ -642,6 +808,9 @@ async function handleServerMessage(event) {
     alDejarDeSonar();
   }
   if (serverContent.turnComplete) {
+    if (turnMetrics) {
+      turnMetrics.serverTurnCompleteMs = Math.round(nowMs() - turnMetrics.startedAt);
+    }
     /*
      * El modelo terminó de GENERAR. No de sonar.
      *
@@ -744,6 +913,9 @@ async function startSession(prompt = "") {
      */
     await initInput();
     const credentials = await tomarToken();
+    activeModel = credentials.model || "unknown";
+    sessionGreetingPrompt =
+      credentials.greetingPrompt || config.greetingPrompt;
 
     socket = new WebSocket(`${WS_ENDPOINT}?access_token=${encodeURIComponent(credentials.token)}`);
     /*
@@ -818,6 +990,7 @@ function showError(text) {
 }
 
 function cleanupSession(closeSocket = true) {
+  flushTelemetry("session-ended");
   clearTimeout(sessionTimer);
   cancelAnimationFrame(animationFrame);
   connected = false;
@@ -957,6 +1130,7 @@ function marcarQueTermino() {
 let despedidaPendiente = false;
 
 function alDejarDeSonar() {
+  flushTelemetry("drained");
   marcarQueTermino();
   if (isBar) panel.classList.remove("is-answering");
   if (!connected) return;

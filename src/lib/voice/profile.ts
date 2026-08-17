@@ -9,7 +9,15 @@
  * Ver: S1gnal Engine/INTEGRACION-EN-APP.md §1
  */
 
-export const VOICE_MODEL = "gemini-3.1-flash-live-preview";
+const VERIFIED_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025";
+
+/**
+ * 3.1 Live tardó casi 3× más y entregó audio a ráfagas en la prueba controlada
+ * del 17-08-2026. El valor verificado queda fijado, con escape por entorno para
+ * volver a evaluar un modelo nuevo sin editar el runtime.
+ */
+export const VOICE_MODEL =
+  process.env.GEMINI_LIVE_MODEL?.trim() || VERIFIED_LIVE_MODEL;
 
 /** Aoede es la voz calibrada en Dental: cálida y sin afectación de locutor. */
 export const VOICE_NAME = "Aoede";
@@ -26,6 +34,7 @@ export type VoiceAgentConfig = {
   systemInstruction: string;
   tools: ToolDeclaration[];
   temperature: number;
+  greetingPrompt: string;
   maxSessionMinutes: number;
 };
 
@@ -165,6 +174,8 @@ export function landingAgent(): VoiceAgentConfig {
     systemInstruction: instruction(),
     tools: TOOLS,
     temperature: 0.5,
+    greetingPrompt:
+      "Inicia la conversación ahora siguiendo tu instrucción de sistema.",
     // Igual que la landing de Dental: ~3 min de conversación con margen para
     // cerrar sin cortar a media frase, que es la peor forma de terminar.
     maxSessionMinutes: 5,

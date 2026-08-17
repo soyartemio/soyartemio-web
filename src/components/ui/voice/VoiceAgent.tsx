@@ -67,6 +67,8 @@ export default function VoiceAgent({ locale = "es" }: { locale?: "es" | "en" }) 
       startOpen: false,
       position: "right",
       toolWebhookUrl: "/api/voice/tool-call",
+      toolTimeoutMs: 15000,
+      telemetryEndpoint: "/api/voice/telemetry",
     };
 
     // El CSS va en el <head> del layout, no aquí: inyectarlo desde el efecto
