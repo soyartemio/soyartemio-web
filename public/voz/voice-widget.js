@@ -130,9 +130,42 @@ let activeModel = "unknown";
 let sessionGreetingPrompt = config.greetingPrompt;
 let turnMetrics = null;
 let playbackMetrics = { underruns: 0, preloadMs: 0, maxQueuedMs: 0 };
+let sessionMetrics = null;
+
+// Mientras abre el WebSocket, el micrófono ya puede estar disponible. Un
+// pequeño pre-roll conserva la primera palabra en vez de tirarla por no existir
+// todavía `setupComplete`. Sólo se guarda audio técnico en memoria y se vacía
+// al conectar; nunca sale por telemetría ni se persiste.
+const EARLY_SPEECH_RMS = 0.01;
+const EARLY_AUDIO_PREROLL_SAMPLES = 4_000; // 250 ms a 16 kHz.
+const EARLY_AUDIO_MAX_SAMPLES = 40_000; // 2.5 s, límite de memoria y latencia.
+let earlyAudioRing = [];
+let earlyAudioRingSamples = 0;
+let earlyAudioQueue = [];
+let earlyAudioQueueSamples = 0;
+let earlySpeechDetected = false;
 
 function nowMs() {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
+function postTelemetry(payload) {
+  if (!config.telemetryEndpoint) return;
+  const body = JSON.stringify(payload);
+
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(
+      config.telemetryEndpoint,
+      new Blob([body], { type: "application/json" }),
+    );
+    return;
+  }
+  void fetch(config.telemetryEndpoint, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body,
+    keepalive: true,
+  }).catch(() => {});
 }
 
 function beginTurn(kind) {
@@ -187,12 +220,11 @@ function flushTelemetry(reason) {
   if (!turnMetrics) return;
   const metrics = turnMetrics;
   turnMetrics = null;
-  if (!config.telemetryEndpoint) return;
 
   // Lista blanca deliberada: no hay textos, argumentos, ids de contacto ni
   // contenido de audio. El endpoint puede registrar este objeto sin exponer la
   // conversación.
-  const payload = JSON.stringify({
+  postTelemetry({
     schema: 1,
     event: "voice_turn",
     reason,
@@ -211,20 +243,23 @@ function flushTelemetry(reason) {
     preloadMs: playbackMetrics.preloadMs,
     maxQueuedMs: playbackMetrics.maxQueuedMs,
   });
+}
 
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon(
-      config.telemetryEndpoint,
-      new Blob([payload], { type: "application/json" }),
-    );
-    return;
-  }
-  void fetch(config.telemetryEndpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: payload,
-    keepalive: true,
-  }).catch(() => {});
+function flushSessionTelemetry(bufferedSpeech) {
+  if (!sessionMetrics) return;
+  const metrics = sessionMetrics;
+  sessionMetrics = null;
+  postTelemetry({
+    schema: 1,
+    event: "voice_session",
+    model: activeModel,
+    micReadyMs: metrics.micReadyAt
+      ? Math.round(metrics.micReadyAt - metrics.startedAt)
+      : null,
+    connectedMs: Math.round(nowMs() - metrics.startedAt),
+    warmToken: metrics.warmToken,
+    bufferedSpeech,
+  });
 }
 
 /* Tolerante con los nodos que falten: desde que el reposo se escribe al cargar
@@ -524,6 +559,75 @@ function remuestrear(muestras, hzOrigen, hzDestino) {
   return salida;
 }
 
+function nivelRms(muestras) {
+  if (!muestras.length) return 0;
+  let suma = 0;
+  for (let i = 0; i < muestras.length; i += 1) {
+    suma += muestras[i] * muestras[i];
+  }
+  return Math.sqrt(suma / muestras.length);
+}
+
+function limpiarAudioTemprano() {
+  earlyAudioRing = [];
+  earlyAudioRingSamples = 0;
+  earlyAudioQueue = [];
+  earlyAudioQueueSamples = 0;
+  earlySpeechDetected = false;
+}
+
+function guardarAudioTemprano(data, samples, rms) {
+  const chunk = { data, samples };
+  const yaHabiaVoz = earlySpeechDetected;
+
+  earlyAudioRing.push(chunk);
+  earlyAudioRingSamples += samples;
+  while (
+    earlyAudioRingSamples > EARLY_AUDIO_PREROLL_SAMPLES &&
+    earlyAudioRing.length > 1
+  ) {
+    const removed = earlyAudioRing.shift();
+    earlyAudioRingSamples -= removed.samples;
+  }
+
+  if (!yaHabiaVoz && rms >= EARLY_SPEECH_RMS) {
+    earlySpeechDetected = true;
+    earlyAudioQueue = [...earlyAudioRing];
+    earlyAudioQueueSamples = earlyAudioRingSamples;
+    return;
+  }
+
+  if (
+    yaHabiaVoz &&
+    earlyAudioQueueSamples < EARLY_AUDIO_MAX_SAMPLES
+  ) {
+    earlyAudioQueue.push(chunk);
+    earlyAudioQueueSamples += samples;
+  }
+}
+
+function enviarAudio(data) {
+  socket.send(JSON.stringify({
+    realtimeInput: {
+      audio: { data, mimeType: "audio/pcm;rate=16000" },
+    },
+  }));
+}
+
+function vaciarAudioTemprano() {
+  const habiaVoz =
+    earlySpeechDetected &&
+    earlyAudioQueue.length > 0 &&
+    socket?.readyState === WebSocket.OPEN;
+
+  if (habiaVoz) {
+    noteInput("voice");
+    earlyAudioQueue.forEach((chunk) => enviarAudio(chunk.data));
+  }
+  limpiarAudioTemprano();
+  return habiaVoz;
+}
+
 function base64ToFloat(base64) {
   const binary = atob(base64);
   const samples = new Float32Array(Math.floor(binary.length / 2));
@@ -623,7 +727,7 @@ async function initInput() {
   silentGain.gain.value = 0;
   source.connect(inputAnalyser).connect(captureNode).connect(silentGain).connect(inputContext.destination);
   captureNode.port.onmessage = ({ data }) => {
-    if (data.type !== "audio" || socket?.readyState !== WebSocket.OPEN || !connected) return;
+    if (data.type !== "audio") return;
     // El micrófono está apagado: no sale audio. El contrato es un interruptor,
     // no un botón que se sostiene.
     if (isBar && !transmitiendo) return;
@@ -633,7 +737,18 @@ async function initInput() {
     // Se captura a la frecuencia del aparato y se entrega a 16 kHz, que es lo
     // único que Gemini entiende.
     const aGemini = remuestrear(data.data, inputContext.sampleRate, HZ_HACIA_GEMINI);
-    socket.send(JSON.stringify({ realtimeInput: { audio: { data: floatToPCM16Base64(aGemini), mimeType: "audio/pcm;rate=16000" } } }));
+    const encoded = floatToPCM16Base64(aGemini);
+
+    if (socket?.readyState === WebSocket.OPEN && connected) {
+      enviarAudio(encoded);
+      return;
+    }
+
+    // La persona no tiene por qué conocer la diferencia entre «micrófono
+    // abierto» y «WebSocket listo». Si empieza a hablar durante ese segundo,
+    // conservamos su primera frase y la entregamos en cuanto Gemini confirme
+    // el setup. El RMS sólo decide si había voz; el audio jamás se registra.
+    guardarAudioTemprano(encoded, aGemini.length, nivelRms(data.data));
   };
   await inputContext.resume();
 }
@@ -704,11 +819,13 @@ async function handleServerMessage(event) {
     interruptButton.disabled = false;
     setState("TE ESCUCHO", "ESCUCHANDO", "TE ESCUCHO");
     startVisual(inputAnalyser, "ESCUCHANDO", "listen");
+    const habloMientrasConectaba = vaciarAudioTemprano();
+    flushSessionTelemetry(habloMientrasConectaba);
     if (pendingPrompt) {
       const prompt = pendingPrompt;
       pendingPrompt = "";
       sendText(prompt);
-    } else if (config.autoGreet) {
+    } else if (config.autoGreet && !habloMientrasConectaba) {
       /*
        * Se le cede el turno con una señal neutra definida por el servidor.
        *
@@ -733,7 +850,10 @@ async function handleServerMessage(event) {
     } else {
       // Sin esto, la conversación se queda anclada en "Iniciando enlace de voz
       // seguro…" aunque la sesión ya esté abierta.
-      renderConversation("", config.readyMessage);
+      renderConversation(
+        "",
+        habloMientrasConectaba ? "Te escuché." : config.readyMessage,
+      );
     }
     return;
   }
@@ -896,6 +1016,12 @@ async function startSession(prompt = "") {
   if (socket || inputStream) return;
   pendingPrompt = prompt;
   chips.style.visibility = "hidden";
+  limpiarAudioTemprano();
+  sessionMetrics = {
+    startedAt: nowMs(),
+    micReadyAt: null,
+    warmToken: Boolean(tokenVigente()),
+  };
   // Con el enlace precalentado no hay nada que esperar, así que tampoco hay que
   // anunciar una espera: se pasa directo a escuchar.
   if (tokenVigente()) {
@@ -912,6 +1038,11 @@ async function startSession(prompt = "") {
      * Safari deja de considerarlo pedido por la persona.
      */
     await initInput();
+    if (sessionMetrics) sessionMetrics.micReadyAt = nowMs();
+    // Desde aquí el pre-roll ya conserva voz aunque Gemini siga terminando el
+    // enlace. La interfaz puede decir «te escucho» porque ya es verdad.
+    setState("TE ESCUCHO", "ENLACE EN CURSO", "HABLA, YA TE ESCUCHO");
+    renderConversation("", "Habla, ya te escucho.");
     const credentials = await tomarToken();
     activeModel = credentials.model || "unknown";
     sessionGreetingPrompt =
@@ -991,6 +1122,8 @@ function showError(text) {
 
 function cleanupSession(closeSocket = true) {
   flushTelemetry("session-ended");
+  sessionMetrics = null;
+  limpiarAudioTemprano();
   clearTimeout(sessionTimer);
   cancelAnimationFrame(animationFrame);
   connected = false;
@@ -1588,6 +1721,11 @@ if (isBar && config.startOpen) {
   reservarEspacio();
 }
 
+// `pointerdown` sucede antes que `click`: en teléfono nos regala el tiempo del
+// propio toque para pedir el token y preparar la salida, sin abrir el micrófono
+// ni mostrar permisos antes de que la persona confirme con el clic.
+launcher.addEventListener("pointerdown", precalentar, { passive: true });
+launcher.addEventListener("pointerenter", precalentar, { passive: true });
 launcher.addEventListener("click", openPanel);
 closeButton.addEventListener("click", closePanel);
 // El micrófono enciende y apaga el micrófono. Para terminar la sesión está el
@@ -1665,5 +1803,8 @@ document.addEventListener("click", (event) => {
   event.preventDefault();
   openPanel();
 });
+document.addEventListener("pointerdown", (event) => {
+  if (event.target.closest?.('a[href="#s1gnal"]')) precalentar();
+}, { passive: true });
 
 animateIdle();

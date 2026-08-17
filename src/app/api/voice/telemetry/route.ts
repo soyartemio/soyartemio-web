@@ -31,7 +31,28 @@ export async function POST(request: Request) {
   if (declaredLength > 4096) return new NextResponse(null, { status: 413 });
 
   const raw = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!raw || raw.event !== "voice_turn") return new NextResponse(null, { status: 400 });
+  if (!raw || (raw.event !== "voice_turn" && raw.event !== "voice_session")) {
+    return new NextResponse(null, { status: 400 });
+  }
+
+  if (raw.event === "voice_session") {
+    console.info(
+      "s1gnal.voice_session",
+      JSON.stringify({
+        schema: 1,
+        model: label(raw.model),
+        micReadyMs: number(raw.micReadyMs),
+        connectedMs: number(raw.connectedMs),
+        warmToken: raw.warmToken === true,
+        bufferedSpeech: raw.bufferedSpeech === true,
+      }),
+    );
+
+    return new NextResponse(null, {
+      status: 204,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
 
   console.info(
     "s1gnal.voice_turn",

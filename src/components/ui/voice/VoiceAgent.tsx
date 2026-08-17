@@ -13,8 +13,9 @@ import { useEffect } from "react";
  *  - `startOpen: false`  — es una cápsula, no el marco de la página.
  *  - `autoStart: true`   — tocar una cápsula que dice HABLAR ya es querer
  *                          hablar; pedir un segundo gesto perdía a la gente.
- *  - `autoGreet: true`   — arranca ella, porque nadie sabe qué decirle a una
- *                          computadora la primera vez.
+ *  - `autoGreet: false`  — en una landing, quien toca HABLAR ya trae una
+ *                          intención. La voz no le roba el primer turno ni lo
+ *                          obliga a esperar un saludo antes de poder hablar.
  *  - Las herramientas NO escriben en ningún sistema: sólo registran interés.
  *
  * El widget es un módulo que lee `window.VoiceWidgetConfig` y busca sus nodos
@@ -63,7 +64,7 @@ export default function VoiceAgent({ locale = "es" }: { locale?: "es" | "en" }) 
       readyMessage: es ? "Te escucho." : "I'm listening.",
       maxSessionMinutes: 5,
       autoStart: true,
-      autoGreet: true,
+      autoGreet: false,
       startOpen: false,
       position: "right",
       toolWebhookUrl: "/api/voice/tool-call",
