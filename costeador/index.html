@@ -1,0 +1,1933 @@
+<!doctype html>
+<html lang="es-VE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tinta &amp; Tasa · Costeador para diseñadoras</title>
+<meta name="description" content="Calcula cuánto cobrar por tus diseños en dólares y bolívares, con tus insumos, la tasa del día, tu punto de equilibrio y tu ahorro.">
+<meta name="theme-color" content="#F3EDE2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tinta & Tasa">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1618 1000'%3E%3Crect width='1000' height='1000' fill='%23D1006B'/%3E%3Crect x='1000' width='618' height='618' fill='%23FFC61A'/%3E%3Crect x='1236' y='618' width='382' height='382' fill='%2300799C'/%3E%3Crect x='1000' y='618' width='236' height='382' fill='%231A1815'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Manrope:wght@400..800&display=swap" media="print" onload="this.media='all'">
+<style>
+/* ============ Tokens (proporción áurea: φ = 1,618) ============ */
+:root{
+  --paper:#F3EDE2; --paper-2:#E9E1D2; --card:#FBF8F2;
+  --ink:#1A1815; --ink-2:#4B463D; --ink-3:#686155;
+  --line:#DCD3C3; --line-2:#BDB19C;
+  --c:#00799C; --m:#D1006B; --y:#FFC61A; --k:#1A1815;
+  --c-ink:#006785; --m-ink:#B5005C; --y-ink:#7A5800; --k-ink:#1A1815;
+  --c-soft:#D3EAF1; --m-soft:#F7DAE7; --y-soft:#FFEFBF; --k-soft:#E3DCCE;
+  --on-c:#FFFFFF; --on-m:#FFFFFF; --on-y:#1A1815; --on-k:#F3EDE2;
+  --ok:#2C7A4B; --warn:#9A5B00; --bad:#BC2338;
+  --shadow:0 1px 0 rgba(26,24,21,.04),0 13px 34px -21px rgba(26,24,21,.35);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .09 0 0 0 0 .08 .45 0 0 0 -.18'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --f-d:'Fraunces',Georgia,'Times New Roman',serif;
+  --f-u:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-m:ui-monospace,'SFMono-Regular',Menlo,Consolas,'Roboto Mono',monospace;
+  /* Escala tipográfica √φ */
+  --t-2:.786rem; --t-1:.886rem; --t0:1rem; --t1:1.272rem; --t2:1.618rem; --t3:2.058rem; --t4:2.618rem; --t5:3.33rem; --t6:4.236rem;
+  /* Espaciado Fibonacci */
+  --s1:3px; --s2:5px; --s3:8px; --s4:13px; --s5:21px; --s6:34px; --s7:55px; --s8:89px;
+  --r1:5px; --r2:8px; --r3:13px; --r4:21px;
+  --g:16px; --ease:cubic-bezier(.2,.8,.2,1);
+  --sec:var(--m); --sec-ink:var(--m-ink); --sec-soft:var(--m-soft); --on-sec:var(--on-m);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#13110E; --paper-2:#1C1915; --card:#1F1C18;
+    --ink:#F2ECE1; --ink-2:#C9C0B0; --ink-3:#A0978A;
+    --line:#332E27; --line-2:#4D463B;
+    --c:#3CC3E6; --m:#FF4FA3; --y:#FFD23F; --k:#F2ECE1;
+    --c-ink:#6FD4EE; --m-ink:#FF7DBA; --y-ink:#FFD23F; --k-ink:#F2ECE1;
+    --c-soft:#0F2A33; --m-soft:#3A1428; --y-soft:#372C0C; --k-soft:#2A2620;
+    --on-c:#06181E; --on-m:#1E0712; --on-y:#1A1815; --on-k:#13110E;
+    --ok:#5BC489; --warn:#F2B04A; --bad:#FF6B7F;
+    --shadow:0 1px 0 rgba(0,0,0,.2),0 13px 34px -21px rgba(0,0,0,.7);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .9 .25 0 0 0 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#13110E; --paper-2:#1C1915; --card:#1F1C18;
+  --ink:#F2ECE1; --ink-2:#C9C0B0; --ink-3:#A0978A;
+  --line:#332E27; --line-2:#4D463B;
+  --c:#3CC3E6; --m:#FF4FA3; --y:#FFD23F; --k:#F2ECE1;
+  --c-ink:#6FD4EE; --m-ink:#FF7DBA; --y-ink:#FFD23F; --k-ink:#F2ECE1;
+  --c-soft:#0F2A33; --m-soft:#3A1428; --y-soft:#372C0C; --k-soft:#2A2620;
+  --on-c:#06181E; --on-m:#1E0712; --on-y:#1A1815; --on-k:#13110E;
+  --ok:#5BC489; --warn:#F2B04A; --bad:#FF6B7F;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 13px 34px -21px rgba(0,0,0,.7);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .9 .25 0 0 0 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color-scheme:dark;
+}
+@media (min-width:610px){:root{--g:21px}}
+
+/* ============ Base ============ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:89px}
+body{margin:0;min-height:100vh;background-color:var(--paper);background-image:var(--grain);color:var(--ink);font:400 var(--t0)/1.5 var(--f-u);-webkit-font-smoothing:antialiased;padding-bottom:calc(144px + env(safe-area-inset-bottom));overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent}
+a{color:inherit;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,p,ol,ul,figure{margin:0}
+ol,ul{padding:0;list-style:none}
+:focus-visible{outline:2px solid var(--m);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{width:100%;max-width:987px;margin:0 auto;padding:0 var(--g)}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:lining-nums tabular-nums}
+
+/* ============ Barra de color (como en una prueba de imprenta) ============ */
+.colorbar{display:flex;height:5px}
+.colorbar i{flex:1}
+.colorbar i:nth-child(1){background:var(--c)} .colorbar i:nth-child(2){background:var(--m)}
+.colorbar i:nth-child(3){background:var(--y)} .colorbar i:nth-child(4){background:var(--k)}
+.colorbar i:nth-child(5){background:var(--c-soft)} .colorbar i:nth-child(6){background:var(--m-soft)}
+.colorbar i:nth-child(7){background:var(--y-soft)} .colorbar i:nth-child(8){background:var(--k-soft)}
+
+/* ============ Encabezado ============ */
+.top{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:var(--s3);height:55px}
+.brand{display:flex;align-items:center;gap:var(--s3);text-decoration:none;margin-right:auto;min-width:0}
+.brand svg{width:26px;height:26px;flex:none}
+.brand-w{font:600 var(--t1)/1 var(--f-d);letter-spacing:-.01em;white-space:nowrap}
+.brand-w i{font-weight:450}
+.brand-w b{color:var(--m);font-weight:600;margin:0 .08em}
+.rate-chip{display:flex;align-items:center;gap:var(--s3);height:38px;padding:0 var(--s4);border:1px solid var(--line-2);border-radius:999px;background:var(--card);font:600 var(--t-2)/1 var(--f-m);white-space:nowrap}
+.rate-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);flex:none}
+.rate-chip[data-state="ok"] .dot{background:var(--ok)}
+.rate-chip[data-state="old"] .dot{background:var(--warn);animation:blink 1.618s infinite}
+.rate-chip[data-state="none"]{border-color:var(--m);color:var(--m-ink)}
+.rate-chip[data-state="none"] .dot{background:var(--m);animation:blink 1.618s infinite}
+.rate-chip .rc-l{color:var(--ink-3)}
+@keyframes blink{50%{opacity:.25}}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;flex:none}
+.icon-btn svg{width:22px;height:22px}
+
+/* ============ Vistas ============ */
+.view{padding-top:var(--s6)}
+.view.enter{animation:rise .382s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}
+.v-c{--sec:var(--c);--sec-ink:var(--c-ink);--sec-soft:var(--c-soft);--on-sec:var(--on-c)}
+.v-m{--sec:var(--m);--sec-ink:var(--m-ink);--sec-soft:var(--m-soft);--on-sec:var(--on-m)}
+.v-y{--sec:var(--y);--sec-ink:var(--y-ink);--sec-soft:var(--y-soft);--on-sec:var(--on-y)}
+.v-k{--sec:var(--k);--sec-ink:var(--k-ink);--sec-soft:var(--k-soft);--on-sec:var(--on-k)}
+
+.sec-head{margin-bottom:var(--s6);max-width:610px}
+.tag{display:flex;align-items:center;gap:var(--s3);font:600 var(--t-2)/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s4)}
+.tag .sw{width:13px;height:13px;border-radius:2px;background:var(--sec);flex:none}
+.sec-t{font:600 clamp(var(--t3),9.2vw,var(--t5))/1.06 var(--f-d);letter-spacing:-.025em}
+.sec-t em,.h2 em,.hero-t em{font-style:italic;font-weight:450;background:linear-gradient(transparent 62%,var(--sec-soft) 62%,var(--sec-soft) 92%,transparent 92%);padding:0 .06em}
+.sec-lead{margin-top:var(--s4);color:var(--ink-2);line-height:1.618;max-width:34em}
+
+.layout{display:grid;gap:var(--s5);grid-template-columns:minmax(0,1fr)}
+.col{display:grid;gap:var(--s4);align-content:start;min-width:0;grid-template-columns:minmax(0,1fr)}
+@media (min-width:880px){
+  .layout{grid-template-columns:minmax(0,1.618fr) minmax(0,1fr);gap:var(--s6);align-items:start}
+  .col-side{position:sticky;top:76px}
+}
+
+/* ============ Tarjetas ============ */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s5)}
+@media (max-width:400px){.card{padding:var(--g)}.card .tpls{margin:0 calc(var(--g) * -1);padding-left:var(--g);padding-right:var(--g)}}
+.step-h{display:flex;gap:var(--s4);align-items:flex-start;margin-bottom:var(--s5)}
+.step-n{flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--sec);color:var(--sec-ink);display:grid;place-items:center;font:600 var(--t0)/1 var(--f-d)}
+.step-h h3,.h3{font:600 var(--t1)/1.25 var(--f-d);letter-spacing:-.01em}
+.step-h p{margin-top:var(--s1);color:var(--ink-2);font-size:var(--t-1);line-height:1.5}
+.h2{font:600 clamp(var(--t2),6.5vw,var(--t3))/1.15 var(--f-d);letter-spacing:-.02em;margin:var(--s7) 0 var(--s5)}
+.hint{font-size:var(--t-1);color:var(--ink-2);line-height:1.5;margin-top:var(--s3)}
+.note{font-size:var(--t-1);color:var(--ink-2);line-height:1.618}
+.note b,.hint b{color:var(--ink)}
+.muted{color:var(--ink-3)}
+.crop{position:relative}
+.crop::before{content:"";position:absolute;inset:-9px;pointer-events:none;opacity:.7;
+  background:
+   linear-gradient(var(--ink-3),var(--ink-3)) 0 9px/5px 1px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) 9px 0/1px 5px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) 100% 9px/5px 1px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) calc(100% - 9px) 0/1px 5px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) 0 calc(100% - 9px)/5px 1px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) 9px 100%/1px 5px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) 100% calc(100% - 9px)/5px 1px no-repeat,
+   linear-gradient(var(--ink-3),var(--ink-3)) calc(100% - 9px) 100%/1px 5px no-repeat}
+
+/* ============ Campos ============ */
+.field{display:grid;gap:var(--s3);min-width:0}
+.field + .field,.hint + .field{margin-top:var(--s5)}
+.lbl{font:700 var(--t-1)/1.3 var(--f-u);color:var(--ink)}
+.lbl small{font-weight:500;color:var(--ink-3)}
+.lbl-row{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s4)}
+.lbl-row output{font:600 var(--t1)/1 var(--f-d);color:var(--sec-ink);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.grid2 > .field + .field{margin-top:0}
+@media (max-width:359px){.grid2.stack{grid-template-columns:1fr}}
+.in{width:100%;height:48px;border:1px solid var(--line-2);background:var(--paper);border-radius:var(--r2);padding:0 var(--s4);font-weight:600;font-size:1.0625rem;font-variant-numeric:lining-nums tabular-nums;transition:border-color .236s,box-shadow .236s;-webkit-appearance:none;appearance:none;min-width:0}
+.in::placeholder{color:var(--ink-3);font-weight:500;opacity:.8}
+.in:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px var(--sec-soft)}
+.in.auto{color:var(--ink-2);font-style:italic}
+.money{position:relative;min-width:0}
+.money > span,.money > .cur{position:absolute;left:0;top:0;bottom:0;display:grid;place-items:center;width:34px;font:600 var(--t-1)/1 var(--f-m);color:var(--ink-3)}
+.money > .in{padding-left:34px}
+.money.bs > span{width:42px}.money.bs > .in{padding-left:42px}
+.money .suf{left:auto;right:0;width:auto;padding-right:var(--s4)}
+.money.has-suf .in{padding-right:62px}
+.money.big .in{height:68px;font:600 var(--t3)/1 var(--f-d);padding-left:42px}
+.money.big > span{width:42px;font-size:var(--t1)}
+.cur{z-index:1;border-right:1px dashed var(--line-2);color:var(--sec-ink)!important;font-weight:700!important;width:42px!important;border-radius:var(--r2) 0 0 var(--r2)}
+.money > .cur + .in{padding-left:50px}
+.auto-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.reset{font:700 var(--t-2)/1 var(--f-u);color:var(--sec-ink);padding:var(--s3) 0;white-space:nowrap}
+
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;border:1px solid var(--line-2);border-radius:var(--r2);background:var(--paper);overflow:hidden;height:48px}
+.stepper .in{border:0;border-radius:0;text-align:center;height:46px;padding:0 var(--s1);background:transparent}
+.stepper .in:focus{box-shadow:inset 0 0 0 2px var(--sec-soft)}
+.stepper button{font:500 var(--t1)/1 var(--f-u);color:var(--ink-2);display:grid;place-items:center}
+.stepper button:active{background:var(--sec-soft)}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;background:transparent;margin:0;--p:50%}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:5px;background:linear-gradient(to right,var(--sec) var(--p),var(--line) var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10.5px;border-radius:50%;background:var(--card);border:2px solid var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-track{height:5px;border-radius:5px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:5px;border-radius:5px;background:var(--sec)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--card);border:2px solid var(--ink)}
+
+.seg{display:flex;flex-wrap:wrap;gap:var(--s3)}
+.seg button{min-height:44px;padding:var(--s3) var(--s4);border:1px solid var(--line-2);border-radius:999px;background:var(--card);font:700 var(--t-1)/1.2 var(--f-u);transition:background .236s,color .236s,border-color .236s;text-align:center}
+.seg button small{display:block;font-weight:500;font-size:var(--t-2);opacity:.75;margin-top:2px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.seg.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg.cols button{border-radius:var(--r2);padding:var(--s3) var(--s2)}
+.seg.cols4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:480px){.seg.cols4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.switch{display:flex;align-items:center;gap:var(--s4);min-height:48px;cursor:pointer;font-weight:600;font-size:var(--t-1)}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .tg{width:44px;height:26px;border-radius:13px;background:var(--line-2);position:relative;flex:none;transition:background .236s}
+.switch .tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--card);transition:transform .236s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked + .tg{background:var(--sec)}
+.switch input:checked + .tg::after{transform:translateX(18px)}
+.switch input:focus-visible + .tg{outline:2px solid var(--m);outline-offset:2px}
+.switch small{display:block;font-weight:500;color:var(--ink-3)}
+
+/* ============ Listas editables ============ */
+.rows{display:grid}
+.row{display:grid;gap:var(--s3);align-items:center;padding:var(--s4) 0;border-bottom:1px dashed var(--line)}
+.row:first-child{padding-top:0}
+.r-cost{grid-template-columns:minmax(0,1fr) 116px 34px}
+.r-phase{grid-template-columns:minmax(0,1fr) 120px 28px;gap:var(--s2)}
+.r-phase .stepper{grid-template-columns:40px minmax(0,1fr) 40px}
+.r-phase > .in{padding:0 10px;font-size:var(--t-1)}
+.r-phase .x{width:28px}
+.r-gear,.r-item{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}
+.r-gear .nm,.r-item .nm{grid-column:1 / 3}
+.r-gear .x,.r-item .x{grid-column:3;grid-row:1}
+.r-item .qty{grid-column:1}
+.r-item .money{grid-column:2 / 4}
+.r-gear .lo,.r-item .lo{grid-column:1 / -1;text-align:right;font:600 var(--t-2)/1 var(--f-m);color:var(--ink-3)}
+.r-gear .lo b,.r-item .lo b{color:var(--ink);font-size:var(--t-1)}
+.x{width:34px;height:44px;display:grid;place-items:center;color:var(--ink-3);font-size:var(--t1);border-radius:var(--r2)}
+.x:active{color:var(--bad);background:var(--m-soft)}
+.add{display:inline-flex;align-items:center;gap:var(--s3);min-height:44px;margin-top:var(--s3);color:var(--sec-ink);font-weight:700;font-size:var(--t-1)}
+.add i{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;font-style:normal;font-size:16px;line-height:1}
+.tot{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s4);border-top:1px solid var(--line);margin-top:var(--s4);padding-top:var(--s4);font-weight:700}
+.tot b{font:600 var(--t1)/1 var(--f-d);font-variant-numeric:lining-nums tabular-nums}
+.empty{padding:var(--s4) 0;color:var(--ink-3);font-size:var(--t-1)}
+
+.tpls{display:flex;gap:var(--s3);overflow-x:auto;padding-bottom:var(--s3);margin:0 calc(var(--g) * -1);padding-left:var(--g);padding-right:var(--g);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tpls::-webkit-scrollbar{display:none}
+.card .tpls{margin:0 calc(var(--s5) * -1);padding-left:var(--s5);padding-right:var(--s5)}
+.tpl{flex:none;width:110px;border:1px solid var(--line-2);border-radius:var(--r2);background:var(--paper);padding:var(--s3);text-align:left;transition:border-color .236s,transform .236s}
+.tpl .tw{display:block;height:34px;border-radius:var(--r1);margin-bottom:var(--s3);background:var(--tw,var(--sec))}
+.tpl b{display:block;font-size:var(--t-1);line-height:1.2}
+.tpl small{display:block;font:500 var(--t-2)/1.3 var(--f-m);color:var(--ink-3);margin-top:2px}
+.tpl[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tpl:active{transform:scale(.97)}
+
+/* ============ Chip de color (resultado) ============ */
+.chip{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--shadow)}
+.chip-top{background:var(--sec);color:var(--on-sec);border-radius:12px 12px 0 0;padding:var(--s5);min-height:178px;display:flex;flex-direction:column;justify-content:flex-end}
+.chip-k{font:600 var(--t-2)/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.chip-v{font:600 clamp(var(--t4),13vw,var(--t6))/1 var(--f-d);letter-spacing:-.03em;margin-top:var(--s3);font-variant-numeric:lining-nums tabular-nums;word-break:break-word}
+.chip-v.pulse{animation:pulse .382s var(--ease)}
+@keyframes pulse{40%{transform:scale(1.025)}}
+.chip-s{font-size:var(--t-1);opacity:.92;margin-top:var(--s3);font-variant-numeric:tabular-nums}
+.chip-bot{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);font:500 var(--t-2)/1.2 var(--f-m);color:var(--ink-3)}
+.chip-bot b{font:700 var(--t-1)/1.2 var(--f-u);color:var(--ink)}
+.chip-body{padding:0 var(--s5) var(--s5)}
+.chip-body > * + *{margin-top:var(--s5)}
+
+.kv{display:grid;gap:var(--s3)}
+.kv div{display:flex;justify-content:space-between;gap:var(--s4);font-size:var(--t-1);color:var(--ink-2)}
+.kv div b{color:var(--ink);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}
+.kv div span small{display:block;font-size:var(--t-2);line-height:1.35}
+.kv .sum{border-top:1px solid var(--line);padding-top:var(--s3);margin-top:var(--s1);font-weight:700;color:var(--ink)}
+
+.bar{display:flex;height:13px;border-radius:13px;overflow:hidden;background:var(--line);gap:2px}
+.bar i{display:block;height:100%;min-width:0;transition:flex-grow .382s var(--ease)}
+.legend{display:grid;gap:var(--s3);margin-top:var(--s4)}
+.legend div{display:grid;grid-template-columns:13px 1fr auto auto;gap:var(--s3);align-items:center;font-size:var(--t-1);color:var(--ink-2)}
+.legend i{width:13px;height:13px;border-radius:3px}
+.legend b{color:var(--ink);font-variant-numeric:lining-nums tabular-nums}
+.legend em{font:500 var(--t-2)/1 var(--f-m);font-style:normal;color:var(--ink-3);min-width:34px;text-align:right}
+
+.gold{display:grid;grid-template-columns:1.618fr 1fr;gap:var(--s3)}
+.mini{border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4);background:var(--paper)}
+.mini .k{font:600 var(--t-2)/1.2 var(--f-m);color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.mini .v{font:600 var(--t1)/1.1 var(--f-d);margin-top:var(--s2);font-variant-numeric:lining-nums tabular-nums}
+.mini .s{font-size:var(--t-2);color:var(--ink-3);margin-top:2px}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.actions .wide{grid-column:1 / -1}
+
+/* ============ Botones ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s3);min-height:48px;padding:0 var(--s5);border-radius:999px;font-weight:800;font-size:var(--t-1);text-decoration:none;border:1px solid transparent;transition:transform .236s var(--ease),background .236s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn svg{width:18px;height:18px;flex:none}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-sec{background:var(--sec);color:var(--on-sec)}
+.btn-m{background:var(--m);color:var(--on-m)}
+.btn-ghost{background:var(--card);border-color:var(--line-2)}
+.btn-danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.w100{width:100%}
+
+/* ============ Glosario en línea ============ */
+.term{display:inline;font:inherit;font-weight:700;color:var(--sec-ink);text-decoration:underline dotted;text-decoration-thickness:1.5px;text-underline-offset:3px;cursor:help;padding:0}
+
+/* ============ Inicio ============ */
+.hero{margin-top:var(--s5)}
+.art{display:block;width:100%;height:auto;border-radius:var(--r2);overflow:hidden}
+.art .sq{transform-box:fill-box;transform-origin:center;animation:pop .618s var(--ease) both}
+.art .sp{fill:none;stroke:var(--paper);stroke-width:7;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.618s var(--ease) .382s forwards}
+.art .gut{fill:none;stroke:var(--paper);stroke-width:9}
+.art .phi{font:italic 450 360px/1 var(--f-d);fill:var(--on-m)}
+.art .lab{font:600 44px/1 var(--f-m);fill:var(--on-m);letter-spacing:4px}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hero-tx{padding:var(--s6) 0 0}
+.eyebrow{font:600 var(--t-2)/1.3 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.hero-t{font:600 clamp(var(--t4),12.5vw,var(--t6))/1.02 var(--f-d);letter-spacing:-.035em;margin-top:var(--s4)}
+.hero-t em{background:linear-gradient(transparent 62%,var(--y) 62%,var(--y) 90%,transparent 90%);color:var(--m-ink)}
+.hero-p{margin-top:var(--s5);color:var(--ink-2);font-size:1.0625rem;line-height:1.618;max-width:30em}
+.hero-cta{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s5)}
+@media (min-width:880px){
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.618fr);gap:var(--s6);align-items:center}
+  .hero-tx{padding:0;order:-1}
+}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3);margin-top:var(--s6)}
+.stat{display:block;text-align:left;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4) var(--s4) var(--s4);position:relative;overflow:hidden;min-width:0}
+.stat::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--sec)}
+.stat .k{display:block;font:600 var(--t-2)/1.2 var(--f-m);color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-top:var(--s1)}
+.stat .v{display:block;font:600 clamp(1.05rem,4.6vw,var(--t2))/1.1 var(--f-d);margin-top:var(--s3);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{display:block;font-size:var(--t-2);color:var(--ink-3);margin-top:2px}
+
+.route{display:grid;gap:var(--s3)}
+.route a,.route button{display:grid;grid-template-columns:34px 1fr 26px;gap:var(--s4);align-items:center;width:100%;text-align:left;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s4) var(--s4) var(--s4) var(--s4)}
+.route .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:600 var(--t0)/1 var(--f-d);background:var(--sec);color:var(--on-sec)}
+.route b{display:block;font-size:var(--t0)}
+.route span.d{display:block;font-size:var(--t-1);color:var(--ink-2);line-height:1.45;margin-top:2px}
+.route .ck{width:26px;height:26px;border-radius:50%;border:1.5px dashed var(--line-2);display:grid;place-items:center}
+.route .done .ck{border:0;background:var(--ok);color:#fff}
+.route .done .ck::after{content:"✓";font-size:14px;font-weight:800}
+
+details.guide{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);margin-top:var(--s4)}
+details.guide summary{list-style:none;cursor:pointer;padding:var(--s4) var(--s5);font-weight:800;display:flex;justify-content:space-between;align-items:center;min-height:55px}
+details.guide summary::-webkit-details-marker{display:none}
+details.guide summary::after{content:"+";font:400 var(--t2)/1 var(--f-d);color:var(--m-ink);transition:transform .236s}
+details.guide[open] summary::after{transform:rotate(45deg)}
+.guide-b{padding:0 var(--s5) var(--s5)}
+.guide-b ol{counter-reset:g;display:grid;gap:var(--s4)}
+.guide-b li{counter-increment:g;display:grid;grid-template-columns:34px 1fr;gap:var(--s3);line-height:1.55;font-size:var(--t-1);color:var(--ink-2)}
+.guide-b li::before{content:counter(g);font:italic 600 var(--t2)/1 var(--f-d);color:var(--m-ink)}
+.guide-b li b{color:var(--ink)}
+.tip{margin-top:var(--s5);padding:var(--s4);border-radius:var(--r2);background:var(--y-soft);font-size:var(--t-1);line-height:1.55}
+
+.rules{display:grid;gap:var(--s3)}
+@media (min-width:610px){.rules{grid-template-columns:1fr 1fr}}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s5);display:grid;grid-template-columns:55px 1fr;gap:var(--s3)}
+.rule .rn{font:italic 500 var(--t3)/1 var(--f-d);color:var(--rc,var(--m-ink))}
+.rule b{display:block;font:600 var(--t1)/1.2 var(--f-d)}
+.rule p{font-size:var(--t-1);color:var(--ink-2);margin-top:var(--s2);line-height:1.55}
+
+.gloss{display:grid;gap:var(--s3);margin-top:var(--s4)}
+.gloss details{background:var(--card);border:1px solid var(--line);border-radius:var(--r2)}
+.gloss summary{list-style:none;cursor:pointer;padding:var(--s4);font-weight:700;display:flex;justify-content:space-between;gap:var(--s3);min-height:48px;align-items:center}
+.gloss summary::-webkit-details-marker{display:none}
+.gloss summary::after{content:"↓";color:var(--ink-3);transition:transform .236s}
+.gloss details[open] summary::after{transform:rotate(180deg)}
+.gloss .gd{padding:0 var(--s4) var(--s4);font-size:var(--t-1);line-height:1.6;color:var(--ink-2)}
+.gloss .ge{margin-top:var(--s3);padding-left:var(--s4);border-left:3px solid var(--y);font-style:italic}
+.foot{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--line);font-size:var(--t-1);color:var(--ink-3);line-height:1.6;display:grid;gap:var(--s4)}
+.foot .phi-line{font:500 var(--t-2)/1.4 var(--f-m);letter-spacing:.04em}
+
+/* ============ Equilibrio ============ */
+.chart{width:100%;height:auto;display:block;margin-top:var(--s4);overflow:visible}
+.chart text{font:600 11px/1 var(--f-m);fill:var(--ink-3)}
+.chart .ax{stroke:var(--line-2);stroke-width:1}
+.chart .gr{stroke:var(--line);stroke-width:1;stroke-dasharray:3 5}
+.chart .l-in{stroke:var(--m);stroke-width:2.5;fill:none;stroke-linecap:round}
+.chart .l-co{stroke:var(--ink);stroke-width:2.5;fill:none;stroke-linecap:round}
+.chart .l-fx{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:6 6}
+.chart .z-loss{fill:var(--m-soft)} .chart .z-gain{fill:var(--y-soft)}
+.chart .reg{stroke:var(--ink);stroke-width:2;fill:none}
+.chart .reg-f{fill:var(--y)}
+.chart .lbl-eq{font:800 13px/1 var(--f-u);fill:var(--ink)}
+.chart .ch-msg{font:600 14px/1 var(--f-u);fill:var(--ink-2)}
+.ch-leg{display:flex;flex-wrap:wrap;gap:var(--s4);margin-top:var(--s4);font-size:var(--t-2);color:var(--ink-2);font-weight:600}
+.ch-leg span{display:inline-flex;align-items:center;gap:var(--s2)}
+.ch-leg i{width:21px;height:4px;border-radius:2px;display:inline-block}
+.prog{position:relative;height:21px;border-radius:21px;background:var(--line);margin:var(--s6) 0 var(--s5)}
+.prog .fill{position:absolute;left:0;top:0;bottom:0;border-radius:21px;background:var(--sec);transition:width .382s var(--ease);max-width:100%}
+.prog .mk{position:absolute;top:-8px;bottom:-8px;width:2px;background:var(--ink)}
+.prog .mk span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font:700 var(--t-2)/1 var(--f-m);white-space:nowrap;margin-bottom:var(--s1);color:var(--ink-2)}
+.prog .mk.end span{left:auto;right:0;transform:none}
+.prog .mk.start span{left:0;transform:none}
+.cap{display:grid;gap:var(--s3);margin-top:var(--s4)}
+.cap-row{display:grid;grid-template-columns:89px 1fr;gap:var(--s3);align-items:center;font-size:var(--t-2);font-weight:700;color:var(--ink-2)}
+.cap-bar{height:13px;border-radius:13px;background:var(--line);overflow:hidden}
+.cap-bar i{display:block;height:100%;border-radius:13px;transition:width .382s var(--ease)}
+.msg{margin-top:var(--s4);padding:var(--s4);border-radius:var(--r2);background:var(--sec-soft);font-size:var(--t-1);line-height:1.6}
+.msg.bad{background:var(--m-soft)}
+.msg.ok{background:var(--c-soft)}
+.msg b{font-weight:800}
+
+/* ============ Ahorro ============ */
+.gsplit{display:flex;aspect-ratio:1.618/1;width:100%;gap:5px;margin-top:var(--s5);border-radius:var(--r2);overflow:hidden}
+.gsplit > div{min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--s4);overflow:hidden}
+.gs-r{padding:0!important;gap:5px}
+.gs-b,.gs-c{display:flex;flex-direction:column;justify-content:flex-end;min-height:0;overflow:hidden}
+.gs-a{background:var(--paper-2);color:var(--ink)}
+.gs-b{background:var(--ink);color:var(--paper);flex:1}
+.gs-c{background:var(--y);color:var(--on-y);flex:1}
+.gsplit .pc{font:600 var(--t-2)/1 var(--f-m);opacity:.8}
+.gsplit .am{font:600 clamp(var(--t0),5vw,var(--t2))/1.1 var(--f-d);margin-top:var(--s2);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}
+.gsplit .nm{font-weight:800;font-size:var(--t-2);margin-top:var(--s1);line-height:1.2}
+.gsplit .tiny .am,.gsplit .tiny .nm{display:none}
+.gs-b,.gs-c{padding:var(--s3) var(--s4)!important}
+.ring-row{display:grid;grid-template-columns:110px 1fr;gap:var(--s5);align-items:center;margin-top:var(--s5)}
+.ring{width:110px;height:110px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.ring .rb{stroke:var(--line)} .ring .rf{stroke:var(--sec);stroke-linecap:round;transition:stroke-dasharray .618s var(--ease)}
+.ring-wrap{position:relative}
+.ring-wrap b{position:absolute;inset:0;display:grid;place-items:center;font:600 var(--t1)/1 var(--f-d)}
+.melt{display:grid;gap:var(--s3);margin-top:var(--s5)}
+.melt div{display:grid;grid-template-columns:76px 1fr;gap:var(--s3);align-items:center;font-size:var(--t-2);font-weight:700;color:var(--ink-2)}
+.melt span.b{height:34px;border-radius:var(--r1);background:var(--c);display:flex;align-items:center;padding:0 var(--s3);color:var(--on-c);font:600 var(--t-1)/1 var(--f-d);white-space:nowrap;transition:width .382s var(--ease);min-width:max-content}
+.melt div:last-child span.b{background:var(--m);color:var(--on-m)}
+.checks{display:grid;gap:var(--s3)}
+.checks li{display:grid;grid-template-columns:21px 1fr;gap:var(--s3);font-size:var(--t-1);line-height:1.55;color:var(--ink-2)}
+.checks li::before{content:"✦";color:var(--sec-ink)}
+.v-k .checks li::before{color:var(--m-ink)}
+.checks b{color:var(--ink)}
+
+/* ============ Navegación inferior ============ */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs-in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));max-width:610px;margin:0 auto}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s1);min-height:62px;text-decoration:none;color:var(--ink-3);font:700 clamp(.66rem,3.1vw,var(--t-2))/1 var(--f-u);position:relative;letter-spacing:-.01em}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"]::before{content:"";position:absolute;top:-1px;left:28%;right:28%;height:4px;border-radius:0 0 4px 4px;background:var(--tc)}
+.tab[aria-current="page"] svg{color:var(--tcink,var(--ink))}
+@media (min-width:880px){
+  .tabs{left:50%;right:auto;bottom:var(--s5);transform:translateX(-50%);width:610px;border:1px solid var(--line);border-radius:var(--r4);box-shadow:var(--shadow);padding-bottom:0}
+  .tab[aria-current="page"]::before{top:0}
+}
+.pricebar{position:fixed;left:var(--s4);right:var(--s4);bottom:calc(70px + env(safe-area-inset-bottom));z-index:25;max-width:584px;margin:0 auto;background:var(--sec);color:var(--on-sec);border-radius:var(--r3);display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s3) var(--s3) var(--s3) var(--s4);box-shadow:var(--shadow);transform:translateY(0);transition:transform .382s var(--ease),opacity .236s}
+.pricebar.off{transform:translateY(144%);opacity:0;pointer-events:none}
+.pricebar .pk{font:600 var(--t-2)/1 var(--f-m);opacity:.85;letter-spacing:.04em;text-transform:uppercase}
+.pricebar .pv{font:600 var(--t1)/1.1 var(--f-d);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pricebar button{flex:none;min-height:40px;padding:0 var(--s4);border-radius:999px;background:var(--on-sec);color:var(--sec);font-weight:800;font-size:var(--t-2)}
+@media (min-width:880px){.pricebar{display:none}}
+
+/* ============ Hoja inferior (sheet) ============ */
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(12,10,8,.5);opacity:0;transition:opacity .236s}
+.sheet-bg.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-width:610px;margin:0 auto;background:var(--card);border-radius:var(--r4) var(--r4) 0 0;max-height:89vh;overflow:auto;-webkit-overflow-scrolling:touch;transform:translateY(105%);transition:transform .382s var(--ease);padding:var(--s3) var(--s5) calc(var(--s6) + env(safe-area-inset-bottom));overscroll-behavior:contain}
+.sheet.on{transform:none}
+@media (min-width:880px){.sheet{bottom:auto;top:50%;border-radius:var(--r4);transform:translateY(-40%);opacity:0;transition:transform .382s var(--ease),opacity .236s}.sheet.on{transform:translateY(-50%);opacity:1}}
+.grip{width:34px;height:5px;border-radius:5px;background:var(--line-2);margin:0 auto var(--s4)}
+.sheet-x{position:absolute;right:var(--s3);top:var(--s3);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:var(--t2);color:var(--ink-2)}
+.sheet-k{font:600 var(--t-2)/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.sheet-t{font:600 var(--t3)/1.1 var(--f-d);letter-spacing:-.02em;margin:var(--s3) 0 var(--s4);padding-right:var(--s6)}
+.sheet-d{line-height:1.618;color:var(--ink-2)}
+.sheet-ex{margin-top:var(--s5);padding:var(--s4) var(--s5);background:var(--y-soft);border-radius:var(--r2);line-height:1.55;font-size:var(--t-1)}
+.sheet-ex span{display:block;font:600 var(--t-2)/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--y-ink);margin-bottom:var(--s3)}
+.sheet .h3{margin:var(--s6) 0 var(--s4)}
+.sheet hr{border:0;border-top:1px solid var(--line);margin:var(--s6) 0}
+
+.toast{position:fixed;left:50%;bottom:calc(144px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,13px);background:var(--ink);color:var(--paper);padding:var(--s4) var(--s5);border-radius:999px;font-weight:700;font-size:var(--t-1);opacity:0;pointer-events:none;transition:opacity .236s,transform .382s var(--ease);max-width:calc(100% - 42px);text-align:center;box-shadow:var(--shadow)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+#print{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+  .art .sp{stroke-dashoffset:0}
+}
+
+/* ============ Impresión / PDF de la cotización ============ */
+@media print{
+  @page{size:A4;margin:16mm}
+  body{background:#fff!important;color:#1A1815;padding:0}
+  body > *:not(#print){display:none!important}
+  #print{display:block!important;font:400 11pt/1.5 var(--f-u);color:#1A1815;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pr-bar{display:flex;height:6px;margin-bottom:10mm}
+  .pr-bar i{flex:1}
+  .pr-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm;border-bottom:1px solid #1A1815;padding-bottom:5mm}
+  .pr-brand{font:600 20pt/1.1 var(--f-d)}
+  .pr-meta{text-align:right;font:500 9pt/1.6 var(--f-m);color:#4B463D}
+  .pr-t{font:600 26pt/1.1 var(--f-d);margin:10mm 0 3mm;letter-spacing:-.02em}
+  .pr-for{color:#4B463D}
+  .pr-tab{width:100%;border-collapse:collapse;margin-top:8mm}
+  .pr-tab th{text-align:left;font:600 8pt/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:#686155;border-bottom:1px solid #BDB19C;padding:0 0 3mm}
+  .pr-tab th:last-child,.pr-tab td:last-child{text-align:right;white-space:nowrap}
+  .pr-tab td{padding:4mm 0;border-bottom:1px dashed #DCD3C3;vertical-align:top}
+  .pr-tab small{color:#686155;font-size:9pt}
+  .pr-tab tfoot td{border:0;padding-top:5mm;font:600 18pt/1 var(--f-d)}
+  .pr-bs{margin-top:2mm;text-align:right;color:#4B463D;font-size:10pt}
+  .pr-terms{margin-top:10mm;padding:5mm 6mm;background:#F3EDE2;border-radius:3mm}
+  .pr-terms h3{font:600 8pt/1 var(--f-m);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3mm;color:#686155}
+  .pr-terms ul{list-style:disc;padding-left:5mm;font-size:10pt}
+  .pr-f{margin-top:12mm;font:italic 500 13pt/1.4 var(--f-d);color:#B5005C}
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:21px;font-weight:700">Esta calculadora necesita JavaScript activado en tu navegador.</p></noscript>
+
+<div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<header class="top">
+  <div class="top-in wrap">
+    <a class="brand" href="#inicio" aria-label="Tinta y Tasa, inicio">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" fill="#D1006B"/></svg>
+      <span class="brand-w"><i>Tinta</i><b>&amp;</b>Tasa</span>
+    </a>
+    <button class="rate-chip" data-open="rate" id="rateChip" data-state="none" aria-label="Tasa del día. Toca para ver o cambiar">
+      <span class="dot"></span><span class="rc-l" data-o="rate.chipName">BCV</span><span class="num" data-o="rate.chip">Poner tasa</span>
+    </button>
+    <button class="icon-btn" data-open="settings" aria-label="Ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h3M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="9" cy="17" r="2.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="app" class="wrap">
+
+<!-- ======================= INICIO ======================= -->
+<section class="view" id="v-inicio" data-view="inicio" aria-labelledby="t-inicio">
+  <div class="hero">
+    <figure class="crop" aria-hidden="true">
+      <svg class="art" id="heroArt" viewBox="0 0 1618 1000" preserveAspectRatio="xMidYMid meet"></svg>
+    </figure>
+    <div class="hero-tx">
+      <p class="eyebrow">Costeador para diseñadoras · Venezuela</p>
+      <h1 class="hero-t" id="t-inicio">Cobra lo que <em>vale</em> tu&nbsp;arte.</h1>
+      <p class="hero-p">Calcula precios justos en dólares y bolívares, con tus materiales y la tasa del día. Tú llenas los datos, esto hace las cuentas.</p>
+      <div class="hero-cta">
+        <a class="btn btn-ink" href="#hora" id="ctaStart">Empezar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="#cotizar">Cotizar ya</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <a href="#hora" class="stat v-c"><span class="k">Tu hora</span><span class="v" data-o="home.hour">—</span><span class="s">por hora</span></a>
+    <a href="#cotizar" class="stat v-m"><span class="k">Cotización</span><span class="v" data-o="home.quote">—</span><span class="s" data-o="home.quoteS">precio actual</span></a>
+    <button class="stat v-y" data-open="rate"><span class="k">Tasa <span data-o="rate.chipName">BCV</span></span><span class="v" data-o="home.rate">—</span><span class="s">Bs por 1 $</span></button>
+  </div>
+
+  <h2 class="h2 v-m">Tu ruta, <em>paso a paso</em></h2>
+  <ol class="route">
+    <li class="v-y" data-step="rate"><button data-open="rate"><span class="n">1</span><span><b>Confirma la tasa del día</b><span class="d">Toca “BCV” arriba. Con internet se actualiza sola.</span></span><span class="ck"></span></button></li>
+    <li class="v-c" data-step="hora"><a href="#hora"><span class="n">2</span><span><b>Calcula cuánto vale tu hora</b><span class="d">Una sola vez. Cambia los ejemplos por tus números.</span></span><span class="ck"></span></a></li>
+    <li class="v-m" data-step="cotizar"><a href="#cotizar"><span class="n">3</span><span><b>Haz tu primera cotización</b><span class="d">Elige el trabajo, ajusta y mándala por WhatsApp o PDF.</span></span><span class="ck"></span></a></li>
+    <li class="v-k" data-step="mes"><a href="#equilibrio"><span class="n">4</span><span><b>Revisa equilibrio y ahorro</b><span class="d">Una vez al mes, para saber si tu negocio respira.</span></span><span class="ck"></span></a></li>
+  </ol>
+
+  <details class="guide">
+    <summary>¿Cómo se usa? Guía de 1 minuto</summary>
+    <div class="guide-b">
+      <ol>
+        <li><span><b>Revisa la tasa.</b> Arriba ves la tasa BCV. Si tienes internet se actualiza sola; si no, tócala y escríbela.</span></li>
+        <li><span><b>Ve a “Mi hora”.</b> Ya trae números de ejemplo: cámbialos por los tuyos (lo que necesitas para vivir, lo que pagas cada mes y tus equipos). Se hace una vez.</span></li>
+        <li><span><b>Ve a “Cotizar”.</b> Elige qué vas a diseñar (logo, flyer, invitación…), ajusta las horas y los materiales. El precio aparece solo, en $ y en Bs.</span></li>
+        <li><span><b>Envíala.</b> Botón de WhatsApp para mandarla al cliente, o PDF para una cotización formal.</span></li>
+        <li><span><b>Una vez al mes</b>, mira “Equilibrio” (cuántos trabajos necesitas) y “Ahorro” (cómo repartir lo que cobras).</span></li>
+      </ol>
+      <p class="tip">💡 <b>Tip:</b> Si ves una palabra <button class="term" data-term="margen">subrayada así</button>, tócala: te explica qué significa con un ejemplo.<br><br>📲 <b>Tenla a mano:</b> en Chrome toca ⋮ → <b>Agregar a la pantalla principal</b>. Queda como una app.</p>
+    </div>
+  </details>
+
+  <h2 class="h2 v-y">Reglas <em>de oro</em></h2>
+  <div class="rules">
+    <div class="rule"><span class="rn">01</span><div><b>Nunca empieces sin anticipo.</b><p>Mínimo 50%. Cliente que no paga anticipo es cliente que “se le murió el teléfono”.</p></div></div>
+    <div class="rule" style="--rc:var(--c-ink)"><span class="rn">02</span><div><b>Piensa en $, cobra en Bs del día.</b><p>Calcula en dólares y pásalo a bolívares con la tasa del día en que te pagan, no del día que cotizaste.</p></div></div>
+    <div class="rule" style="--rc:var(--y-ink)"><span class="rn">03</span><div><b>Las revisiones se cuentan.</b><p>Di cuántas incluye tu precio. La “última cambiadita” número nueve se cobra aparte.</p></div></div>
+    <div class="rule" style="--rc:var(--ink)"><span class="rn">04</span><div><b>Tu tiempo es materia prima.</b><p>“Es solo un logo” son unas 14 horas de trabajo. Cóbralas todas.</p></div></div>
+    <div class="rule"><span class="rn">05</span><div><b>Págate primero.</b><p>Aparta tu ahorro apenas cobras. Lo que “sobra a fin de mes” es una leyenda urbana.</p></div></div>
+    <div class="rule" style="--rc:var(--c-ink)"><span class="rn">06</span><div><b>¿Trabajar por exposición?</b><p>La única exposición garantizada es a la quiebra. 💀</p></div></div>
+  </div>
+
+  <h2 class="h2 v-c">Diccionario <em>sin enredos</em></h2>
+  <label class="sr" for="glossQ">Buscar en el diccionario</label>
+  <input class="in" id="glossQ" type="search" placeholder="Busca: margen, brecha, anticipo…" autocomplete="off">
+  <div class="gloss" id="gloss"></div>
+
+  <footer class="foot">
+    <p>🔒 Tus datos se guardan <b>solo en este teléfono</b>. Nadie más los ve. Si borras los datos de Chrome, se borran: descarga un respaldo desde <button class="term" data-open="settings">Ajustes</button> de vez en cuando.</p>
+    <p class="phi-line">Diseñado en proporción áurea · 1 : 1,618 · C M Y K</p>
+  </footer>
+</section>
+
+<!-- ======================= MI HORA ======================= -->
+<section class="view v-c" id="v-hora" data-view="hora" aria-labelledby="t-hora" hidden>
+  <header class="sec-head">
+    <p class="tag"><span class="sw"></span>C · 01 · Cian</p>
+    <h1 class="sec-t" id="t-hora">¿Cuánto vale <em>tu hora</em>?</h1>
+    <p class="sec-lead">Es la base de todos tus precios. Ya hay números de ejemplo: cámbialos por los tuyos y el resultado se calcula solo.</p>
+  </header>
+  <div class="layout">
+    <div class="col">
+      <div class="card">
+        <div class="step-h"><span class="step-n">1</span><div><h3>¿Cuánto necesitas ganar al mes?</h3><p>Tu sueldo: lo que necesitas para vivir (comida, casa, tus gastos personales).</p></div></div>
+        <div class="money big"><span>$</span><input class="in" inputmode="decimal" enterkeyhint="done" data-k="hour.salary" aria-label="Sueldo mensual en dólares"></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">2</span><div><h3>Lo que pagas cada mes para trabajar</h3><p>Tus <button class="term" data-term="costoFijo">gastos fijos</button>: los pagas aunque no tengas ni un cliente.</p></div></div>
+        <div class="rows" id="costsList"></div>
+        <button class="add" data-add="hour.costs"><i>+</i>Agregar gasto</button>
+        <div class="tot"><span>Total al mes</span><b data-o="h.costs">$0</b></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">3</span><div><h3>Tus herramientas se gastan</h3><p>Tu compu no es eterna. Esto es la <button class="term" data-term="depreciacion">depreciación</button>: lo que debes apartar cada mes para reemplazarla.</p></div></div>
+        <div class="rows" id="gearList"></div>
+        <button class="add" data-add="hour.gear"><i>+</i>Agregar equipo</button>
+        <div class="tot"><span>Desgaste al mes</span><b data-o="h.gear">$0</b></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">4</span><div><h3>¿Cuánto tiempo trabajas?</h3><p>Sé honesta: aquí se define cuántas horas puedes cobrar.</p></div></div>
+        <div class="grid2">
+          <div class="field"><span class="lbl">Días por semana</span>
+            <div class="stepper"><button type="button" data-inc="-1" aria-label="Un día menos">−</button><input class="in" inputmode="decimal" enterkeyhint="done" data-k="hour.days" aria-label="Días por semana"><button type="button" data-inc="1" aria-label="Un día más">+</button></div></div>
+          <div class="field"><span class="lbl">Horas por día</span>
+            <div class="stepper"><button type="button" data-inc="-0.5" aria-label="Media hora menos">−</button><input class="in" inputmode="decimal" enterkeyhint="done" data-k="hour.hrs" aria-label="Horas por día"><button type="button" data-inc="0.5" aria-label="Media hora más">+</button></div></div>
+        </div>
+        <div class="field" style="margin-top:var(--s5)">
+          <div class="lbl-row"><label class="lbl" for="rgBill">¿Qué parte de ese tiempo diseñas de verdad?</label><output data-o="h.billPct">65%</output></div>
+          <input type="range" id="rgBill" min="20" max="100" step="5" data-k="hour.billable">
+          <p class="hint">El resto se va en WhatsApp, reuniones y buscar clientes. Lo normal: 60–70%. <button class="term" data-term="horasFacturables">¿Qué es esto?</button></p>
+        </div>
+        <div class="tot"><span>Horas de diseño al mes</span><b data-o="h.bill">0 h</b></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">5</span><div><h3>Reserva para meses flojos</h3><p>Diciembre, agosto, la semana sin luz… Un % extra para cuando entren menos trabajos. <button class="term" data-term="reserva">Ver ejemplo</button></p></div></div>
+        <div class="lbl-row"><label class="lbl" for="rgRes">Reserva</label><output data-o="h.resPct">10%</output></div>
+        <input type="range" id="rgRes" min="0" max="30" step="1" data-k="hour.reserve">
+      </div>
+    </div>
+
+    <aside class="col col-side">
+      <div class="chip crop" data-result>
+        <div class="chip-top">
+          <span class="chip-k">Tu hora vale</span>
+          <span class="chip-v" data-o="h.rate">$0</span>
+          <span class="chip-s" data-o="h.rateBs">por cada hora de diseño</span>
+        </div>
+        <div class="chip-bot"><b>Tono · Tu hora</b><span>C100 M0 Y0 K0</span></div>
+        <div class="chip-body">
+          <div class="kv">
+            <div><span>Tu sueldo</span><b data-o="h.k.salary"></b></div>
+            <div><span>Gastos fijos</span><b data-o="h.k.costs"></b></div>
+            <div><span>Desgaste de equipos</span><b data-o="h.k.gear"></b></div>
+            <div><span>Reserva</span><b data-o="h.k.res"></b></div>
+            <div class="sum"><span>Necesitas facturar al mes</span><b data-o="h.k.total"></b></div>
+          </div>
+          <p class="note" data-h="h.msg"></p>
+          <a class="btn btn-sec w100" href="#cotizar">Ahora sí: cotizar →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= COTIZAR ======================= -->
+<section class="view v-m" id="v-cotizar" data-view="cotizar" aria-labelledby="t-cotizar" hidden>
+  <header class="sec-head">
+    <p class="tag"><span class="sw"></span>M · 02 · Magenta</p>
+    <h1 class="sec-t" id="t-cotizar">Tu <em>cotización</em></h1>
+    <p class="sec-lead">Elige qué vas a diseñar, ajusta horas y materiales. El precio se calcula solo, en dólares y en bolívares.</p>
+  </header>
+  <div class="layout">
+    <div class="col">
+      <div class="card">
+        <div class="grid2 stack">
+          <div class="field"><label class="lbl" for="qProj">Proyecto</label><input class="in" id="qProj" data-k="quote.project" data-type="text" placeholder="Ej: Logo Panadería Sol" autocomplete="off"></div>
+          <div class="field"><label class="lbl" for="qCli">Cliente</label><input class="in" id="qCli" data-k="quote.client" data-type="text" placeholder="Nombre del cliente" autocomplete="off"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">1</span><div><h3>¿Qué vas a diseñar?</h3><p>Cargamos horas y materiales típicos. Luego los ajustas a tu ritmo.</p></div></div>
+        <div class="tpls" id="tpls" role="group" aria-label="Plantillas de trabajo"></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">2</span><div><h3>Horas de trabajo</h3><p>Cuánto te toma cada etapa. ¿No sabes? Cronométrate en tu próximo trabajo (spoiler: siempre es más de lo que crees).</p></div></div>
+        <div class="rows" id="phaseList"></div>
+        <button class="add" data-add="quote.phases"><i>+</i>Agregar etapa</button>
+        <div class="tot"><span>Total de horas</span><b data-o="q.hrs">0 h</b></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">3</span><div><h3>Materiales e insumos</h3><p>Lo que gastas solo para este trabajo: tu <button class="term" data-term="costoVariable">costo variable</button>. Usa el <button class="term" data-term="reposicion">precio de hoy</button>, no el que pagaste. Toca <b>$</b> / <b>Bs</b> para cambiar la moneda.</p></div></div>
+        <div class="rows" id="itemList"></div>
+        <button class="add" data-add="quote.items"><i>+</i>Agregar material</button>
+        <div class="tot"><span>Total materiales</span><b data-o="q.items">$0</b></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">4</span><div><h3>Ajusta el precio</h3><p>Lo que hace que el mismo diseño valga distinto.</p></div></div>
+        <div class="field"><span class="lbl">¿Para quién es?</span>
+          <div class="seg cols" data-seg="quote.who" role="group" aria-label="Tipo de cliente">
+            <button type="button" data-v="emp">Emprendedor<small>precio base</small></button>
+            <button type="button" data-v="pyme">Empresa<small>+25%</small></button>
+            <button type="button" data-v="grande">Gran marca<small>+50%</small></button>
+          </div>
+          <p class="hint">Un logo para una marca grande le genera más dinero a ella: vale más.</p>
+        </div>
+        <div class="field"><span class="lbl">¿Para cuándo?</span>
+          <div class="seg cols" data-seg="quote.urg" role="group" aria-label="Urgencia">
+            <button type="button" data-v="0" data-n>Normal<small>sin recargo</small></button>
+            <button type="button" data-v="0.25" data-n>Rápido<small>+25%</small></button>
+            <button type="button" data-v="0.5" data-n>Urgente<small>+50%</small></button>
+          </div>
+        </div>
+        <div class="field"><span class="lbl">Rondas de <button class="term" data-term="revision">revisión</button> incluidas</span>
+          <div class="stepper" style="max-width:178px"><button type="button" data-inc="-1" aria-label="Una revisión menos">−</button><input class="in" inputmode="decimal" enterkeyhint="done" data-k="quote.revs" aria-label="Revisiones incluidas"><button type="button" data-inc="1" aria-label="Una revisión más">+</button></div>
+        </div>
+        <div class="field">
+          <div class="lbl-row"><label class="lbl" for="rgMar"><button class="term" data-term="margen">Ganancia</button> del negocio</label><output data-o="q.marPct">20%</output></div>
+          <input type="range" id="rgMar" min="0" max="60" step="5" data-k="quote.margin">
+          <p class="hint">Tu sueldo ya está en tu hora. Esto es extra para crecer: equipo nuevo, cursos. Recomendado: 15–30%.</p>
+        </div>
+        <div class="field">
+          <div class="lbl-row"><label class="lbl" for="rgBuf"><button class="term" data-term="colchon">Colchón cambiario</button></label><output data-o="q.bufPct">5%</output></div>
+          <input type="range" id="rgBuf" min="0" max="30" step="1" data-k="quote.buffer">
+          <p class="hint">Por si la tasa sube entre que cotizas y cobras. Si la tasa está brincando mucho, súbelo.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">5</span><div><h3>¿Cómo te pagan?</h3><p>Si la plataforma cobra <button class="term" data-term="comision">comisión</button>, se suma al precio para que no salga de tu bolsillo.</p></div></div>
+        <div class="seg" data-seg="quote.pay" role="group" aria-label="Método de pago">
+          <button type="button" data-v="pm">Pago móvil</button>
+          <button type="button" data-v="zelle">Zelle</button>
+          <button type="button" data-v="usdt">Binance</button>
+          <button type="button" data-v="cash">Efectivo $</button>
+          <button type="button" data-v="paypal">PayPal</button>
+          <button type="button" data-v="otro">Otro</button>
+        </div>
+        <div class="field" id="payPctF" style="margin-top:var(--s4)" hidden><label class="lbl" for="qPct">Comisión de esa plataforma (%)</label>
+          <div class="money has-suf" style="max-width:178px"><input class="in" id="qPct" inputmode="decimal" enterkeyhint="done" data-k="quote.payPct" style="padding-left:var(--s4)"><span class="suf">%</span></div></div>
+        <p class="hint" data-o="q.payNote"></p>
+        <div class="field"><span class="lbl"><button class="term" data-term="anticipo">Anticipo</button> para empezar</span>
+          <div class="seg cols" data-seg="quote.dep" role="group" aria-label="Anticipo">
+            <button type="button" data-v="30" data-n>30%</button>
+            <button type="button" data-v="50" data-n>50%</button>
+            <button type="button" data-v="100" data-n>100%</button>
+          </div>
+        </div>
+        <div class="field"><span class="lbl">¿Por cuánto tiempo vale el precio?</span>
+          <div class="seg cols" data-seg="quote.valid" role="group" aria-label="Validez">
+            <button type="button" data-v="24h">24 horas</button>
+            <button type="button" data-v="3d">3 días</button>
+            <button type="button" data-v="7d">7 días</button>
+          </div>
+          <p class="hint">Con la tasa en movimiento, mientras más corto, más segura estás.</p>
+        </div>
+        <div style="margin-top:var(--s4)">
+          <label class="switch"><input type="checkbox" data-k="quote.round"><span class="tg"></span><span>Redondear el precio<small>$97,40 → $100. Se ve más profesional.</small></span></label>
+          <label class="switch"><input type="checkbox" data-k="quote.iva"><span class="tg"></span><span>Cobrar <button class="term" data-term="iva">IVA</button> (16%)<small>Solo si emites factura fiscal.</small></span></label>
+        </div>
+      </div>
+    </div>
+
+    <aside class="col col-side">
+      <div class="chip crop" data-result id="quoteResult">
+        <div class="chip-top">
+          <span class="chip-k">Precio sugerido</span>
+          <span class="chip-v" data-o="q.price">$0</span>
+          <span class="chip-s" data-o="q.priceBs">—</span>
+        </div>
+        <div class="chip-bot"><b>Tono · Tu precio</b><span>C0 M100 Y0 K0</span></div>
+        <div class="chip-body">
+          <div>
+            <div class="bar" id="qBar" aria-hidden="true"></div>
+            <div class="legend" id="qLegend"></div>
+          </div>
+          <div class="gold">
+            <div class="mini"><div class="k">Anticipo <span data-o="q.depPct">50%</span></div><div class="v" data-o="q.dep">$0</div><div class="s" data-o="q.depBs">—</div></div>
+            <div class="mini"><div class="k"><button class="term" data-term="piso">Tu piso</button></div><div class="v" data-o="q.floor">$0</div><div class="s">no bajes de aquí</div></div>
+          </div>
+          <p class="note" data-h="q.msg"></p>
+          <div class="actions">
+            <button class="btn btn-m wide" data-act="wa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>Enviar por WhatsApp</button>
+            <button class="btn btn-ghost" data-act="pdf">PDF</button>
+            <button class="btn btn-ghost" data-act="copy">Copiar</button>
+            <button class="btn btn-ink" data-act="saveQ">Guardar</button>
+            <button class="btn btn-ghost" data-act="newQ">Nueva</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="h3">Tus cotizaciones</h3>
+        <div class="rows" id="quoteList" style="margin-top:var(--s4)"></div>
+      </div>
+      <details class="guide" style="margin-top:0">
+        <summary>¿Cómo se calcula?</summary>
+        <div class="guide-b"><p class="note">(<b>horas × valor de tu hora</b> × tipo de cliente × urgencia) + <b>materiales</b> → eso es tu costo. Encima va tu <b>ganancia</b>, luego el <b>colchón cambiario</b> y, si aplica, la <b>comisión</b> de cobro. Así de simple, así de justo.</p></div>
+      </details>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= EQUILIBRIO ======================= -->
+<section class="view v-y" id="v-equilibrio" data-view="equilibrio" aria-labelledby="t-eq" hidden>
+  <header class="sec-head">
+    <p class="tag"><span class="sw"></span>Y · 03 · Amarillo</p>
+    <h1 class="sec-t" id="t-eq">Tu punto de <em>equilibrio</em></h1>
+    <p class="sec-lead">¿Cuántos trabajos necesitas al mes para no perder dinero? Antes de ese número pierdes; después, todo es ganancia. <button class="term" data-term="equilibrio">Explícamelo mejor</button></p>
+  </header>
+  <div class="layout">
+    <div class="col">
+      <div class="card">
+        <div class="step-h"><span class="step-n">1</span><div><h3>Tus números del mes</h3><p>Vienen de “Mi hora” y de tu cotización actual. Cámbialos si tu trabajo promedio es otro.</p></div></div>
+        <div class="kv">
+          <div><span>Gastos del negocio + equipos</span><b data-o="b.fOp"></b></div>
+          <div><span>Tu sueldo + reserva</span><b data-o="b.fSal"></b></div>
+          <div class="sum"><span>Total que debes cubrir</span><b data-o="b.fLive"></b></div>
+        </div>
+        <p class="hint"><a href="#hora" class="term">Editar en Mi hora</a></p>
+        <div class="field" style="margin-top:var(--s5)">
+          <div class="auto-row"><label class="lbl" for="bePrice">Precio promedio por trabajo</label><button class="reset" data-reset="be.price">↺ de Cotizar</button></div>
+          <div class="money"><span>$</span><input class="in" id="bePrice" inputmode="decimal" enterkeyhint="done" data-k="be.price" data-null></div>
+        </div>
+        <div class="field">
+          <div class="auto-row"><label class="lbl" for="beVc">Materiales y comisión por trabajo</label><button class="reset" data-reset="be.vc">↺ de Cotizar</button></div>
+          <div class="money"><span>$</span><input class="in" id="beVc" inputmode="decimal" enterkeyhint="done" data-k="be.vc" data-null></div>
+        </div>
+        <div class="field">
+          <div class="auto-row"><label class="lbl" for="beHrs">Horas por trabajo</label><button class="reset" data-reset="be.hrs">↺ de Cotizar</button></div>
+          <div class="money has-suf"><input class="in" id="beHrs" inputmode="decimal" enterkeyhint="done" data-k="be.hrs" data-null style="padding-left:var(--s4)"><span class="suf">horas</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="h3">Dónde se cruzan las líneas</h3>
+        <svg class="chart" id="beChart" viewBox="0 0 610 377" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico del punto de equilibrio"></svg>
+        <div class="ch-leg"><span><i style="background:var(--m)"></i>Lo que cobras</span><span><i style="background:var(--ink)"></i>Lo que gastas</span><span><i style="background:var(--m-soft);height:13px;width:13px"></i>Pierdes</span><span><i style="background:var(--y-soft);height:13px;width:13px;border:1px solid var(--y)"></i>Ganas</span></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">2</span><div><h3>¿Cuántos llevas este mes?</h3><p>Súmale uno cada vez que cierres un trabajo.</p></div></div>
+        <div class="stepper" style="max-width:178px"><button type="button" data-inc="-1" aria-label="Un trabajo menos">−</button><input class="in" inputmode="decimal" enterkeyhint="done" data-k="be.done" aria-label="Trabajos este mes"><button type="button" data-inc="1" aria-label="Un trabajo más">+</button></div>
+        <div class="prog" id="beProg"><div class="fill"></div><div class="mk" data-mk="op"><span></span></div><div class="mk end" data-mk="live"><span></span></div></div>
+        <div class="msg" data-h="b.doneMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="h3">¿Te da el tiempo?</h3>
+        <div class="cap">
+          <div class="cap-row"><span>Necesitas</span><div class="cap-bar"><i id="capNeed"></i></div></div>
+          <div class="cap-row"><span>Tienes</span><div class="cap-bar"><i id="capHave" style="background:var(--c)"></i></div></div>
+        </div>
+        <div class="msg" id="capMsg" data-h="b.capMsg"></div>
+      </div>
+    </div>
+
+    <aside class="col col-side">
+      <div class="chip crop" data-result>
+        <div class="chip-top">
+          <span class="chip-k">Para vivir de esto necesitas</span>
+          <span class="chip-v" data-o="b.nLive">—</span>
+          <span class="chip-s">trabajos al mes</span>
+        </div>
+        <div class="chip-bot"><b>Tono · Equilibrio</b><span>C0 M0 Y100 K0</span></div>
+        <div class="chip-body">
+          <div class="gold">
+            <div class="mini"><div class="k">Para no perder</div><div class="v" data-o="b.nOp">—</div><div class="s">cubre el negocio</div></div>
+            <div class="mini"><div class="k">Cada trabajo</div><div class="v" data-o="b.contrib">—</div><div class="s">te deja · <button class="term" data-term="contribucion">¿qué es?</button></div></div>
+          </div>
+          <p class="note" data-h="b.msg"></p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= AHORRO ======================= -->
+<section class="view v-k" id="v-ahorro" data-view="ahorro" aria-labelledby="t-ah" hidden>
+  <header class="sec-head">
+    <p class="tag"><span class="sw"></span>K · 04 · Negro</p>
+    <h1 class="sec-t" id="t-ah">Que no se te <em>evapore</em></h1>
+    <p class="sec-lead">Cobrar bien es la mitad. La otra mitad es que el dinero dure. Aquí repartes lo que cobras, armas tu colchón y ves cuánto te cuesta esperar.</p>
+  </header>
+  <div class="layout">
+    <div class="col">
+      <div class="card">
+        <div class="step-h"><span class="step-n">1</span><div><h3>Reparte cada pago</h3><p>Apenas te paguen, antes de gastar nada, divídelo así. Se llama <button class="term" data-term="pagate">págate primero</button>.</p></div></div>
+        <div class="field">
+          <div class="auto-row"><label class="lbl" for="svInc">¿Cuánto te pagaron?</label><button class="reset" data-reset="sv.income">↺ de Cotizar</button></div>
+          <div class="money"><span>$</span><input class="in" id="svInc" inputmode="decimal" enterkeyhint="done" data-k="sv.income" data-null></div>
+        </div>
+        <div class="field"><span class="lbl">Fórmula</span>
+          <div class="seg cols cols4" data-seg="sv.preset" role="group" aria-label="Fórmula de reparto">
+            <button type="button" data-v="aurea">Áurea<small>62 · 24 · 14</small></button>
+            <button type="button" data-v="eq">Clásica<small>70 · 20 · 10</small></button>
+            <button type="button" data-v="ap">Apretada<small>85 · 10 · 5</small></button>
+            <button type="button" data-v="custom">A mi gusto<small>tú decides</small></button>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:var(--s5)">
+          <div class="field"><div class="lbl-row"><label class="lbl" for="rgSave">Ahorro</label><output data-o="s.savePct"></output></div><input type="range" id="rgSave" min="0" max="50" step="0.1" data-k="sv.save"></div>
+          <div class="field"><div class="lbl-row"><label class="lbl" for="rgGrow">Crecer</label><output data-o="s.growPct"></output></div><input type="range" id="rgGrow" min="0" max="50" step="0.1" data-k="sv.grow"></div>
+        </div>
+        <div class="gsplit" id="gsplit" aria-hidden="true">
+          <div class="gs-a"><span class="pc" data-o="s.needPct"></span><span class="am" data-o="s.need"></span><span class="nm">Vivir y trabajar</span></div>
+          <div class="gs-r" style="display:flex;flex-direction:column">
+            <div class="gs-b"><span class="pc" data-o="s.savePct"></span><span class="am" data-o="s.save"></span><span class="nm">Ahorro en $</span></div>
+            <div class="gs-c"><span class="pc" data-o="s.growPct"></span><span class="am" data-o="s.grow"></span><span class="nm">Crecer</span></div>
+          </div>
+        </div>
+        <div class="kv" style="margin-top:var(--s5)">
+          <div><span>Vivir y trabajar <small class="muted">(gastos, comida, servicios)</small></span><b data-o="s.needL"></b></div>
+          <div><span>Ahorro <small class="muted">(en dólares, no se toca)</small></span><b data-o="s.saveL"></b></div>
+          <div><span>Crecer <small class="muted">(cursos, equipo, un gustico)</small></span><b data-o="s.growL"></b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">2</span><div><h3>Tu fondo de emergencia</h3><p>Para cuando se dañe la compu o pase un mes sin clientes. <button class="term" data-term="fondo">¿Qué es?</button></p></div></div>
+        <div class="field"><span class="lbl">¿Cuántos meses quieres cubrir?</span>
+          <div class="seg cols" data-seg="sv.efMonths" role="group" aria-label="Meses a cubrir">
+            <button type="button" data-v="3" data-n>3 meses<small>para empezar</small></button>
+            <button type="button" data-v="6" data-n>6 meses<small>tranquila</small></button>
+            <button type="button" data-v="9" data-n>9 meses<small>blindada</small></button>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:var(--s5)">
+          <div class="field"><label class="lbl" for="efHave">Ya tengo</label><div class="money"><span>$</span><input class="in" id="efHave" inputmode="decimal" enterkeyhint="done" data-k="sv.efHave"></div></div>
+          <div class="field"><label class="lbl" for="efMon">Aparto al mes</label><div class="money"><span>$</span><input class="in" id="efMon" inputmode="decimal" enterkeyhint="done" data-k="sv.efMonthly"></div></div>
+        </div>
+        <div class="ring-row">
+          <div class="ring-wrap"><svg class="ring" viewBox="0 0 110 110" aria-hidden="true"><circle class="rb" cx="55" cy="55" r="45"/><circle class="rf" id="efRing" cx="55" cy="55" r="45" stroke-dasharray="0 283"/></svg><b data-o="s.efPct">0%</b></div>
+          <p class="note" data-h="s.efMsg"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">3</span><div><h3>Una meta con nombre</h3><p>Una tableta, un curso, una laptop nueva. Ponle nombre y fecha.</p></div></div>
+        <div class="field"><label class="lbl" for="glN">¿Para qué ahorras?</label><input class="in" id="glN" data-k="sv.goalName" data-type="text" autocomplete="off"></div>
+        <div class="grid2" style="margin-top:var(--s5)">
+          <div class="field"><label class="lbl" for="glA">Cuesta</label><div class="money"><span>$</span><input class="in" id="glA" inputmode="decimal" enterkeyhint="done" data-k="sv.goalAmt"></div></div>
+          <div class="field"><span class="lbl">En cuántos meses</span><div class="stepper"><button type="button" data-inc="-1" aria-label="Un mes menos">−</button><input class="in" inputmode="decimal" enterkeyhint="done" data-k="sv.goalMonths" aria-label="Meses"><button type="button" data-inc="1" aria-label="Un mes más">+</button></div></div>
+        </div>
+        <div class="msg" data-h="s.goalMsg"></div>
+      </div>
+
+      <div class="card">
+        <div class="step-h"><span class="step-n">4</span><div><h3>El costo de esperar</h3><p>Los bolívares pierden valor cada día: eso es la <button class="term" data-term="devaluacion">devaluación</button>. Mira cuánto pierdes si no los usas o cambias rápido.</p></div></div>
+        <div class="field">
+          <div class="auto-row"><label class="lbl" for="dvBs">Bolívares que cobraste</label><button class="reset" data-reset="sv.bs">↺ de Cotizar</button></div>
+          <div class="money bs"><span>Bs</span><input class="in" id="dvBs" inputmode="decimal" enterkeyhint="done" data-k="sv.bs" data-null></div>
+        </div>
+        <div class="field">
+          <div class="auto-row"><label class="lbl" for="dvP">El dólar sube al mes</label><button class="reset" data-reset="sv.deval">↺ automático</button></div>
+          <div class="money has-suf" style="max-width:178px"><input class="in" id="dvP" inputmode="decimal" enterkeyhint="done" data-k="sv.deval" data-null style="padding-left:var(--s4)"><span class="suf">%</span></div>
+          <p class="hint" data-o="s.devNote"></p>
+        </div>
+        <div class="field">
+          <div class="lbl-row"><label class="lbl" for="rgDays">Si los guardas por</label><output data-o="s.days"></output></div>
+          <input type="range" id="rgDays" min="1" max="60" step="1" data-k="sv.days">
+        </div>
+        <div class="melt">
+          <div><span>Hoy</span><span class="b" id="mNow" data-o="s.now"></span></div>
+          <div><span data-o="s.laterL">Después</span><span class="b" id="mLater" data-o="s.later"></span></div>
+        </div>
+        <div class="msg bad" data-h="s.devMsg"></div>
+      </div>
+    </div>
+
+    <aside class="col col-side">
+      <div class="chip crop" data-result>
+        <div class="chip-top">
+          <span class="chip-k">De este pago, ahorra</span>
+          <span class="chip-v" data-o="s.chip">$0</span>
+          <span class="chip-s" data-o="s.chipS">en dólares, apenas te paguen</span>
+        </div>
+        <div class="chip-bot"><b>Tono · Págate primero</b><span>C0 M0 Y0 K100</span></div>
+        <div class="chip-body">
+          <ul class="checks">
+            <li><span><b>Ahorra en dólares</b>, no en bolívares: los Bs guardados se encogen.</span></li>
+            <li><span><b>Cobra en Bs → úsalos o cámbialos el mismo día.</b></span></li>
+            <li><span><b>Cuentas separadas:</b> una para el negocio, otra para ti. Mezclarlas es la receta del “¿y la plata?”.</span></li>
+            <li><span><b>El fondo de emergencia no es para vacaciones.</b> Aunque el pasaje esté en oferta.</span></li>
+            <li><span>Mira esta sección <b>una vez al mes</b>. Diez minutos que valen oro.</span></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+</main>
+
+<div class="pricebar off" id="pricebar" aria-live="off">
+  <div style="min-width:0"><div class="pk" data-o="bar.k">Precio</div><div class="pv" data-o="bar.v">$0</div></div>
+  <button data-act="toResult">Ver detalle</button>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="tabs-in">
+    <a class="tab" href="#inicio" data-v="inicio" style="--tc:var(--ink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="11.7" rx="1"/><path d="M14.2 6v11.7M2.5 17.7A11.7 11.7 0 0 1 14.2 6M14.2 13.2h7.3"/></svg>Inicio</a>
+    <a class="tab" href="#hora" data-v="hora" style="--tc:var(--c);--tcink:var(--c-ink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2.1"/></svg>Mi hora</a>
+    <a class="tab" href="#cotizar" data-v="cotizar" style="--tc:var(--m);--tcink:var(--m-ink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 18.4 9 14 20.5h-4L5.6 9z"/><circle cx="12" cy="11.6" r="1.7"/><path d="M12 2.8v7.1"/></svg>Cotizar</a>
+    <a class="tab" href="#equilibrio" data-v="equilibrio" style="--tc:var(--y);--tcink:var(--y-ink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 19 21 5M3 11.2h18"/><circle cx="13" cy="11.2" r="2.6"/></svg>Equilibrio</a>
+    <a class="tab" href="#ahorro" data-v="ahorro" style="--tc:var(--k)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8 3.5h8M8.5 3.5v3L6 10v9.2c0 .7.6 1.3 1.3 1.3h9.4c.7 0 1.3-.6 1.3-1.3V10l-2.5-3.5v-3"/><circle cx="12" cy="14.5" r="2.6"/></svg>Ahorro</a>
+  </div>
+</nav>
+
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="grip" aria-hidden="true"></div>
+  <button class="sheet-x" data-act="closeSheet" aria-label="Cerrar">×</button>
+  <div id="sheetBody"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="print"></div>
+
+<template id="tpl-rate">
+  <p class="sheet-k">Tasa del día</p>
+  <h2 class="sheet-t" id="sheetTitle">¿A cuánto está el dólar?</h2>
+  <p class="sheet-d">Cuántos bolívares cuesta 1 dólar hoy. <button class="term" data-term="tasa">¿Qué es esto?</button></p>
+  <div class="grid2" style="margin-top:var(--s5)">
+    <div class="field"><label class="lbl" for="rBcv"><button class="term" data-term="bcv">BCV</button> <small>(oficial)</small></label><div class="money bs"><span>Bs</span><input class="in" id="rBcv" inputmode="decimal" enterkeyhint="done" data-k="rate.bcv" data-null data-dec></div></div>
+    <div class="field"><label class="lbl" for="rPar"><button class="term" data-term="paralelo">Paralela</button> <small>(USDT)</small></label><div class="money bs"><span>Bs</span><input class="in" id="rPar" inputmode="decimal" enterkeyhint="done" data-k="rate.par" data-null data-dec></div></div>
+  </div>
+  <p class="hint" data-o="rate.meta"></p>
+  <button class="btn btn-ink w100" style="margin-top:var(--s4)" data-act="fetchRates">↻ Actualizar ahora</button>
+  <h3 class="h3">¿Con cuál tasa pasas tus precios a bolívares?</h3>
+  <div class="seg cols" data-seg="rate.use" role="group" aria-label="Tasa para convertir">
+    <button type="button" data-v="bcv">BCV<small>oficial</small></button>
+    <button type="button" data-v="avg">Promedio<small>entre ambas</small></button>
+    <button type="button" data-v="par">Paralela<small>USDT</small></button>
+  </div>
+  <div class="msg" data-h="rate.gap" style="margin-top:var(--s5)"></div>
+</template>
+
+<template id="tpl-settings">
+  <p class="sheet-k">Ajustes</p>
+  <h2 class="sheet-t" id="sheetTitle">Tu estudio</h2>
+  <div class="field"><label class="lbl" for="pfS">Tu nombre o el de tu estudio</label><input class="in" id="pfS" data-k="profile.studio" data-type="text" placeholder="Ej: Ana Pérez · Diseño" autocomplete="name"></div>
+  <div class="field"><label class="lbl" for="pfP">Tu WhatsApp <small>(sale en el PDF)</small></label><input class="in" id="pfP" type="tel" data-k="profile.phone" data-type="text" placeholder="0412 000 0000" autocomplete="tel"></div>
+  <div class="field"><span class="lbl">Apariencia</span>
+    <div class="seg cols" data-seg="theme" role="group" aria-label="Tema">
+      <button type="button" data-v="auto">Automático</button>
+      <button type="button" data-v="light">Papel</button>
+      <button type="button" data-v="dark">Cuarto oscuro</button>
+    </div>
+  </div>
+  <hr>
+  <h3 class="h3" style="margin-top:0">Respaldo</h3>
+  <p class="note">Tus datos viven solo en este teléfono. Descarga un respaldo para no perderlos si cambias de teléfono o borras Chrome.</p>
+  <div class="actions" style="margin-top:var(--s4)">
+    <button class="btn btn-ink" data-act="backup">Descargar</button>
+    <button class="btn btn-ghost" data-act="restore">Cargar</button>
+  </div>
+  <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+  <hr>
+  <button class="btn btn-danger w100" data-act="wipe">Borrar todos mis datos</button>
+</template>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= Constantes ================= */
+var PHI = 1.618033988749895, WEEKS = 52/12, KEY = 'tintaytasa.v1';
+var API = 'https://ve.dolarapi.com/v1/';
+
+var DEF = {
+  v:1, theme:'auto',
+  profile:{studio:'', phone:''},
+  rate:{bcv:null, par:null, use:'bcv', at:0, src:'', dev:null, devAt:0},
+  hour:{
+    salary:400,
+    costs:[{n:'Internet',v:25},{n:'Luz y servicios',v:10},{n:'Teléfono y datos',v:10},{n:'Programas (Adobe, Canva…)',v:20},{n:'Transporte',v:15}],
+    gear:[{n:'Computadora',p:800,m:36},{n:'Tableta gráfica',p:150,m:36},{n:'Teléfono',p:250,m:24}],
+    reserve:10, days:5, hrs:6, billable:65
+  },
+  quote:{project:'', client:'', tpl:'logo', phases:null, items:[], who:'emp', urg:0, revs:2, margin:20, buffer:5, pay:'pm', payPct:3, iva:false, round:true, dep:50, valid:'24h'},
+  quotes:[],
+  be:{price:null, vc:null, hrs:null, done:0},
+  sv:{income:null, preset:'aurea', save:23.6, grow:14.6, efMonths:3, efHave:0, efMonthly:30, goalName:'Tableta gráfica nueva', goalAmt:300, goalMonths:6, bs:null, deval:null, days:7},
+  seen:{}
+};
+
+var TPL = {
+  logo:    {n:'Logo', s:'14 h aprox.', c:'var(--m)', ph:[['Brief',2],['Bocetos',4],['Diseño digital',5],['Revisiones',2],['Entrega final',1]], it:[]},
+  marca:   {n:'Identidad de marca', s:'logo + manual', c:'var(--c)', ph:[['Investigación',4],['Bocetos',8],['Logo y sistema',14],['Revisiones',4],['Manual de marca',4]], it:[]},
+  redes:   {n:'Pack redes', s:'10 posts', c:'var(--y)', ph:[['Brief',1],['Ideas y textos',2],['Diseño de piezas',8],['Revisiones',2],['Entrega',1]], it:[]},
+  flyer:   {n:'Flyer impreso', s:'100 unidades', c:'var(--k)', ph:[['Brief',0.5],['Idea',1],['Diseño',2.5],['Revisiones',1],['Arte final',0.5]], it:[['Impresión full color',100,0.15,'usd']]},
+  invita:  {n:'Invitación', s:'50 impresas', c:'var(--m)', ph:[['Brief',1],['Bocetos',1.5],['Diseño',3],['Revisiones',1],['Arte final',1]], it:[['Papel especial',50,0.3,'usd'],['Impresión',50,0.4,'usd'],['Sobres',50,0.15,'usd'],['Traslado / delivery',1,3,'usd']]},
+  etiqueta:{n:'Etiqueta', s:'o empaque', c:'var(--c)', ph:[['Brief y medidas',2],['Bocetos',4],['Diseño y troquel',6],['Revisiones',2],['Arte final',2]], it:[['Prueba de impresión',1,10,'usd']]},
+  ilustra: {n:'Ilustración', s:'pieza final', c:'var(--y)', ph:[['Brief',1],['Bocetos',3],['Ilustración',8],['Revisiones',2],['Entrega',1]], it:[]},
+  blanco:  {n:'En blanco', s:'a tu medida', c:'var(--line-2)', ph:[['Diseño',1]], it:[]}
+};
+DEF.quote.phases = TPL.logo.ph.map(function(p){return {n:p[0],h:p[1]};});
+
+var WHO = {emp:{n:'Emprendedor',m:1}, pyme:{n:'Empresa',m:1.25}, grande:{n:'Gran marca',m:1.5}};
+var PAY = {pm:{n:'Pago móvil / transferencia',p:0,f:0}, zelle:{n:'Zelle',p:0,f:0}, usdt:{n:'Binance / USDT',p:0,f:0}, cash:{n:'Efectivo en $',p:0,f:0}, paypal:{n:'PayPal',p:5.4,f:0.3}, otro:{n:'Otro',p:null,f:0}};
+var VALID = {'24h':'por 24 horas','3d':'por 3 días','7d':'por 7 días'};
+var PRESET = {aurea:[23.6,14.6], eq:[20,10], ap:[10,5]};
+var LIM = {'hour.days':[1,7],'hour.hrs':[0.5,16],'hour.billable':[20,100],'hour.reserve':[0,30],'hour.salary':[0,1e7],
+  'quote.revs':[0,20],'quote.margin':[0,60],'quote.buffer':[0,30],'quote.payPct':[0,30],
+  'be.done':[0,999],'sv.goalMonths':[1,120],'sv.days':[1,60],'sv.save':[0,50],'sv.grow':[0,50],'sv.deval':[0,500]};
+
+var TERMS = {
+  tasa:{t:'Tasa de cambio', d:'Cuántos bolívares cuesta 1 dólar. En Venezuela cambia casi a diario; por eso la app te pide revisarla.', e:'Si la tasa es 100, un trabajo de $50 son Bs 5.000.'},
+  bcv:{t:'Tasa BCV (oficial)', d:'La publica el Banco Central de Venezuela. Es la que usan bancos, tiendas y puntos de venta.', e:'Cuando un cliente te paga por pago móvil, normalmente calcula con la BCV.'},
+  paralelo:{t:'Tasa paralela', d:'El precio del dólar “en la calle” o en USDT (Binance). Suele ser más alta que la oficial.', e:'Si vendes tus bolívares para comprar dólares, casi siempre lo haces a la paralela.'},
+  brecha:{t:'Brecha cambiaria', d:'La diferencia, en %, entre la tasa paralela y la oficial. Es plata que se te escapa si cobras con una tasa y compras con otra.', e:'BCV 100 y paralela 130: brecha de 30%. Cobras Bs 10.000 (= $100 a BCV), pero con eso solo compras $77 reales.'},
+  costoFijo:{t:'Gasto fijo', d:'Lo que pagas cada mes aunque no tengas ni un cliente.', e:'Internet, luz, Adobe o Canva Pro, el plan del teléfono.'},
+  costoVariable:{t:'Costo variable (insumos)', d:'Lo que gastas solo cuando haces un trabajo. Sin trabajo, no hay gasto.', e:'Impresión, papel, vinil, tinta, empaque, delivery.'},
+  depreciacion:{t:'Depreciación', d:'Lo que tus equipos pierden de valor con el uso. Cada mes “gastas” un pedacito de tu compu, aunque no lo veas.', e:'Una laptop de $800 que dura 3 años = $22 al mes que apartas para comprar la próxima.'},
+  horasFacturables:{t:'Horas facturables', d:'Las horas en que de verdad diseñas para un cliente. Contestar WhatsApp, hacer tus posts o buscar clientes también es trabajo, pero nadie te lo paga directo.', e:'Trabajas 6 horas, pero diseñas 4: tus horas facturables son el 65%.'},
+  valorHora:{t:'Valor de tu hora', d:'Lo mínimo que debe pagarte cada hora de diseño para cubrir tu vida y tu negocio.', e:'Si necesitas $600 al mes y diseñas 80 horas, tu hora vale $7,50.'},
+  reserva:{t:'Reserva para meses flojos', d:'Un % extra que apartas para cuando haya pocos clientes. En los meses buenos guardas para los malos.', e:'Con 10% de reserva, si necesitas $500 al mes, calculas con $550.'},
+  margen:{t:'Ganancia (margen)', d:'Un extra encima de lo que te cuesta hacer el trabajo. Tu sueldo ya va en tu hora; la ganancia es para que tu negocio crezca.', e:'Con 20% de ganancia, un trabajo que te cuesta $100 lo cobras en $120.'},
+  colchon:{t:'Colchón cambiario', d:'Un % extra por si la tasa sube entre que cotizas, compras materiales y te pagan.', e:'Cotizas el lunes, te pagan el viernes y el dólar subió 4%: el colchón te cubre.'},
+  comision:{t:'Comisión de cobro', d:'Lo que se queda la plataforma con la que te pagan. Si no la sumas al precio, la pagas tú.', e:'PayPal cobra ~5,4% + $0,30. De $100 te llegan unos $94,30.'},
+  anticipo:{t:'Anticipo', d:'Parte del pago por adelantado, antes de empezar. Te protege de clientes que desaparecen y de que la tasa suba.', e:'50% al aprobar la cotización, 50% al entregar los archivos finales.'},
+  piso:{t:'Precio mínimo (tu piso)', d:'Por debajo de esto pierdes dinero. Si te regatean, puedes bajar hasta aquí… nunca menos.', e:'Si tu precio es $120 y tu piso $95, tienes $25 para negociar.'},
+  revision:{t:'Ronda de revisión', d:'Cada vez que el cliente pide cambios. Si no las limitas, un logo puede durar para siempre.', e:'“Incluye 2 revisiones. Cada revisión extra: $8.”'},
+  equilibrio:{t:'Punto de equilibrio', d:'El número de trabajos al mes en el que lo que cobras cubre exactamente lo que gastas. Antes de ese número pierdes; después, ganas.', e:'Si cada trabajo te deja $50 y necesitas $500 al mes, tu equilibrio son 10 trabajos.'},
+  contribucion:{t:'Margen de contribución', d:'Lo que te queda de cada trabajo después de pagar sus materiales y comisiones. Ese dinero es el que va pagando tus gastos del mes.', e:'Cobras $80 y gastas $10 en impresión: cada trabajo “aporta” $70.'},
+  fondo:{t:'Fondo de emergencia', d:'Dinero guardado solo para imprevistos: se daña la compu, te enfermas, un mes sin clientes. No es para vacaciones.', e:'La meta típica es tener de 3 a 6 meses de tus gastos.'},
+  pagate:{t:'Págate primero', d:'Apartar tu ahorro apenas cobras, y no con lo que sobre a fin de mes (porque nunca sobra).', e:'Te pagan $100: antes de gastar nada, $24 van directo a tu ahorro.'},
+  devaluacion:{t:'Devaluación', d:'Cuando el bolívar pierde valor frente al dólar: con los mismos bolívares compras menos dólares.', e:'Bs 10.000 hoy son $100. Si el dólar sube 10%, mañana son $91.'},
+  inflacion:{t:'Inflación', d:'Cuando los precios suben con el tiempo. El dinero quieto compra cada vez menos.', e:'El papel que costaba $5 ahora cuesta $6.'},
+  reposicion:{t:'Precio de reposición', d:'Lo que te costaría comprar ese material HOY, no lo que pagaste hace un mes.', e:'Compraste vinil a $8, hoy cuesta $10: cotiza con $10.'},
+  iva:{t:'IVA', d:'Impuesto del 16% en Venezuela. Solo lo cobras si emites factura fiscal.', e:'Trabajo de $100 + IVA = $116.'}
+};
+
+/* ================= Utilidades ================= */
+function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function sum(a){var t=0;for(var i=0;i<a.length;i++)t+=(+a[i]||0);return t;}
+function clamp(v,a,b){return Math.min(b,Math.max(a,v));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fin(n){return typeof n==='number'&&isFinite(n);}
+
+/* Números al estilo venezolano: 1.234,56 */
+function fmtNum(n,dec){
+  if(!fin(n)) return '—';
+  var neg=n<0; n=Math.abs(n);
+  var s=n.toFixed(dec), p=s.split('.');
+  var i=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return (neg?'−':'')+i+(p[1]?','+p[1]:'');
+}
+function usd(n){ if(!fin(n)) return '—'; var r=Math.round(n*100)/100; return (r<0?'−':'')+'$'+fmtNum(Math.abs(r), r%1===0?0:2); }
+function bs(n){ return fin(n)&&n>0 ? 'Bs '+fmtNum(n,2) : '—'; }
+function pct(n,d){ return fmtNum(n, d==null?(n%1===0?0:1):d)+'%'; }
+function fmtIn(n){
+  if(n==null||n===''||!fin(+n)) return '';
+  var s=String(Math.round(+n*10000)/10000), p=s.split('.');
+  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(p[1]?','+p[1]:'');
+}
+/* Lee "1.234,5", "36,5", "36.5" o "1.500" sin enredos */
+function parseNum(v,decDot){
+  var s=String(v==null?'':v).trim().replace(/[^\d.,]/g,'');
+  if(!s) return null;
+  if(s.indexOf(',')>-1){ s=s.replace(/\./g,'').replace(',','.').replace(/,/g,''); }
+  else{
+    var p=s.split('.');
+    if(p.length>2) s=p.join('');
+    else if(p.length===2 && !decDot && p[1].length===3 && p[0]!=='' && +p[0]!==0) s=p.join('');
+  }
+  var n=parseFloat(s);
+  return fin(n)?n:null;
+}
+function fdate(t){ var d=new Date(t); return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear(); }
+function sameDay(a,b){ var x=new Date(a),y=new Date(b); return x.getFullYear()===y.getFullYear()&&x.getMonth()===y.getMonth()&&x.getDate()===y.getDate(); }
+function ago(t){
+  var m=Math.round((Date.now()-t)/60000);
+  if(m<1) return 'hace un momento'; if(m<60) return 'hace '+m+' min';
+  var h=Math.round(m/60); if(h<24) return 'hace '+h+' h';
+  var d=Math.round(h/24); return 'hace '+d+(d===1?' día':' días');
+}
+function plural(n,a,b){ return n===1?a:b; }
+
+/* ================= Estado ================= */
+function merge(base,add){
+  if(!add||typeof add!=='object') return base;
+  Object.keys(add).forEach(function(k){
+    var v=add[k];
+    if(v&&typeof v==='object'&&!Array.isArray(v)&&base[k]&&typeof base[k]==='object'&&!Array.isArray(base[k])) merge(base[k],v);
+    else if(v!==undefined) base[k]=v;
+  });
+  return base;
+}
+var S = (function(){
+  var s=clone(DEF);
+  try{ var raw=localStorage.getItem(KEY); if(raw) s=merge(s,JSON.parse(raw)); }catch(e){}
+  if(!Array.isArray(s.quote.phases)) s.quote.phases=clone(DEF.quote.phases);
+  return s;
+})();
+var saveT=null;
+function flush(){ clearTimeout(saveT); saveT=null; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function persist(){ clearTimeout(saveT); saveT=setTimeout(flush,250); }
+function getP(path){ return path.split('.').reduce(function(o,k){return o==null?o:o[k];},S); }
+function setP(path,val){ var ks=path.split('.'), last=ks.pop(), o=ks.reduce(function(o,k){return o[k];},S); o[last]=val; }
+
+/* ================= Tasa ================= */
+function rateUse(){ var r=S.rate,b=+r.bcv||0,p=+r.par||0; if(r.use==='par'&&p) return 'par'; if(r.use==='avg'&&p&&b) return 'avg'; return b?'bcv':(p?'par':'bcv'); }
+function rate(){ var r=S.rate,b=+r.bcv||0,p=+r.par||0,u=rateUse(); return u==='par'?p:u==='avg'?(b+p)/2:b; }
+function rateName(){ return {bcv:'BCV',avg:'promedio',par:'paralela'}[rateUse()]; }
+
+/* ================= Cálculos ================= */
+function calcHour(){
+  var h=S.hour;
+  var costs=sum(h.costs.map(function(c){return c.v;}));
+  var gear=sum(h.gear.map(function(g){return (+g.m>0)?(+g.p||0)/g.m:0;}));
+  var base=(+h.salary||0)+costs+gear;
+  var res=base*h.reserve/100, total=base+res;
+  var hours=h.days*WEEKS*h.hrs, bill=hours*h.billable/100;
+  var r=bill>0?total/bill:0;
+  return {costs:costs,gear:gear,base:base,res:res,total:total,hours:hours,bill:bill,rate:r,salary:+h.salary||0};
+}
+function nice(p){
+  if(p<=0) return 0;
+  var st=p<10?0.5:p<50?1:p<300?5:p<1500?10:50;
+  return Math.ceil(p/st-1e-9)*st;
+}
+function calcQuote(H){
+  var q=S.quote, R=rate();
+  var hrs=sum(q.phases.map(function(p){return p.h;}));
+  var who=WHO[q.who]||WHO.emp, urg=+q.urg||0;
+  var time=hrs*H.rate*who.m*(1+urg);
+  var lines=q.items.map(function(it){ var unit=it.cur==='bs'?(R?(+it.p||0)/R:0):(+it.p||0); return (+it.q||0)*unit; });
+  var I=sum(lines), cost=time+I;
+  var profit=cost*q.margin/100, buffer=(cost+profit)*q.buffer/100, net=cost+profit+buffer;
+  var pay=PAY[q.pay]||PAY.pm, pc=clamp((pay.p==null?(+q.payPct||0):pay.p)/100,0,.5), fix=pay.f;
+  var raw=net>0?(net+fix)/(1-pc):0;
+  var price=q.round?nice(raw):Math.ceil(raw*100-1e-6)/100;
+  var fee=price>0?price*pc+fix:0;
+  var extra=Math.max(0,price-net-fee);
+  var iva=q.iva?price*0.16:0, total=price+iva;
+  var floor=cost>0?Math.ceil((cost+fix)/(1-pc)*100)/100:0;
+  var dep=total*q.dep/100;
+  var revExtra=H.rate>0?Math.ceil(H.rate*who.m*(1+q.margin/100)):0;
+  var matPrice=I>0?Math.min(price,Math.round(I*(1+q.buffer/100)/(1-pc)*100)/100):0;
+  var eff=hrs>0?(price-I-fee)/hrs:0;
+  return {hrs:hrs,time:time,lines:lines,I:I,cost:cost,profit:profit+extra,buffer:buffer,fee:fee,price:price,iva:iva,total:total,
+    floor:floor,dep:dep,revExtra:revExtra,matPrice:matPrice,eff:eff,R:R,who:who,pay:pay,pc:pc,
+    bsTotal:R?total*R:null, bsDep:R?dep*R:null};
+}
+function calcBE(H,Q){
+  var b=S.be;
+  var price=b.price!=null?b.price:Q.price, vc=b.vc!=null?b.vc:(Q.I+Q.fee), hrs=b.hrs!=null?b.hrs:Q.hrs;
+  var fOp=H.costs+H.gear, fLive=H.total, contrib=price-vc, ok=contrib>0;
+  var nOp=ok?Math.ceil(fOp/contrib-1e-9):Infinity, nLive=ok?Math.ceil(fLive/contrib-1e-9):Infinity;
+  return {price:price,vc:vc,hrs:hrs,fOp:fOp,fLive:fLive,fSal:fLive-fOp,contrib:contrib,ok:ok,nOp:nOp,nLive:nLive,
+    xLive:ok?fLive/contrib:Infinity,need:ok?nLive*hrs:Infinity,cap:H.bill,done:+b.done||0};
+}
+function calcSave(H,Q){
+  var v=S.sv, R=rate();
+  var income=v.income!=null?v.income:Q.total;
+  var save=+v.save||0, grow=+v.grow||0, need=Math.max(0,100-save-grow);
+  var efNeed=H.total, goal=efNeed*v.efMonths, have=+v.efHave||0, rem=Math.max(0,goal-have);
+  var efPct=goal>0?Math.min(1,have/goal):0;
+  var efMonths=rem<=0?0:(v.efMonthly>0?Math.ceil(rem/v.efMonthly-1e-9):Infinity);
+  var gMonth=v.goalMonths>0?(+v.goalAmt||0)/v.goalMonths:0;
+  var bsAmt=v.bs!=null?v.bs:(Q.bsTotal||0);
+  var dev=v.deval!=null?v.deval:(S.rate.dev!=null?S.rate.dev:10);
+  var f=Math.pow(1+dev/100,v.days/30);
+  var now=R?bsAmt/R:0, later=now/f, loss=now-later;
+  return {income:income,save:save,grow:grow,need:need,efNeed:efNeed,goal:goal,have:have,rem:rem,efPct:efPct,efMonths:efMonths,
+    gMonth:gMonth,gWeek:gMonth/WEEKS,bsAmt:bsAmt,dev:dev,f:f,now:now,later:later,loss:loss,lossPct:1-1/f,
+    hoursLost:H.rate>0?loss/H.rate:0,R:R};
+}
+
+/* ================= Pintar ================= */
+var AUTO={};
+function put(k,v){ var els=document.querySelectorAll('[data-o="'+k+'"]'); for(var i=0;i<els.length;i++) if(els[i].textContent!==v) els[i].textContent=v; }
+function puth(k,v){ var els=document.querySelectorAll('[data-h="'+k+'"]'); for(var i=0;i<els.length;i++) if(els[i].getAttribute('data-last')!==v){ els[i].innerHTML=v; els[i].setAttribute('data-last',v); } }
+function term(k,label){ return '<button class="term" data-term="'+k+'">'+label+'</button>'; }
+
+var lastPrice=null, lastHour=null;
+function pulse(k,val){
+  var el=$('[data-o="'+k+'"].chip-v'); if(!el) return;
+  el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+}
+
+function update(){
+  var H=calcHour(), Q=calcQuote(H), B=calcBE(H,Q), V=calcSave(H,Q);
+  AUTO={'be.price':Q.price,'be.vc':Math.round((Q.I+Q.fee)*100)/100,'be.hrs':Q.hrs,'sv.income':Q.total,'sv.bs':Q.bsTotal?Math.round(Q.bsTotal*100)/100:null,
+    'sv.deval':S.rate.dev!=null?S.rate.dev:10};
+  paintRate(); paintHour(H); paintQuote(Q,H); paintBE(B,H); paintSave(V,H,Q); paintHome(H,Q);
+  paintAuto(); paintSegs(); paintRanges(); paintBar(H,Q,B,V);
+  if(lastPrice!==null&&lastPrice!==Q.price) pulse('q.price');
+  if(lastHour!==null&&Math.abs(lastHour-H.rate)>0.004) pulse('h.rate');
+  lastPrice=Q.price; lastHour=H.rate;
+}
+
+function paintRate(){
+  var r=S.rate, chip=$('#rateChip'), R=rate();
+  var state=!R?'none':(r.at&&sameDay(r.at,Date.now())?'ok':'old');
+  chip.setAttribute('data-state',state);
+  put('rate.chipName', rateUse()==='bcv'?'BCV':rateUse()==='par'?'PAR':'PROM');
+  put('rate.chip', R?fmtNum(R,2):'Poner tasa');
+  put('home.rate', R?fmtNum(R,2):'—');
+  var meta;
+  if(!r.at) meta='Todavía no hay tasa. Toca “Actualizar ahora” o escríbela tú.';
+  else meta=(r.src==='auto'?'Actualizada automáticamente ':'Escrita por ti ')+ago(r.at)+'.'+(sameDay(r.at,Date.now())?'':' ⚠️ No es de hoy: actualízala antes de cotizar.');
+  put('rate.meta', meta);
+  var b=+r.bcv||0, p=+r.par||0, gap;
+  if(b&&p){
+    var g=p/b-1;
+    gap='La '+term('brecha','brecha')+' de hoy es de <b>'+pct(g*100,1)+'</b>. ';
+    gap+= g>0.02 ? 'Si cobras en Bs a tasa BCV y luego compras dólares a la paralela, de cada <b>$100</b> te quedan unos <b>'+usd(100/(1+g))+'</b>. Por eso: cobra en $ cuando puedas, o usa tus Bs el mismo día.' : 'Casi no hay diferencia entre las dos tasas. 🎉';
+  } else gap='Escribe también la tasa paralela para ver la '+term('brecha','brecha')+': cuánto pierdes si cobras a una tasa y compras a otra.';
+  puth('rate.gap', gap);
+}
+
+function paintHour(H){
+  var R=rate();
+  put('h.costs',usd(H.costs)); put('h.gear',usd(H.gear));
+  put('h.bill',fmtNum(Math.round(H.bill),0)+' h');
+  put('h.billPct',pct(S.hour.billable)); put('h.resPct',pct(S.hour.reserve));
+  put('h.rate',usd(H.rate));
+  put('h.rateBs', R&&H.rate?bs(H.rate*R)+' por hora · tasa '+rateName():'por cada hora de diseño');
+  put('h.k.salary',usd(H.salary)); put('h.k.costs',usd(H.costs)); put('h.k.gear',usd(H.gear)); put('h.k.res',usd(H.res)); put('h.k.total',usd(H.total));
+  $$('[data-gm]').forEach(function(el){ var g=S.hour.gear[+el.getAttribute('data-gm')]; if(g) el.innerHTML='= <b>'+usd(g.m>0?g.p/g.m:0)+'</b> al mes'; });
+  var msg;
+  if(H.bill<=0) msg='Pon cuántas horas trabajas para calcular tu hora.';
+  else msg='Para cubrir tu vida y tu negocio necesitas facturar <b>'+usd(H.total)+'</b> al mes. Con <b>'+fmtNum(Math.round(H.bill),0)+' horas</b> de diseño real, cada hora debe pagarte al menos <b>'+usd(H.rate)+'</b>. Si cobras menos, le estás regalando tu tiempo al cliente. Bonito gesto, pésimo negocio.';
+  puth('h.msg',msg);
+}
+
+var SEG_COLORS=['var(--m)','var(--c)','var(--y)','var(--k-soft)','var(--line-2)'];
+function paintQuote(Q,H){
+  var q=S.quote;
+  put('q.hrs',fmtNum(Q.hrs,Q.hrs%1?1:0)+' h');
+  put('q.items',usd(Q.I));
+  $$('[data-li]').forEach(function(el){ var i=+el.getAttribute('data-li'); el.innerHTML='= <b>'+usd(Q.lines[i]||0)+'</b>'+(q.items[i]&&q.items[i].cur==='bs'&&!Q.R?' <span style="color:var(--bad)">(falta la tasa)</span>':''); });
+  put('q.marPct',pct(q.margin)); put('q.bufPct',pct(q.buffer));
+  put('q.price',usd(Q.total));
+  put('q.priceBs', Q.bsTotal?bs(Q.bsTotal)+' · tasa '+rateName()+(q.iva?' · con IVA':''):'Pon la tasa para ver el monto en Bs');
+  put('q.depPct',q.dep+'%'); put('q.dep',usd(Q.dep)); put('q.depBs',Q.bsDep?bs(Q.bsDep):'—');
+  put('q.floor',usd(Q.floor));
+  var payNote = q.pay==='paypal' ? 'PayPal cobra ~5,4% + $0,30 por pago recibido (aprox.). Ya está sumado: te llega tu precio completo.'
+    : q.pay==='otro' ? 'Se suma '+pct(+q.payPct||0)+' al precio para cubrir la comisión.'
+    : q.pay==='pm' ? 'Sin comisión. Ojo: el pago móvil se calcula con la tasa del día en que te pagan.'
+    : 'Sin comisión.';
+  put('q.payNote',payNote);
+  $('#payPctF').hidden = q.pay!=='otro';
+  // barra de desglose
+  var parts=[['Tu tiempo',Q.time,'var(--m)'],['Materiales',Q.I,'var(--c)'],['Ganancia',Q.profit,'var(--y)'],['Colchón',Q.buffer,'var(--ink-3)'],['Comisión',Q.fee,'var(--line-2)']];
+  var tot=Q.price||1, bar='', leg='';
+  parts.forEach(function(p){
+    if(p[1]<=0.004) return;
+    bar+='<i style="flex:'+(p[1]/tot).toFixed(4)+' 1 0;background:'+p[2]+'"></i>';
+    leg+='<div><i style="background:'+p[2]+'"></i><span>'+p[0]+'</span><b>'+usd(p[1])+'</b><em>'+pct(p[1]/tot*100,0)+'</em></div>';
+  });
+  if(Q.iva>0) leg+='<div><i style="background:transparent;border:1px dashed var(--line-2)"></i><span>IVA (16%)</span><b>'+usd(Q.iva)+'</b><em>aparte</em></div>';
+  var bEl=$('#qBar'), lEl=$('#qLegend');
+  if(bEl.getAttribute('data-last')!==bar){ bEl.innerHTML=bar; bEl.setAttribute('data-last',bar); }
+  if(lEl.getAttribute('data-last')!==leg){ lEl.innerHTML=leg; lEl.setAttribute('data-last',leg); }
+  var msg;
+  if(H.rate<=0) msg='Primero calcula <a class="term" href="#hora">el valor de tu hora</a>: sin eso, tu tiempo vale $0 (y no, no vale $0).';
+  else if(Q.hrs<=0) msg='Agrega al menos una etapa con horas de trabajo.';
+  else{
+    msg='Por <b>'+fmtNum(Q.hrs,Q.hrs%1?1:0)+' horas</b> de trabajo, en la práctica ganas <b>'+usd(Q.eff)+' por hora</b> (tu mínimo es '+usd(H.rate)+'). ';
+    msg+= Q.revExtra>0 ? 'Cada revisión extra: <b>'+usd(Q.revExtra)+'</b>. ' : '';
+    msg+='Si te regatean, no bajes de <b>'+usd(Q.floor)+'</b>.';
+  }
+  puth('q.msg',msg);
+}
+
+function paintBE(B,H){
+  put('b.fOp',usd(B.fOp)); put('b.fSal',usd(B.fSal)); put('b.fLive',usd(B.fLive));
+  put('b.nLive',B.ok?String(B.nLive):'∞');
+  put('b.nOp',B.ok?B.nOp+' '+plural(B.nOp,'trabajo','trabajos'):'∞');
+  put('b.contrib',usd(B.contrib));
+  var msg;
+  if(!B.ok) msg='💀 Con estos números cada trabajo te cuesta más de lo que cobras. Es como pagar por trabajar. Sube tu precio o baja los materiales.';
+  else msg='Cada trabajo te deja <b>'+usd(B.contrib)+'</b> después de materiales. Con <b>'+B.nOp+'</b> '+plural(B.nOp,'trabajo','trabajos')+' cubres el negocio; con <b>'+B.nLive+'</b> también te pagas tu sueldo. Desde el trabajo <b>'+(B.nLive+1)+'</b>, todo es ganancia. 🎯';
+  puth('b.msg',msg);
+  // progreso
+  var prog=$('#beProg'), maxN=B.ok?Math.max(B.nLive,B.done,1):Math.max(B.done,1);
+  prog.querySelector('.fill').style.width=(Math.min(B.done/maxN,1)*100)+'%';
+  var mo=prog.querySelector('[data-mk="op"]'), ml=prog.querySelector('[data-mk="live"]');
+  if(B.ok){
+    mo.hidden=false; ml.hidden=false;
+    var po=Math.min(B.nOp/maxN,1), pl=Math.min(B.nLive/maxN,1), gap=pl-po;
+    mo.style.left=(po*100)+'%'; ml.style.left='calc('+(pl*100)+'% - 2px)';
+    mo.querySelector('span').textContent=gap<0.12?'':(gap<0.38?String(B.nOp):'Negocio · '+B.nOp);
+    mo.classList.toggle('start',po<0.12);
+    ml.querySelector('span').textContent='Vivir · '+B.nLive;
+    if(B.nOp===B.nLive) mo.hidden=true;
+  } else { mo.hidden=true; ml.hidden=true; }
+  var dm;
+  if(!B.ok) dm='Primero ajusta tus precios: con los números actuales no hay equilibrio posible.';
+  else if(B.done>=B.nLive) dm='🎉 <b>¡Cubriste todo!</b> Llevas '+B.done+' '+plural(B.done,'trabajo','trabajos')+'. Lo que entre de aquí en adelante es ganancia: ahorra una parte.';
+  else if(B.done>=B.nOp) dm='Ya cubriste los gastos del negocio. Te '+plural(B.nLive-B.done,'falta','faltan')+' <b>'+(B.nLive-B.done)+'</b> para pagarte tu sueldo completo.';
+  else dm='Llevas <b>'+B.done+'</b>. Te '+plural(B.nOp-B.done,'falta','faltan')+' <b>'+(B.nOp-B.done)+'</b> para cubrir el negocio y <b>'+(B.nLive-B.done)+'</b> para vivir de esto.';
+  puth('b.doneMsg',dm);
+  // capacidad
+  var need=B.ok?B.need:0, have=B.cap, mx=Math.max(need,have,1);
+  $('#capNeed').style.width=(B.ok?Math.min(need/mx,1)*100:100)+'%';
+  $('#capNeed').style.background=B.ok&&need<=have?'var(--y)':'var(--m)';
+  $('#capHave').style.width=(have/mx*100)+'%';
+  var cm;
+  if(!B.ok) cm='Sin equilibrio no hay cálculo de tiempo. Ajusta precios primero.';
+  else if(B.hrs<=0) cm='Pon cuántas horas te toma un trabajo promedio.';
+  else if(need>have) cm='⚠️ <b>No te da el tiempo.</b> Necesitas '+fmtNum(Math.round(need),0)+' h de diseño al mes y tienes '+fmtNum(Math.round(have),0)+' h. Opciones: subir tus precios, tomar trabajos más grandes o bajar gastos.';
+  else cm='✓ <b>Sí te da.</b> Necesitas '+fmtNum(Math.round(need),0)+' h de diseño y tienes '+fmtNum(Math.round(have),0)+' h. Te sobran '+fmtNum(Math.round(have-need),0)+' h para más clientes (o para dormir).';
+  puth('b.capMsg',cm);
+  $('#capMsg').className='msg '+(B.ok&&need<=have?'ok':'bad');
+  chartBE(B);
+}
+
+function chartBE(B){
+  var svg=$('#beChart'); if(!svg||$('#v-equilibrio').hidden) return;
+  var W=Math.max(280,Math.round(svg.clientWidth||610)),Ht=Math.round(W/PHI),pl=55,pr=13,pt=21,pb=44,html='';
+  svg.setAttribute('viewBox','0 0 '+W+' '+Ht);
+  if(!B.ok||!fin(B.xLive)){
+    svg.innerHTML='<text x="'+W/2+'" y="'+Ht/2+'" text-anchor="middle" class="ch-msg">Las líneas nunca se cruzan 💀</text>'; return;
+  }
+  var xMax=Math.max(4,Math.ceil(B.xLive*PHI)), F=B.fLive, P=B.price, Vc=Math.max(0,B.vc);
+  var yMax=Math.max(P*xMax,F+Vc*xMax)*1.08;
+  function X(n){return pl+(n/xMax)*(W-pl-pr);} function Y(v){return Ht-pb-(v/yMax)*(Ht-pt-pb);}
+  var xs=B.xLive, ys=P*xs;
+  html+='<path class="z-loss" d="M'+X(0)+' '+Y(0)+'L'+X(xs)+' '+Y(ys)+'L'+X(0)+' '+Y(F)+'Z"/>';
+  html+='<path class="z-gain" d="M'+X(xs)+' '+Y(ys)+'L'+X(xMax)+' '+Y(P*xMax)+'L'+X(xMax)+' '+Y(F+Vc*xMax)+'Z"/>';
+  var step=xMax<=10?1:xMax<=20?2:xMax<=50?5:xMax<=100?10:25;
+  for(var n=0;n<=xMax;n+=step){ html+='<line class="gr" x1="'+X(n)+'" x2="'+X(n)+'" y1="'+pt+'" y2="'+(Ht-pb)+'"/><text x="'+X(n)+'" y="'+(Ht-pb+21)+'" text-anchor="middle">'+n+'</text>'; }
+  [0,.5,1].forEach(function(f){ var v=yMax*f/1.08; var lab=v>=1000?'$'+fmtNum(v/1000,1)+'k':'$'+fmtNum(Math.round(v),0); html+='<text x="'+(pl-8)+'" y="'+(Y(v)+5)+'" text-anchor="end">'+lab+'</text>'; });
+  html+='<line class="ax" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(Ht-pb)+'" y2="'+(Ht-pb)+'"/>';
+  html+='<text x="'+(W-pr)+'" y="'+(Ht-4)+'" text-anchor="end">trabajos al mes →</text>';
+  html+='<line class="l-fx" x1="'+X(0)+'" x2="'+X(xMax)+'" y1="'+Y(F)+'" y2="'+Y(F)+'"/>';
+  html+='<path class="l-co" d="M'+X(0)+' '+Y(F)+'L'+X(xMax)+' '+Y(F+Vc*xMax)+'"/>';
+  html+='<path class="l-in" d="M'+X(0)+' '+Y(0)+'L'+X(xMax)+' '+Y(P*xMax)+'"/>';
+  var cx=X(xs), cy=Y(ys);
+  html+='<circle class="reg-f" cx="'+cx+'" cy="'+cy+'" r="8"/><circle class="reg" cx="'+cx+'" cy="'+cy+'" r="13"/><path class="reg" d="M'+(cx-21)+' '+cy+'H'+(cx+21)+'M'+cx+' '+(cy-21)+'V'+(cy+21)+'"/>';
+  var lx=clamp(cx,pl+86,W-pr-86), ly=cy-30<pt+8?cy+44:cy-30;
+  html+='<text class="lbl-eq" x="'+lx+'" y="'+ly+'" text-anchor="middle">Equilibrio: '+fmtNum(xs,1)+' trabajos</text>';
+  if(svg.getAttribute('data-last')!==html){ svg.innerHTML=html; svg.setAttribute('data-last',html); }
+}
+
+function paintSave(V,H,Q){
+  var R=V.R;
+  put('s.savePct',pct(V.save,1)); put('s.growPct',pct(V.grow,1)); put('s.needPct',pct(V.need,1));
+  var a=V.income*V.need/100, b=V.income*V.save/100, c=V.income*V.grow/100;
+  put('s.need',usd(a)); put('s.save',usd(b)); put('s.grow',usd(c));
+  function both(x){ return usd(x)+(R?' · '+bs(x*R):''); }
+  put('s.needL',both(a)); put('s.saveL',both(b)); put('s.growL',both(c));
+  put('s.chip',usd(b)); put('s.chipS', V.income>0?'de '+usd(V.income)+' · en dólares, apenas te paguen':'escribe cuánto te pagaron');
+  var gs=$('#gsplit');
+  var ga=gs.querySelector('.gs-a'), gr=gs.querySelector('.gs-r'), gb=gs.querySelector('.gs-b'), gc=gs.querySelector('.gs-c');
+  ga.style.flex=Math.max(V.need,0.001)+' 1 0px'; gr.style.flex=Math.max(V.save+V.grow,0.001)+' 1 0px';
+  gb.style.flex=Math.max(V.save,0.001)+' 1 0px'; gc.style.flex=Math.max(V.grow,0.001)+' 1 0px';
+  ga.classList.toggle('tiny',V.need<12); gr.hidden=(V.save+V.grow)<=0;
+  gb.classList.toggle('tiny',V.save/(V.save+V.grow||1)<0.3||V.save<6); gc.classList.toggle('tiny',V.grow/(V.save+V.grow||1)<0.3||V.grow<6);
+  // fondo de emergencia
+  $('#efRing').setAttribute('stroke-dasharray',(V.efPct*282.74).toFixed(1)+' 283');
+  put('s.efPct',pct(Math.round(V.efPct*100),0));
+  var em='Tu meta: <b>'+usd(V.goal)+'</b> ('+S.sv.efMonths+' meses de '+usd(V.efNeed)+', según “Mi hora”). ';
+  if(V.rem<=0) em+='🎉 <b>¡Ya la lograste!</b> Ahora sí: ese dinero no se toca.';
+  else if(!fin(V.efMonths)) em+='Te faltan <b>'+usd(V.rem)+'</b>. Pon cuánto puedes apartar al mes, aunque sea poquito.';
+  else{ var d=new Date(); d.setMonth(d.getMonth()+V.efMonths);
+    em+='Te faltan <b>'+usd(V.rem)+'</b>. Apartando '+usd(S.sv.efMonthly)+' al mes lo logras en <b>'+V.efMonths+' '+plural(V.efMonths,'mes','meses')+'</b> (≈ '+d.toLocaleDateString('es-VE',{month:'long',year:'numeric'})+').'; }
+  puth('s.efMsg',em);
+  var gn=esc(S.sv.goalName||'tu meta');
+  puth('s.goalMsg', V.gMonth>0 ? 'Para <b>'+gn+'</b> ('+usd(+S.sv.goalAmt||0)+') en '+S.sv.goalMonths+' '+plural(+S.sv.goalMonths,'mes','meses')+': aparta <b>'+usd(V.gMonth)+' al mes</b>, o sea <b>'+usd(V.gWeek)+' por semana</b>.'+(H.rate>0?' Equivale a unas '+fmtNum(V.gMonth/H.rate,1)+' horas de tu trabajo al mes.':'') : 'Escribe cuánto cuesta y en cuántos meses lo quieres.');
+  // costo de esperar
+  put('s.days',S.sv.days+' '+plural(+S.sv.days,'día','días'));
+  put('s.devNote', S.sv.deval!=null?'Escrito por ti.':(S.rate.dev!=null?'Calculado con la tasa BCV del último mes.':'Valor de ejemplo. Con internet se calcula solo con la tasa BCV real.'));
+  put('s.now',usd(V.now)); put('s.later',usd(V.later)); put('s.laterL','En '+S.sv.days+' d');
+  $('#mNow').style.width='100%'; $('#mLater').style.width=(100/V.f).toFixed(1)+'%';
+  var dm;
+  if(!R) dm='Pon la tasa del día (arriba) para hacer este cálculo.';
+  else if(V.bsAmt<=0) dm='Escribe cuántos bolívares cobraste.';
+  else dm='Hoy tus '+bs(V.bsAmt)+' valen <b>'+usd(V.now)+'</b>. Si esperas '+S.sv.days+' '+plural(+S.sv.days,'día','días')+', valdrán unos <b>'+usd(V.later)+'</b>: pierdes <b>'+usd(V.loss)+'</b>'+(V.hoursLost>0.05?', como regalar <b>'+fmtNum(V.hoursLost,1)+' horas</b> de tu trabajo':'')+'. El bolívar no espera a nadie: úsalos o cámbialos rápido.';
+  puth('s.devMsg',dm);
+}
+
+function paintHome(H,Q){
+  put('home.hour',H.rate>0?usd(H.rate):'—');
+  put('home.quote',Q.total>0?usd(Q.total):'—');
+  put('home.quoteS',S.quote.project?S.quote.project:'precio actual');
+  var done={rate:!!(S.rate.at&&sameDay(S.rate.at,Date.now())&&rate()), hora:!!S.seen.hora, cotizar:!!(S.quotes.length||S.seen.cotizarOk), mes:!!(S.seen.equilibrio&&S.seen.ahorro)};
+  $$('.route li').forEach(function(li){ var k=li.getAttribute('data-step'); li.firstElementChild.classList.toggle('done',!!done[k]); });
+  var cta=$('#ctaStart');
+  if(S.seen.hora){ cta.setAttribute('href','#cotizar'); cta.firstChild.nodeValue='Ir a cotizar '; }
+}
+
+function paintAuto(){
+  $$('[data-null][data-k]').forEach(function(el){
+    var k=el.getAttribute('data-k'); if(!(k in AUTO)) return;
+    var isAuto=getP(k)==null; el.classList.toggle('auto',isAuto);
+    if(isAuto&&document.activeElement!==el) el.value=fmtIn(AUTO[k]==null?'':Math.round(AUTO[k]*100)/100);
+    var rs=$('[data-reset="'+k+'"]'); if(rs) rs.hidden=isAuto;
+  });
+}
+function paintSegs(){
+  $$('[data-seg]').forEach(function(g){
+    var v=String(getP(g.getAttribute('data-seg')));
+    $$('button[data-v]',g).forEach(function(b){ b.setAttribute('aria-pressed',String(b.getAttribute('data-v')===v)); });
+  });
+  $$('.tpl').forEach(function(b){ b.setAttribute('aria-pressed',String(b.getAttribute('data-tpl')===S.quote.tpl)); });
+}
+function paintRanges(){
+  $$('input[type=range]').forEach(function(r){
+    var mn=+r.min,mx=+r.max,v=+r.value; r.style.setProperty('--p',((v-mn)/(mx-mn)*100)+'%');
+  });
+}
+
+/* Barra flotante con el resultado (móvil) */
+var CUR='inicio';
+function paintBar(H,Q,B,V){
+  var k='',v='';
+  if(CUR==='hora'){k='Tu hora vale';v=usd(H.rate)+(Q.R&&H.rate?' · '+bs(H.rate*Q.R):'');}
+  else if(CUR==='cotizar'){k='Precio sugerido';v=usd(Q.total)+(Q.bsTotal?' · '+bs(Q.bsTotal):'');}
+  else if(CUR==='equilibrio'){k='Equilibrio';v=B.ok?B.nLive+' trabajos al mes':'Sin equilibrio';}
+  else if(CUR==='ahorro'){k='De este pago, ahorra';v=usd(V.income*V.save/100);}
+  put('bar.k',k); put('bar.v',v);
+  var bar=$('#pricebar'); ['v-c','v-m','v-y','v-k'].forEach(function(c){ bar.classList.remove(c); });
+  var cls={hora:'v-c',cotizar:'v-m',equilibrio:'v-y',ahorro:'v-k'}[CUR]; if(cls) bar.classList.add(cls);
+  checkBar();
+}
+var barTick=false;
+function checkBar(){
+  var bar=$('#pricebar'), view=$('#v-'+CUR), chip=view&&view.querySelector('[data-result]');
+  if(!chip||CUR==='inicio'||sheetOpen){ bar.classList.add('off'); return; }
+  var r=chip.getBoundingClientRect(), vh=window.innerHeight;
+  var visible=r.top<vh-89&&r.bottom>89;
+  bar.classList.toggle('off',visible);
+  bar.setAttribute('aria-hidden',String(visible));
+}
+window.addEventListener('scroll',function(){ if(barTick) return; barTick=true; requestAnimationFrame(function(){ barTick=false; checkBar(); }); },{passive:true});
+var rzT=null;
+window.addEventListener('resize',function(){ checkBar(); clearTimeout(rzT); rzT=setTimeout(function(){ if(CUR==='equilibrio') update(); },160); });
+
+/* ================= Listas editables ================= */
+function numIn(list,i,f,v,label,extra){
+  return '<input class="in" inputmode="decimal" enterkeyhint="done" data-list="'+list+'" data-i="'+i+'" data-f="'+f+'" value="'+fmtIn(v)+'" aria-label="'+esc(label)+'"'+(extra||'')+'>';
+}
+function txtIn(list,i,f,v,label,cls){
+  return '<input class="in '+(cls||'')+'" data-list="'+list+'" data-i="'+i+'" data-f="'+f+'" data-type="text" value="'+esc(v)+'" aria-label="'+esc(label)+'" autocomplete="off">';
+}
+function delBtn(list,i,name){ return '<button type="button" class="x" data-del="'+list+'" data-i="'+i+'" aria-label="Quitar '+esc(name)+'">×</button>'; }
+
+function renderCosts(){
+  $('#costsList').innerHTML = S.hour.costs.length ? S.hour.costs.map(function(c,i){
+    return '<div class="row r-cost">'+txtIn('hour.costs',i,'n',c.n,'Nombre del gasto')+'<div class="money"><span>$</span>'+numIn('hour.costs',i,'v',c.v,'Monto mensual de '+c.n)+'</div>'+delBtn('hour.costs',i,c.n)+'</div>';
+  }).join('') : '<p class="empty">Sin gastos fijos. ¿Segura? Hasta el internet cuenta.</p>';
+}
+function renderGear(){
+  $('#gearList').innerHTML = S.hour.gear.length ? S.hour.gear.map(function(g,i){
+    return '<div class="row r-gear">'+txtIn('hour.gear',i,'n',g.n,'Nombre del equipo','nm')+delBtn('hour.gear',i,g.n)+
+      '<div class="money"><span>$</span>'+numIn('hour.gear',i,'p',g.p,'Precio de '+g.n)+'</div>'+
+      '<div class="money has-suf">'+numIn('hour.gear',i,'m',g.m,'Meses que dura '+g.n,' style="padding-left:13px"')+'<span class="suf">meses</span></div>'+
+      '<div class="lo" data-gm="'+i+'"></div></div>';
+  }).join('') : '<p class="empty">Sin equipos. ¿Diseñas con la mente? Respeto.</p>';
+}
+function renderPhases(){
+  $('#phaseList').innerHTML = S.quote.phases.length ? S.quote.phases.map(function(p,i){
+    return '<div class="row r-phase">'+txtIn('quote.phases',i,'n',p.n,'Etapa')+
+      '<div class="stepper"><button type="button" data-inc="-0.5" aria-label="Media hora menos">−</button>'+numIn('quote.phases',i,'h',p.h,'Horas de '+p.n)+'<button type="button" data-inc="0.5" aria-label="Media hora más">+</button></div>'+
+      delBtn('quote.phases',i,p.n)+'</div>';
+  }).join('') : '<p class="empty">Sin etapas. Agrega al menos una: tu tiempo no es gratis.</p>';
+}
+function renderItems(){
+  $('#itemList').innerHTML = S.quote.items.length ? S.quote.items.map(function(it,i){
+    return '<div class="row r-item">'+txtIn('quote.items',i,'n',it.n,'Material','nm')+delBtn('quote.items',i,it.n)+
+      '<div class="money has-suf qty">'+numIn('quote.items',i,'q',it.q,'Cantidad de '+it.n,' style="padding-left:13px"')+'<span class="suf">unid.</span></div>'+
+      '<div class="money"><button type="button" class="cur" data-cur="'+i+'" aria-label="Moneda del precio: toca para cambiar">'+(it.cur==='bs'?'Bs':'$')+'</button>'+numIn('quote.items',i,'p',it.p,'Precio por unidad de '+it.n)+'</div>'+
+      '<div class="lo" data-li="'+i+'"></div></div>';
+  }).join('') : '<p class="empty">Sin materiales: trabajo 100% digital. ✨</p>';
+}
+function renderTpls(){
+  $('#tpls').innerHTML = Object.keys(TPL).map(function(k){ var t=TPL[k];
+    return '<button type="button" class="tpl" data-tpl="'+k+'" style="--tw:'+t.c+'"><span class="tw"></span><b>'+t.n+'</b><small>'+t.s+'</small></button>'; }).join('');
+}
+function renderQuotes(){
+  var el=$('#quoteList');
+  if(!S.quotes.length){ el.innerHTML='<p class="empty">Aún no guardas cotizaciones. La primera siempre es la más difícil (mentira, es esta).</p>'; return; }
+  el.innerHTML=S.quotes.map(function(q){
+    return '<div class="row" style="grid-template-columns:minmax(0,1fr) 34px"><button type="button" data-load="'+q.id+'" style="text-align:left;min-height:44px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center">'+
+      '<span style="min-width:0"><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(q.project||q.tplName)+'</b><span class="muted" style="font-size:var(--t-2)">'+esc(q.client||'Sin cliente')+' · '+fdate(q.at)+'</span></span>'+
+      '<b style="font-family:var(--f-d);font-size:var(--t1)">'+usd(q.total)+'</b></button>'+delBtn('quotes',q.id,q.project||'cotización').replace('data-del="quotes"','data-delq="1"')+'</div>';
+  }).join('');
+}
+function renderGloss(filter){
+  var f=(filter||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  var keys=Object.keys(TERMS).sort(function(a,b){return TERMS[a].t.localeCompare(TERMS[b].t,'es');});
+  var html=keys.filter(function(k){ var t=TERMS[k]; return !f||(t.t+' '+t.d).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').indexOf(f)>-1; })
+    .map(function(k){ var t=TERMS[k]; return '<details><summary>'+t.t+'</summary><div class="gd">'+t.d+'<div class="ge">'+t.e+'</div></div></details>'; }).join('');
+  $('#gloss').innerHTML=html||'<p class="empty">No encontré esa palabra. Prueba con otra.</p>';
+}
+function renderLists(){ renderCosts(); renderGear(); renderPhases(); renderItems(); renderQuotes(); }
+
+/* ================= Llenar inputs desde el estado ================= */
+function fillInputs(root){
+  $$('[data-k]',root).forEach(function(el){
+    if(document.activeElement===el) return;
+    var v=getP(el.getAttribute('data-k'));
+    if(el.type==='checkbox') el.checked=!!v;
+    else if(el.type==='range') el.value=v;
+    else if(el.getAttribute('data-type')==='text') el.value=v==null?'':v;
+    else el.value=fmtIn(v);
+  });
+}
+
+/* ================= Eventos ================= */
+function readVal(el){
+  if(el.type==='checkbox') return el.checked;
+  if(el.type==='range') return +el.value;
+  if(el.getAttribute('data-type')==='text') return el.value;
+  var n=parseNum(el.value, el.hasAttribute('data-dec'));
+  if(n==null) return el.hasAttribute('data-null')?null:0;
+  return n;
+}
+document.addEventListener('input',function(e){
+  var el=e.target, k=el.getAttribute&&el.getAttribute('data-k'), v;
+  if(k){
+    v=readVal(el);
+    if(typeof v==='number'&&LIM[k]) v=clamp(v,LIM[k][0],LIM[k][1]);
+    setP(k,v);
+    if(k==='rate.bcv'||k==='rate.par'){ S.rate.at=Date.now(); S.rate.src='manual'; }
+    if(k==='sv.save'||k==='sv.grow'){
+      S.sv.preset='custom';
+      if(S.sv.save+S.sv.grow>100){ if(k==='sv.save') S.sv.grow=100-S.sv.save; else S.sv.save=100-S.sv.grow; fillInputs($('#v-ahorro')); }
+    }
+    if(k==='quote.project'||k==='quote.client') { /* nada extra */ }
+  } else if(el.getAttribute&&el.getAttribute('data-list')){
+    var arr=getP(el.getAttribute('data-list')), i=+el.getAttribute('data-i'), f=el.getAttribute('data-f');
+    if(!arr||!arr[i]) return;
+    v=readVal(el); if(typeof v==='number') v=Math.max(0,v);
+    arr[i][f]=v;
+  } else return;
+  persist(); update();
+});
+document.addEventListener('change',function(e){ if(e.target.type==='checkbox'&&e.target.getAttribute('data-k')){ setP(e.target.getAttribute('data-k'),e.target.checked); persist(); update(); } });
+document.addEventListener('focusin',function(e){
+  var el=e.target; if(el.getAttribute&&el.getAttribute('inputmode')==='decimal'){ setTimeout(function(){ try{el.select();}catch(x){} },0); }
+});
+document.addEventListener('focusout',function(e){
+  var el=e.target; if(!el.getAttribute||el.getAttribute('inputmode')!=='decimal') return;
+  var k=el.getAttribute('data-k');
+  if(k){ var v=getP(k); if(v==null&&(k in AUTO)) { paintAuto(); return; } el.value=fmtIn(v); }
+  else if(el.getAttribute('data-list')){ var arr=getP(el.getAttribute('data-list')), it=arr&&arr[+el.getAttribute('data-i')]; if(it) el.value=fmtIn(it[el.getAttribute('data-f')]); }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.type!=='search'){ e.target.blur(); }
+  if(e.key==='Escape'&&sheetOpen) closeSheet(true);
+});
+
+document.addEventListener('click',function(e){
+  var t=e.target.closest('button,a[data-open],[data-term]'); if(!t) return;
+  var d=t.dataset;
+  if(d.term){ e.preventDefault(); openTerm(d.term,t); return; }
+  if(d.open){ e.preventDefault(); openSheet(d.open,t); return; }
+  if(d.inc){
+    var wrap=t.parentNode, inp=wrap.querySelector('input');
+    var cur=parseNum(inp.value)||0, nv=Math.round((cur+(+d.inc))*100)/100;
+    var k=inp.getAttribute('data-k'), lim=k&&LIM[k];
+    nv=lim?clamp(nv,lim[0],lim[1]):Math.max(0,nv);
+    inp.value=fmtIn(nv); inp.dispatchEvent(new Event('input',{bubbles:true}));
+    return;
+  }
+  var seg=t.closest('[data-seg]');
+  if(seg&&d.v!==undefined){
+    var key=seg.getAttribute('data-seg'), val=t.hasAttribute('data-n')?+d.v:d.v;
+    setP(key,val);
+    if(key==='sv.preset'&&PRESET[val]){ S.sv.save=PRESET[val][0]; S.sv.grow=PRESET[val][1]; fillInputs($('#v-ahorro')); }
+    if(key==='theme') applyTheme();
+    persist(); update(); return;
+  }
+  if(d.add){
+    var list=getP(d.add);
+    if(d.add==='hour.costs') list.push({n:'',v:0});
+    else if(d.add==='hour.gear') list.push({n:'',p:0,m:24});
+    else if(d.add==='quote.phases') list.push({n:'',h:1});
+    else if(d.add==='quote.items') list.push({n:'',q:1,p:0,cur:'usd'});
+    renderLists(); persist(); update();
+    var ins=$$('[data-list="'+d.add+'"][data-f="n"]'); if(ins.length){ var last=ins[ins.length-1]; last.focus(); last.placeholder='Escribe el nombre'; }
+    return;
+  }
+  if(d.del){ getP(d.del).splice(+d.i,1); renderLists(); persist(); update(); return; }
+  if(d.delq){ var id=+t.closest('.row').querySelector('[data-load]').getAttribute('data-load'); S.quotes=S.quotes.filter(function(q){return q.id!==id;}); renderQuotes(); persist(); update(); toast('Cotización borrada'); return; }
+  if(d.cur!==undefined&&t.classList.contains('cur')){ var it=S.quote.items[+d.cur]; if(it){ it.cur=it.cur==='bs'?'usd':'bs'; t.textContent=it.cur==='bs'?'Bs':'$'; persist(); update(); if(it.cur==='bs'&&!rate()) toast('Pon la tasa del día para convertir Bs'); } return; }
+  if(d.tpl){ applyTpl(d.tpl); return; }
+  if(d.load){ loadQuote(+d.load); return; }
+  if(d.reset){ setP(d.reset,null); persist(); update(); toast('Tomado automáticamente'); return; }
+  if(d.act){ ACT[d.act]&&ACT[d.act](t); }
+});
+$('#glossQ').addEventListener('input',function(e){ renderGloss(e.target.value); });
+
+function applyTpl(k){
+  var t=TPL[k]; if(!t) return;
+  S.quote.tpl=k;
+  S.quote.phases=t.ph.map(function(p){return {n:p[0],h:p[1]};});
+  S.quote.items=t.it.map(function(p){return {n:p[0],q:p[1],p:p[2],cur:p[3]};});
+  renderPhases(); renderItems(); persist(); update();
+  toast(t.n+': horas y materiales cargados');
+}
+function loadQuote(id){
+  var q=S.quotes.filter(function(x){return x.id===id;})[0]; if(!q) return;
+  S.quote=merge(clone(DEF.quote),clone(q.snap));
+  renderPhases(); renderItems(); fillInputs($('#v-cotizar')); persist(); update();
+  window.scrollTo({top:0,behavior:'smooth'}); toast('Cotización cargada');
+}
+
+/* ================= Acciones ================= */
+function quoteText(Q){
+  var q=S.quote, t=TPL[q.tpl]||TPL.blanco, name=q.project||t.n, R=Q.R;
+  var inc=q.phases.filter(function(p){return p.n&&p.h>0;}).map(function(p){return p.n.toLowerCase();});
+  var L=[];
+  L.push('Hola'+(q.client?' '+q.client:'')+' 👋');
+  L.push('Te comparto la cotización de *'+name+'*:');
+  L.push('');
+  if(inc.length) L.push('• Incluye: '+inc.join(', ')+'.');
+  L.push('• '+(q.revs>0?q.revs+' '+plural(+q.revs,'ronda','rondas')+' de revisión incluidas.':'Sin rondas de revisión incluidas.')+(Q.revExtra>0?' Revisión adicional: '+usd(Q.revExtra)+' c/u.':''));
+  var mats=q.items.filter(function(i){return i.n;}).map(function(i){return i.n;});
+  if(mats.length) L.push('• Materiales: '+mats.join(', ')+'.');
+  L.push('');
+  L.push('💰 *Total: '+usd(Q.total)+'*'+(q.iva?' (IVA incluido)':''));
+  if(R) L.push('   Equivale a '+bs(Q.bsTotal)+' (tasa '+rateName()+' de hoy '+fdate(Date.now())+': '+fmtNum(R,2)+')');
+  if(q.dep<100) L.push('✅ Para empezar: anticipo de '+q.dep+'% → '+usd(Q.dep)+(R?' ('+bs(Q.bsDep)+')':'')+'. El resto al entregar.');
+  else L.push('✅ Pago completo para empezar.');
+  L.push('⏳ Precio válido '+VALID[q.valid]+'. Si pagas en bolívares, se calcula con la tasa del día del pago.');
+  if(S.profile.studio) { L.push(''); L.push(S.profile.studio); }
+  return L.join('\n');
+}
+function copyText(text){
+  if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(text).then(function(){return true;},function(){return fallbackCopy(text);});
+  return Promise.resolve(fallbackCopy(text));
+}
+function fallbackCopy(t){ var ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=false; try{ok=document.execCommand('copy');}catch(e){} document.body.removeChild(ta); return ok; }
+function current(){ var H=calcHour(); return calcQuote(H); }
+function markQuoted(){ if(!S.seen.cotizarOk){ S.seen.cotizarOk=true; persist(); update(); } }
+
+var ACT={
+  wa:function(){ var Q=current(); if(Q.total<=0){ toast('Primero arma la cotización'); return; } markQuoted(); window.open('https://wa.me/?text='+encodeURIComponent(quoteText(Q)),'_blank'); },
+  copy:function(){ var Q=current(); copyText(quoteText(Q)).then(function(ok){ toast(ok?'Copiada ✓ Pégala donde quieras':'No pude copiar. Usa el botón de WhatsApp.'); }); markQuoted(); },
+  pdf:function(){ var Q=current(); if(Q.total<=0){ toast('Primero arma la cotización'); return; } buildPrint(Q); markQuoted(); setTimeout(function(){ window.print(); },60); },
+  saveQ:function(){
+    var Q=current(), q=S.quote, t=TPL[q.tpl]||TPL.blanco;
+    if(Q.total<=0){ toast('No hay nada que guardar todavía'); return; }
+    S.quotes.unshift({id:Date.now(),at:Date.now(),project:q.project,client:q.client,tplName:t.n,total:Q.total,bs:Q.bsTotal,rate:Q.R,snap:clone(q)});
+    S.quotes=S.quotes.slice(0,60); markQuoted(); renderQuotes(); persist(); update(); toast('Guardada en tus cotizaciones ✓');
+  },
+  newQ:function(){
+    var keep=S.quote; S.quote=clone(DEF.quote);
+    ['who','margin','buffer','pay','payPct','iva','round','dep','valid','revs'].forEach(function(k){ S.quote[k]=keep[k]; });
+    renderPhases(); renderItems(); fillInputs($('#v-cotizar')); persist(); update();
+    window.scrollTo({top:0,behavior:'smooth'}); toast('Cotización nueva lista');
+  },
+  toResult:function(){ var c=$('#v-'+CUR+' [data-result]'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); },
+  closeSheet:function(){ closeSheet(true); },
+  fetchRates:function(){ fetchRates(true); },
+  backup:function(){
+    flush(); var blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}), a=document.createElement('a'), d=new Date();
+    a.href=URL.createObjectURL(blob); a.download='tinta-y-tasa-respaldo-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'.json';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500); toast('Respaldo descargado ✓');
+  },
+  restore:function(){ var f=$('#restoreFile'); if(f) f.click(); },
+  wipe:function(){
+    if(!confirm('¿Borrar todos tus datos? Esto no se puede deshacer.')) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    S=clone(DEF); closeSheet(true); renderAll(); toast('Listo, como nuevo'); fetchRates(false);
+  }
+};
+document.addEventListener('change',function(e){
+  if(e.target.id!=='restoreFile'||!e.target.files[0]) return;
+  var r=new FileReader();
+  r.onload=function(){ try{ var data=JSON.parse(r.result); if(!data||!data.hour||!data.quote) throw 0; S=merge(clone(DEF),data); flush(); closeSheet(true); renderAll(); toast('Respaldo cargado ✓'); }catch(x){ toast('Ese archivo no es un respaldo válido'); } };
+  r.readAsText(e.target.files[0]);
+});
+
+function buildPrint(Q){
+  var p=S.profile, q=S.quote, t=TPL[q.tpl]||TPL.blanco, d=Date.now();
+  var num='TT-'+new Date(d).getFullYear().toString().slice(2)+('0'+(new Date(d).getMonth()+1)).slice(-2)+('0'+new Date(d).getDate()).slice(-2)+'-'+(S.quotes.length+1);
+  var inc=q.phases.filter(function(x){return x.n&&x.h>0;}).map(function(x){return esc(x.n);}).join(', ');
+  var mats=q.items.filter(function(x){return x.n;}).map(function(x){return esc(x.n)+' ('+fmtIn(x.q)+')';}).join(', ');
+  var service=Q.price-Q.matPrice;
+  var h='<div class="pr-bar"><i style="background:#00799C"></i><i style="background:#D1006B"></i><i style="background:#FFC61A"></i><i style="background:#1A1815"></i></div>'+
+    '<header class="pr-h"><div><div class="pr-brand">'+esc(p.studio||'Cotización de diseño')+'</div>'+(p.phone?'<div>WhatsApp '+esc(p.phone)+'</div>':'')+'</div>'+
+    '<div class="pr-meta">Cotización '+num+'<br>'+fdate(d)+'<br>Válida '+VALID[q.valid]+'</div></header>'+
+    '<h1 class="pr-t">'+esc(q.project||t.n)+'</h1>'+(q.client?'<p class="pr-for">Para: <b>'+esc(q.client)+'</b></p>':'')+
+    '<table class="pr-tab"><thead><tr><th>Concepto</th><th>Monto</th></tr></thead><tbody>'+
+    '<tr><td><b>Servicio de diseño</b><br><small>'+(inc?'Incluye: '+inc+'. ':'')+(q.revs>0?q.revs+' '+plural(+q.revs,'ronda','rondas')+' de revisión.':'')+'</small></td><td>'+usd(service)+'</td></tr>'+
+    (Q.matPrice>0?'<tr><td><b>Materiales e impresión</b><br><small>'+mats+'</small></td><td>'+usd(Q.matPrice)+'</td></tr>':'')+
+    (Q.iva>0?'<tr><td>IVA (16%)</td><td>'+usd(Q.iva)+'</td></tr>':'')+
+    '</tbody><tfoot><tr><td>Total</td><td>'+usd(Q.total)+'</td></tr></tfoot></table>'+
+    (Q.R?'<p class="pr-bs">Equivalente hoy: '+bs(Q.bsTotal)+' · tasa '+rateName()+' '+fmtNum(Q.R,2)+'</p>':'')+
+    '<div class="pr-terms"><h3>Condiciones</h3><ul>'+
+    (q.dep<100?'<li>Anticipo de '+q.dep+'% ('+usd(Q.dep)+') para iniciar; el resto al entregar.</li>':'<li>Pago completo para iniciar.</li>')+
+    '<li>Incluye '+q.revs+' '+plural(+q.revs,'ronda','rondas')+' de revisión.'+(Q.revExtra>0?' Revisión adicional: '+usd(Q.revExtra)+' c/u.':'')+'</li>'+
+    '<li>Pagos en bolívares se calculan con la tasa '+(rateUse()==='bcv'?'BCV':'del día')+' del día del pago.</li>'+
+    '<li>Los archivos finales se entregan al completar el pago.</li></ul></div>'+
+    '<p class="pr-f">Gracias por confiar en mi trabajo.</p>';
+  $('#print').innerHTML=h;
+}
+
+/* ================= Hoja inferior ================= */
+var sheetOpen=false, sheetOpener=null;
+function showSheet(html,opener){
+  var sh=$('#sheet'), bg=$('#sheetBg');
+  $('#sheetBody').innerHTML='';
+  if(typeof html==='string') $('#sheetBody').innerHTML=html; else $('#sheetBody').appendChild(html);
+  sheetOpener=opener||null;
+  sh.hidden=false; bg.hidden=false;
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ sh.classList.add('on'); bg.classList.add('on'); }); });
+  if(!sheetOpen){ try{ history.pushState({sheet:1},''); }catch(e){} }
+  sheetOpen=true; checkBar();
+  setTimeout(function(){ var x=$('.sheet-x'); if(x) x.focus({preventScroll:true}); },60);
+  fillInputs($('#sheet')); update();
+}
+function closeSheet(fromUI){
+  if(!sheetOpen) return;
+  sheetOpen=false;
+  var sh=$('#sheet'), bg=$('#sheetBg');
+  sh.classList.remove('on'); bg.classList.remove('on');
+  setTimeout(function(){ if(!sheetOpen){ sh.hidden=true; bg.hidden=true; $('#sheetBody').innerHTML=''; } },390);
+  if(fromUI&&history.state&&history.state.sheet){ try{ history.back(); }catch(e){} }
+  if(sheetOpener&&sheetOpener.focus) sheetOpener.focus({preventScroll:true});
+  checkBar();
+}
+window.addEventListener('popstate',function(){ if(sheetOpen) closeSheet(false); });
+$('#sheetBg').addEventListener('click',function(){ closeSheet(true); });
+function openSheet(name,opener){
+  var tpl=$('#tpl-'+name); if(!tpl) return;
+  showSheet(document.importNode(tpl.content,true),opener);
+  if(name==='rate'&&navigator.onLine&&(!S.rate.at||Date.now()-S.rate.at>30*60000)) fetchRates(false);
+}
+function openTerm(k,opener){
+  var t=TERMS[k]; if(!t) return;
+  showSheet('<p class="sheet-k">Diccionario sin enredos</p><h2 class="sheet-t" id="sheetTitle">'+t.t+'</h2><p class="sheet-d">'+t.d+'</p><div class="sheet-ex"><span>Ejemplo</span>'+t.e+'</div>',opener);
+}
+
+/* ================= Toast ================= */
+var toastT=null;
+function toast(msg){ var el=$('#toast'); el.textContent=msg; el.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('on'); },2618); }
+
+/* ================= Tasa automática (DolarAPI) ================= */
+var fetching=false;
+function getJSON(url,ms){
+  var ctl=('AbortController' in window)?new AbortController():null, to=setTimeout(function(){ if(ctl) ctl.abort(); },ms||9000);
+  return fetch(url,{signal:ctl?ctl.signal:undefined,cache:'no-store'}).then(function(r){ clearTimeout(to); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+function fetchRates(manual){
+  if(fetching) return; fetching=true;
+  if(manual) put('rate.meta','Buscando la tasa de hoy…');
+  getJSON(API+'dolares').then(function(j){
+    var arr=Array.isArray(j)?j:[j];
+    function pick(f){ for(var i=0;i<arr.length;i++){ var x=arr[i]; if(x&&String(x.fuente||x.nombre||'').toLowerCase().indexOf(f)>-1){ var v=+(x.promedio||x.venta||x.compra); if(v>0) return v; } } return null; }
+    var of=pick('oficial'), pa=pick('paralelo');
+    if(!of&&!pa) throw new Error('vacío');
+    if(of) S.rate.bcv=Math.round(of*10000)/10000;
+    if(pa) S.rate.par=Math.round(pa*10000)/10000;
+    S.rate.at=Date.now(); S.rate.src='auto';
+    persist(); fillInputs(document); update();
+    if(manual) toast('Tasa actualizada ✓');
+    if(!S.rate.devAt||Date.now()-S.rate.devAt>12*3600000) fetchHistory();
+  }).catch(function(){
+    if(manual) toast('Sin conexión con la tasa. Escríbela a mano.');
+    update();
+  }).then(function(){ fetching=false; });
+}
+function fetchHistory(){
+  getJSON(API+'historicos/dolares/oficial',12000).then(function(j){
+    if(!Array.isArray(j)||j.length<2) return;
+    var pts=j.map(function(x){ return {t:Date.parse(x.fecha||x.fechaActualizacion), v:+(x.promedio||x.venta)}; })
+      .filter(function(p){ return p.t&&p.v>0; }).sort(function(a,b){ return a.t-b.t; });
+    if(pts.length<2) return;
+    var last=pts[pts.length-1], target=last.t-30*864e5, best=null;
+    pts.forEach(function(p){ if(p.t<=target) best=p; });
+    if(!best) return;
+    var days=(last.t-best.t)/864e5; if(days<20) return;
+    var m=Math.pow(last.v/best.v,30/days)-1;
+    if(fin(m)&&m>-0.5&&m<3){ S.rate.dev=Math.round(m*1000)/10; S.rate.devAt=Date.now(); persist(); update(); }
+  }).catch(function(){});
+}
+
+/* ================= Tema ================= */
+function applyTheme(){
+  var r=document.documentElement;
+  if(S.theme==='light'||S.theme==='dark') r.setAttribute('data-theme',S.theme); else r.removeAttribute('data-theme');
+  var dark=S.theme==='dark'||(S.theme!=='light'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
+  $('meta[name="theme-color"]').setAttribute('content',dark?'#13110E':'#F3EDE2');
+}
+if(window.matchMedia){ var mq=matchMedia('(prefers-color-scheme: dark)'); if(mq.addEventListener) mq.addEventListener('change',applyTheme); }
+
+/* ================= Arte áureo del inicio ================= */
+function heroArt(){
+  var svg=$('#heroArt'); if(!svg) return;
+  var W=1618,H=1000,x=0,y=0,w=W,h=H,sq=[],d='M0 '+H,s,i,k;
+  for(i=0;i<10;i++){
+    k=i%4;
+    if(k===0){ s=h; sq.push([x,y,s]); d+='A'+s+' '+s+' 0 0 1 '+(x+s)+' '+y; x+=s; w-=s; }
+    else if(k===1){ s=w; sq.push([x,y,s]); d+='A'+s+' '+s+' 0 0 1 '+(x+s)+' '+(y+s); y+=s; h-=s; }
+    else if(k===2){ s=h; sq.push([x+w-s,y,s]); d+='A'+s+' '+s+' 0 0 1 '+(x+w-s)+' '+(y+s); w-=s; }
+    else { s=w; sq.push([x,y+h-s,s]); d+='A'+s+' '+s+' 0 0 1 '+x+' '+(y+h-s); h-=s; }
+  }
+  var fills=['var(--m)','var(--y)','var(--c)','var(--k)','var(--paper-2)','var(--m)','var(--y)','var(--c)','var(--k)','var(--paper-2)'];
+  var html='<rect width="'+W+'" height="'+H+'" fill="var(--paper-2)"/>';
+  sq.forEach(function(q,j){ html+='<rect class="sq" style="animation-delay:'+(j*70)+'ms" x="'+q[0].toFixed(2)+'" y="'+q[1].toFixed(2)+'" width="'+q[2].toFixed(2)+'" height="'+q[2].toFixed(2)+'" fill="'+fills[j]+'"/>'; });
+  sq.forEach(function(q){ html+='<rect class="gut" x="'+q[0].toFixed(2)+'" y="'+q[1].toFixed(2)+'" width="'+q[2].toFixed(2)+'" height="'+q[2].toFixed(2)+'"/>'; });
+  html+='<path class="sp" pathLength="1" d="'+d.replace(/(\d+\.\d{3})\d+/g,'$1')+'"/>';
+  html+='<text class="phi" x="89" y="660">φ</text><text class="lab" x="89" y="912">1 : 1,618</text>';
+  svg.innerHTML=html;
+}
+
+/* ================= Rutas ================= */
+var VIEWS=['inicio','hora','cotizar','equilibrio','ahorro'];
+function route(){
+  var h=(location.hash||'').slice(1)||'inicio'; if(VIEWS.indexOf(h)<0) h='inicio';
+  if(sheetOpen) closeSheet(false);
+  CUR=h;
+  VIEWS.forEach(function(v){ var el=$('#v-'+v); var on=v===h; el.hidden=!on; if(on){ el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); } });
+  $$('.tab').forEach(function(t){ if(t.getAttribute('data-v')===h) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+  S.seen[h]=true; persist();
+  window.scrollTo(0,0);
+  update();
+}
+window.addEventListener('hashchange',route);
+document.addEventListener('visibilitychange',function(){ if(document.hidden) flush(); else if(navigator.onLine&&S.rate.at&&Date.now()-S.rate.at>3*3600000) fetchRates(false); });
+window.addEventListener('pagehide',flush);
+window.addEventListener('online',function(){ fetchRates(false); });
+
+function renderAll(){ applyTheme(); renderTpls(); renderLists(); renderGloss(''); fillInputs(document); route(); }
+
+heroArt();
+renderAll();
+if(!S.rate.at||Date.now()-S.rate.at>3*3600000) fetchRates(false);
+setInterval(function(){ if(sheetOpen) paintRate(); },30000);
+})();
+</script>
+</body>
+</html>
