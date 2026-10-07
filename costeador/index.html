@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tinta &amp; Tasa · Costeador para diseñadoras</title>
-<meta name="description" content="Calcula cuánto cobrar por tus diseños en dólares y bolívares, con tus insumos, la tasa del día, tu punto de equilibrio y tu ahorro.">
+<title>Costeador de Andreina Camacho · A.C., Antes de Cobrar</title>
+<meta name="description" content="El costeador de Andreina Camacho: cuánto cobrar por cada diseño en dólares y bolívares, con insumos, tasa del día, punto de equilibrio y ahorro. A.C.: Antes de Cobrar.">
 <meta name="theme-color" content="#F3EDE2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tinta & Tasa">
+<meta name="apple-mobile-web-app-title" content="Costeador AC">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1618 1000'%3E%3Crect width='1000' height='1000' fill='%23D1006B'/%3E%3Crect x='1000' width='618' height='618' fill='%23FFC61A'/%3E%3Crect x='1236' y='618' width='382' height='382' fill='%2300799C'/%3E%3Crect x='1000' y='618' width='236' height='382' fill='%231A1815'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,9 +96,12 @@ ol,ul{padding:0;list-style:none}
 .top-in{display:flex;align-items:center;gap:var(--s3);height:55px}
 .brand{display:flex;align-items:center;gap:var(--s3);text-decoration:none;margin-right:auto;min-width:0}
 .brand svg{width:26px;height:26px;flex:none}
-.brand-w{font:600 var(--t1)/1 var(--f-d);letter-spacing:-.01em;white-space:nowrap}
-.brand-w i{font-weight:450}
-.brand-w b{color:var(--m);font-weight:600;margin:0 .08em}
+.brand-w{display:flex;flex-direction:column;white-space:nowrap;min-width:0}
+.brand-k{display:none;font:600 .618rem/1 var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s1)}
+.brand-n{font:600 1.06rem/1 var(--f-d);letter-spacing:-.01em}
+.brand-n i{font-weight:450;color:var(--m-ink);display:block}
+.brand-n b{font-weight:600}
+@media (min-width:610px){.brand-k{display:block}.brand-n{font-size:var(--t1)}.brand-n i{display:inline}}
 .rate-chip{display:flex;align-items:center;gap:var(--s3);height:38px;padding:0 var(--s4);border:1px solid var(--line-2);border-radius:999px;background:var(--card);font:600 var(--t-2)/1 var(--f-m);white-space:nowrap}
 .rate-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);flex:none}
 .rate-chip[data-state="ok"] .dot{background:var(--ok)}
@@ -305,15 +308,18 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .art .sq{transform-box:fill-box;transform-origin:center;animation:pop .618s var(--ease) both}
 .art .sp{fill:none;stroke:var(--paper);stroke-width:7;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.618s var(--ease) .382s forwards}
 .art .gut{fill:none;stroke:var(--paper);stroke-width:9}
-.art .phi{font:italic 450 360px/1 var(--f-d);fill:var(--on-m)}
+.art .phi{font:italic 450 400px/1 var(--f-d);fill:var(--on-m);letter-spacing:-20px}
 .art .lab{font:600 44px/1 var(--f-m);fill:var(--on-m);letter-spacing:4px}
 @keyframes pop{from{opacity:0;transform:scale(.9)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 .hero-tx{padding:var(--s6) 0 0}
 .eyebrow{font:600 var(--t-2)/1.3 var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.hero-t{font:600 clamp(var(--t4),12.5vw,var(--t6))/1.02 var(--f-d);letter-spacing:-.035em;margin-top:var(--s4)}
+.hero-t{font:600 clamp(var(--t3),10vw,var(--t6))/1.04 var(--f-d);letter-spacing:-.035em;margin-top:var(--s4)}
+.hero-t small{display:block;font:italic 450 .5em/1.2 var(--f-d);color:var(--ink-2);letter-spacing:-.01em;margin-bottom:var(--s2)}
 .hero-t em{background:linear-gradient(transparent 62%,var(--y) 62%,var(--y) 90%,transparent 90%);color:var(--m-ink)}
 .hero-p{margin-top:var(--s5);color:var(--ink-2);font-size:1.0625rem;line-height:1.618;max-width:30em}
+.hero-p b{color:var(--ink)}
+.hero-p em{font:italic 500 1.1em/1 var(--f-d);color:var(--m-ink);background:linear-gradient(transparent 62%,var(--y-soft) 62%)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s5)}
 @media (min-width:880px){
   .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.618fr);gap:var(--s6);align-items:center}
@@ -503,9 +509,9 @@ details.guide[open] summary::after{transform:rotate(45deg)}
 <div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <header class="top">
   <div class="top-in wrap">
-    <a class="brand" href="#inicio" aria-label="Tinta y Tasa, inicio">
+    <a class="brand" href="#inicio" aria-label="Costeador de Andreina Camacho, inicio">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" fill="#D1006B"/></svg>
-      <span class="brand-w"><i>Tinta</i><b>&amp;</b>Tasa</span>
+      <span class="brand-w"><span class="brand-k">Costeador de</span><span class="brand-n"><i>Andreina</i> <b>Camacho</b></span></span>
     </a>
     <button class="rate-chip" data-open="rate" id="rateChip" data-state="none" aria-label="Tasa del día. Toca para ver o cambiar">
       <span class="dot"></span><span class="rc-l" data-o="rate.chipName">BCV</span><span class="num" data-o="rate.chip">Poner tasa</span>
@@ -525,9 +531,9 @@ details.guide[open] summary::after{transform:rotate(45deg)}
       <svg class="art" id="heroArt" viewBox="0 0 1618 1000" preserveAspectRatio="xMidYMid meet"></svg>
     </figure>
     <div class="hero-tx">
-      <p class="eyebrow">Costeador para diseñadoras · Venezuela</p>
-      <h1 class="hero-t" id="t-inicio">Cobra lo que <em>vale</em> tu&nbsp;arte.</h1>
-      <p class="hero-p">Calcula precios justos en dólares y bolívares, con tus materiales y la tasa del día. Tú llenas los datos, esto hace las cuentas.</p>
+      <p class="eyebrow">A.C. · Antes de Cobrar</p>
+      <h1 class="hero-t" id="t-inicio"><small>El costeador de</small><em>Andreina</em> Camacho</h1>
+      <p class="hero-p">Tus iniciales ya lo sabían: <b>A.C. = Antes de Cobrar</b>. Primero se calcula; después se cobra lo que tu arte <em>vale</em>, en dólares y en bolívares, aunque la tasa no se quede quieta.</p>
       <div class="hero-cta">
         <a class="btn btn-ink" href="#hora" id="ctaStart">Empezar
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -581,7 +587,7 @@ details.guide[open] summary::after{transform:rotate(45deg)}
 
   <footer class="foot">
     <p>🔒 Tus datos se guardan <b>solo en este teléfono</b>. Nadie más los ve. Si borras los datos de Chrome, se borran: descarga un respaldo desde <button class="term" data-open="settings">Ajustes</button> de vez en cuando.</p>
-    <p class="phi-line">Diseñado en proporción áurea · 1 : 1,618 · C M Y K</p>
+    <p class="phi-line">Hecho a la medida de Andreina Camacho · proporción áurea 1 : 1,618 · C M Y K</p>
   </footer>
 </section>
 
@@ -1068,7 +1074,7 @@ var API = 'https://ve.dolarapi.com/v1/';
 
 var DEF = {
   v:1, theme:'auto',
-  profile:{studio:'', phone:''},
+  profile:{studio:'Andreina Camacho · Diseño', phone:''},
   rate:{bcv:null, par:null, use:'bcv', at:0, src:'', dev:null, devAt:0},
   hour:{
     salary:400,
@@ -1753,7 +1759,7 @@ var ACT={
   fetchRates:function(){ fetchRates(true); },
   backup:function(){
     flush(); var blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}), a=document.createElement('a'), d=new Date();
-    a.href=URL.createObjectURL(blob); a.download='tinta-y-tasa-respaldo-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'.json';
+    a.href=URL.createObjectURL(blob); a.download='costeador-ac-respaldo-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'.json';
     document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500); toast('Respaldo descargado ✓');
   },
   restore:function(){ var f=$('#restoreFile'); if(f) f.click(); },
@@ -1900,7 +1906,7 @@ function heroArt(){
   sq.forEach(function(q,j){ html+='<rect class="sq" style="animation-delay:'+(j*70)+'ms" x="'+q[0].toFixed(2)+'" y="'+q[1].toFixed(2)+'" width="'+q[2].toFixed(2)+'" height="'+q[2].toFixed(2)+'" fill="'+fills[j]+'"/>'; });
   sq.forEach(function(q){ html+='<rect class="gut" x="'+q[0].toFixed(2)+'" y="'+q[1].toFixed(2)+'" width="'+q[2].toFixed(2)+'" height="'+q[2].toFixed(2)+'"/>'; });
   html+='<path class="sp" pathLength="1" d="'+d.replace(/(\d+\.\d{3})\d+/g,'$1')+'"/>';
-  html+='<text class="phi" x="89" y="660">φ</text><text class="lab" x="89" y="912">1 : 1,618</text>';
+  html+='<text class="phi" x="70" y="640">AC</text><text class="lab" x="89" y="912">φ · 1 : 1,618</text>';
   svg.innerHTML=html;
 }
 
